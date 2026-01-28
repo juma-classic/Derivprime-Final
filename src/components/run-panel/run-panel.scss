@@ -110,13 +110,22 @@
         bottom: 4rem !important; /* Move higher - was 1rem, now 4rem from bottom */
         left: 2rem !important; /* Align with panel position */
         width: 36.6rem !important; /* Match panel width */
-        height: 80px !important; /* Increased height for better clickability */
-        background-color: var(--general-main-2);
-        border-top: 2px solid var(--brand-red-coral); /* Make border more prominent */
-        border-radius: 8px; /* Rounded all corners */
-        z-index: 1000; /* Very high z-index to ensure visibility */
-        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3); /* Stronger shadow for better visibility */
+        height: 90px !important; /* Increased height for better visibility */
+        background: linear-gradient(
+            135deg,
+            rgb(15 23 42 / 95%) 0%,
+            rgb(30 41 59 / 95%) 100%
+        ) !important; /* Dark gradient background */
+
+        border: 2px solid #14b8a6 !important; /* Teal border to match site branding */
+        border-radius: 12px !important; /* More rounded corners */
+        z-index: 1001 !important; /* Even higher z-index to ensure visibility */
+        box-shadow:
+            0 8px 32px rgb(0 0 0 / 40%),
+            0 0 20px rgb(20 184 166 / 20%) !important; /* Enhanced shadow with teal glow */
+
         pointer-events: auto !important; /* Ensure events are captured */
+        backdrop-filter: blur(10px) !important; /* Glass effect */
 
         @include flex-center(center);
 
@@ -129,27 +138,79 @@
 
         &-button {
             width: 280px !important; /* Slightly smaller to fit better */
-            height: 40px !important; /* Increased height */
+            height: 50px !important; /* Increased height for better visibility */
             margin: 8px !important; /* Reduced margin */
-            background-color: var(--brand-red-coral) !important; /* Make button more prominent */
-            color: white !important;
-            font-weight: bold !important;
-            font-size: 16px !important; /* Larger text */
-            border-radius: 6px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(
+                135deg,
+                #0d9488 0%,
+                #14b8a6 100%
+            ) !important; /* Teal gradient matching site branding */
+
+            color: #fff !important; /* Pure white text - forced with high specificity */
+            font-weight: 700 !important; /* Bolder text */
+            font-size: 18px !important; /* Larger text for better visibility */
+            border-radius: 8px !important; /* More rounded corners */
+            box-shadow:
+                0 4px 12px rgb(13 148 136 / 40%),
+                0 0 20px rgb(20 184 166 / 20%) !important; /* Teal glow effect */
+
             cursor: pointer !important; /* Ensure button is clickable */
-            border: none !important;
+            border: 2px solid rgb(255 255 255 / 20%) !important; /* Subtle white border */
             text-transform: uppercase; /* Make text more prominent */
+            letter-spacing: 1px !important; /* Better letter spacing */
             pointer-events: auto !important; /* Ensure button events work */
-            
-            &:hover {
-                background-color: var(--brand-red-coral) !important;
-                opacity: 0.9;
-                transform: translateY(-1px);
+            transition: all 0.3s ease !important; /* Smooth transitions */
+
+            /* Override shared button component styles - target all text elements */
+            .dc-btn__text,
+            .dc-btn__icon,
+            span,
+            & > * {
+                color: #fff !important;
+                text-decoration: none !important;
             }
-            
+
+            /* Ensure white text with maximum specificity */
+            &,
+            &:link,
+            &:visited,
+            &:focus,
             &:active {
-                transform: translateY(0);
+                color: #fff !important;
+                text-decoration: none !important;
+            }
+
+            &:hover {
+                background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important; /* Darker teal on hover */
+                color: #fff !important; /* Keep white text on hover */
+                transform: translateY(-2px) scale(1.02) !important; /* Lift effect */
+                box-shadow:
+                    0 6px 16px rgb(13 148 136 / 60%),
+                    0 0 30px rgb(20 184 166 / 30%) !important; /* Enhanced teal glow on hover */
+
+                border-color: rgb(255 255 255 / 40%) !important; /* Brighter border on hover */
+
+                /* Ensure white text on hover for all child elements */
+                .dc-btn__text,
+                .dc-btn__icon,
+                span,
+                & > * {
+                    color: #fff !important;
+                }
+            }
+
+            &:active {
+                transform: translateY(0) scale(1) !important; /* Reset on click */
+                box-shadow: 0 2px 8px rgb(13 148 136 / 40%) !important; /* Reduced shadow on click */
+                color: #fff !important; /* Ensure white text on active state */
+
+                /* Ensure white text on active for all child elements */
+                .dc-btn__text,
+                .dc-btn__icon,
+                span,
+                & > * {
+                    color: #fff !important;
+                }
             }
         }
     }
