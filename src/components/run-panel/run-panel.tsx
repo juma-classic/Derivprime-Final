@@ -319,10 +319,6 @@ const RunPanel = observer(() => {
                     {content}
                 </Drawer>
                 {!isDesktop && <MobileDrawerFooter />}
-                {/* Always render footer when drawer is open for fixed positioning */}
-                {isDesktop && is_drawer_open && (
-                    <DrawerFooter is_clear_stat_disabled={is_clear_stat_disabled} onClearStatClick={onClearStatClick} />
-                )}
             </div>
             <SelfExclusion onRunButtonClick={onRunButtonClick} />
             <StatisticsInfoModal

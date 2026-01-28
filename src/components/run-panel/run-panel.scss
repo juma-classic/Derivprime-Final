@@ -121,6 +121,11 @@
 
         flex-direction: column;
 
+        /* Hide any duplicate footers that might appear */
+        &:not(:last-of-type) {
+            display: none !important;
+        }
+
         &-button {
             width: 280px !important; /* Slightly smaller to fit better */
             height: 40px !important; /* Increased height */
