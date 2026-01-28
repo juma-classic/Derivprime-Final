@@ -7,6 +7,7 @@ const CURRENCY_ICONS = {
     btc: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyBtcIcon }))),
     busd: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyBusdIcon }))),
     dai: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyDaiIcon }))),
+    demo: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyDemoIcon }))),
     eth: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyEthIcon }))),
     eur: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyEurIcon }))),
     'eur-check': lazy(() =>
@@ -27,6 +28,7 @@ const CURRENCY_ICONS = {
     usdc: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyUsdcIcon }))),
     usdk: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyUsdkIcon }))),
     ust: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyUsdtIcon }))),
+    usdt: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyUsdtIcon }))),
     virtual: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyDemoIcon }))),
     xrp: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyXrpIcon }))),
     algo: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyAlgoIcon }))),
@@ -73,9 +75,9 @@ export const CurrencyIcon = ({ currency, isVirtual }: { currency?: string; isVir
     // When fake real mode is active and you're on a demo account:
     // - Show USD icon for the active demo account (top display and Real tab)
     // - Show Demo icon for inactive accounts (Demo tab fake account)
-    // This is determined by checking if currency is explicitly set to 'virtual'
-    const shouldShowDemoIcon = currency === 'virtual' || (isVirtual && !isFakeRealMode);
-    const shouldShowUSDIcon = isVirtual && isFakeRealMode && currency !== 'virtual' && activeLoginId?.includes('VRT');
+    // This is determined by checking if currency is explicitly set to 'virtual' or 'demo'
+    const shouldShowDemoIcon = currency === 'virtual' || currency === 'demo' || (isVirtual && !isFakeRealMode);
+    const shouldShowUSDIcon = isVirtual && isFakeRealMode && currency !== 'virtual' && currency !== 'demo' && activeLoginId?.includes('VRT');
 
     const Icon = shouldShowDemoIcon
         ? CURRENCY_ICONS.virtual // Show Demo icon
