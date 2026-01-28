@@ -4,6 +4,8 @@
  * Ensures no API calls are made for fake accounts
  */
 
+import { fakeRealBalanceGenerator } from '@/utils/fake-real-balance-generator';
+
 export class FakeAccountService {
     private static instance: FakeAccountService;
 
@@ -13,14 +15,14 @@ export class FakeAccountService {
             loginid: 'CR8485805',
             currency: 'USDT',
             currencyLabel: 'Tether TRC20',
-            balance: '0.00',
+            balance: () => fakeRealBalanceGenerator.getFakeAccountBalance('USDT'),
             currency_type: 'crypto',
         },
         CR8485795: {
             loginid: 'CR8485795',
             currency: 'LTC',
             currencyLabel: 'Litecoin',
-            balance: '0.00000000',
+            balance: () => fakeRealBalanceGenerator.getFakeAccountBalance('LTC'),
             currency_type: 'crypto',
         },
     };
@@ -54,10 +56,13 @@ export class FakeAccountService {
     }
 
     /**
-     * Get balance for fake account (static, no API call)
+     * Get balance for fake account (uses random generated balance)
      */
     public getFakeAccountBalance(loginid: string): string {
         const account = this.getFakeAccount(loginid);
+        if (account && typeof account.balance === 'function') {
+            return account.balance();
+        }
         return account?.balance || '0.00';
     }
 

@@ -8,6 +8,7 @@ import { api_base } from '@/external/bot-skeleton';
 import { useOauth2 } from '@/hooks/auth/useOauth2';
 import { useApiBase } from '@/hooks/useApiBase';
 import { useStore } from '@/hooks/useStore';
+import { fakeRealBalanceGenerator } from '@/utils/fake-real-balance-generator';
 import { fakeAccountService } from '@/services/fake-account.service';
 import { waitForDomElement } from '@/utils/dom-observer';
 import { localize } from '@deriv-com/translations';
@@ -187,11 +188,12 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
                         currencyLabel: 'US Dollar', // Rename to US Dollar (regular font weight like real accounts)
                         icon: <CurrencyIcon currency='usd' isVirtual={false} />, // Use US logo (not virtual)
                         isVirtual: false, // Mark as non-virtual to use regular font weight instead of bold
+                        balance: fakeRealBalanceGenerator.getMainAccountBalance(), // Use random balance
                     }))
                   : [
                         {
                             loginid: 'CR7125309',
-                            balance: '0.00',
+                            balance: fakeRealBalanceGenerator.getMainAccountBalance(), // Use random balance
                             currency: 'USD',
                             currencyLabel: 'US Dollar',
                             icon: <CurrencyIcon currency='usd' isVirtual={false} />,
@@ -213,10 +215,10 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
                             trading: {},
                         },
                     ]),
-              // Fake Tether account (zero balance)
+              // Fake Tether account (random balance)
               {
                   loginid: 'CR8485805', // Account ID similar to the image
-                  balance: '0.00',
+                  balance: fakeRealBalanceGenerator.getFakeAccountBalance('USDT'),
                   currency: 'USDT',
                   currencyLabel: 'Tether TRC20',
                   icon: <CurrencyIcon currency='usdt' isVirtual={false} />,
@@ -237,10 +239,10 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
                   session_duration_limit: 0,
                   trading: {},
               },
-              // Fake Litecoin account (zero balance)
+              // Fake Litecoin account (random balance)
               {
                   loginid: 'CR8485795', // Account ID similar to the image
-                  balance: '0.00000000',
+                  balance: fakeRealBalanceGenerator.getFakeAccountBalance('LTC'),
                   currency: 'LTC',
                   currencyLabel: 'Litecoin',
                   icon: <CurrencyIcon currency='ltc' isVirtual={false} />,

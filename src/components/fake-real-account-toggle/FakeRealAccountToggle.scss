@@ -308,6 +308,56 @@
     }
 }
 
+.toggle-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.regenerate-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #00ff88, #0088ff);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgb(0 255 136 / 30%);
+
+    // Shine effect
+    &:before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgb(255 255 255 / 30%), transparent);
+        transform: rotate(45deg);
+        animation: shine 3s ease-in-out infinite;
+    }
+
+    &:hover {
+        background: linear-gradient(135deg, #00ff88, #0066ff);
+        transform: translateY(-2px);
+        box-shadow:
+            0 6px 20px rgb(0 255 136 / 40%),
+            0 0 25px rgb(0 136 255 / 30%);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+}
+
 @keyframes border-rotate {
     0% {
         background-position: 0% 50%;

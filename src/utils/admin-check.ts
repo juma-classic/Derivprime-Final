@@ -7,6 +7,10 @@
 const ADMIN_IDENTIFIERS = [
     'CR5186289', // Add admin login IDs here
     'VRTC90460', // Virtual account for testing
+    'CR7125309', // Real account ID
+    'VRTC7528369', // Demo account ID
+    'VRTC9119201', // Additional admin demo account
+    'CR6164902', // Additional admin real account
     'admin@tradermaster.site',
     'support@tradermaster.site',
 ];

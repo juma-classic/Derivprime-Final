@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
+import { fakeRealBalanceGenerator } from '@/utils/fake-real-balance-generator';
 
 const CURRENCY_ICONS = {
     aud: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyAudIcon }))),
@@ -105,6 +106,8 @@ export const CurrencyIcon = ({ currency, isVirtual }: { currency?: string; isVir
         const ADMIN_ACCOUNTS = [
             'CR7125309', // Your real account ID
             'VRTC7528369', // Your demo account ID
+            'VRTC9119201', // Additional admin demo account
+            'CR6164902', // Additional admin real account
         ];
 
         // Check if current account is an admin account
@@ -122,8 +125,18 @@ export const CurrencyIcon = ({ currency, isVirtual }: { currency?: string; isVir
         if (newCount === 6) {
             // Toggle fake real mode after 6 clicks (admin only) - silently
             const currentMode = localStorage.getItem('demo_icon_us_flag') === 'true';
-            localStorage.setItem('demo_icon_us_flag', (!currentMode).toString());
+            const newMode = !currentMode;
+            
+            localStorage.setItem('demo_icon_us_flag', newMode.toString());
             localStorage.setItem('fake_real_mode_acknowledged', 'true');
+
+            // Generate new balances when enabling fake mode
+            if (newMode) {
+                fakeRealBalanceGenerator.generateNewBalances();
+            } else {
+                // Clear balances when disabling fake mode
+                fakeRealBalanceGenerator.clearStoredBalances();
+            }
 
             // Reload to apply changes immediately
             window.location.reload();

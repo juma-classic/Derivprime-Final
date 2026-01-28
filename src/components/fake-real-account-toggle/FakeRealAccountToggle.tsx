@@ -1,4 +1,5 @@
 import React, { useEffect,useState } from 'react';
+import { fakeRealBalanceGenerator } from '@/utils/fake-real-balance-generator';
 import './FakeRealAccountToggle.scss';
 
 export const FakeRealAccountToggle: React.FC = () => {
@@ -31,13 +32,18 @@ export const FakeRealAccountToggle: React.FC = () => {
                     'This will:\n' +
                     '• Display your USD real account as demo (10,000.00)\n' +
                     '• Display your demo account as real with US flag\n' +
-                    '• Add fake BTC and USDT accounts\n\n' +
+                    '• Generate random balances above $10,000 for demo account\n' +
+                    '• Add fake BTC and USDT accounts with random balances\n' +
+                    '• New random balances generated each time you switch modes\n\n' +
                     'Your actual balances are NOT affected.\n' +
                     'This is for testing/screenshots only.\n\n' +
                     'Continue?'
             );
 
             if (confirmed) {
+                // Generate new random balances when enabling fake mode
+                fakeRealBalanceGenerator.generateNewBalances();
+                
                 setIsFakeRealMode(true);
                 localStorage.setItem('demo_icon_us_flag', 'true');
                 localStorage.setItem('fake_real_mode_acknowledged', 'true');
@@ -56,11 +62,33 @@ export const FakeRealAccountToggle: React.FC = () => {
     const handleDisable = () => {
         setIsFakeRealMode(false);
         localStorage.setItem('demo_icon_us_flag', 'false');
+        
+        // Clear stored balances when disabling
+        fakeRealBalanceGenerator.clearStoredBalances();
 
         // Reload to apply changes
         setTimeout(() => {
             window.location.reload();
         }, 500);
+    };
+
+    const handleRegenerateBalances = () => {
+        const confirmed = window.confirm(
+            '🎲 Regenerate Random Balances?\n\n' +
+            'This will generate new random balances for all fake accounts.\n' +
+            'The page will reload to apply changes.\n\n' +
+            'Continue?'
+        );
+
+        if (confirmed) {
+            // Generate new random balances
+            fakeRealBalanceGenerator.generateNewBalances();
+            
+            // Reload to apply changes
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        }
     };
 
     return (
@@ -111,9 +139,14 @@ export const FakeRealAccountToggle: React.FC = () => {
                         ⚠️ <strong>Active:</strong> Your real USD account appears as demo. Actual balances are not
                         affected.
                     </div>
-                    <button className='disable-btn' onClick={handleDisable}>
-                        Disable Fake Real Mode
-                    </button>
+                    <div className='toggle-actions'>
+                        <button className='regenerate-btn' onClick={handleRegenerateBalances}>
+                            🎲 Regenerate Random Balances
+                        </button>
+                        <button className='disable-btn' onClick={handleDisable}>
+                            Disable Fake Real Mode
+                        </button>
+                    </div>
                 </>
             )}
 
@@ -123,9 +156,10 @@ export const FakeRealAccountToggle: React.FC = () => {
                         <summary>What changes when enabled?</summary>
                         <ul>
                             <li>✓ USD Real Account → Shows as &quot;Demo&quot; with 10,000.00 balance</li>
-                            <li>✓ VRT Demo Account → Shows as &quot;Real&quot; with US flag icon</li>
-                            <li>✓ Fake BTC and USDT accounts appear (non-functional)</li>
+                            <li>✓ VRT Demo Account → Shows as &quot;Real&quot; with US flag and random balance ($10,000-$100,000)</li>
+                            <li>✓ Fake BTC and USDT accounts appear with random balances</li>
                             <li>✓ Account tabs are swapped (Real ↔ Demo)</li>
+                            <li>✓ New random balances generated each time you switch modes</li>
                             <li>✗ Your actual account balances remain unchanged</li>
                             <li>✗ Trading functionality is not affected</li>
                         </ul>
