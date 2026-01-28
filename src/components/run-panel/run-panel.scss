@@ -8,7 +8,7 @@
 
     &__container {
         height: calc(var(--bot-content-height) * 0.4) !important; /* Reduced by 60% for maximum accessibility */
-        top: 6rem !important; /* Moved very close to navigation menu */
+        top: 3rem !important; /* Moved 50% higher (was 6rem, now 3rem) */
         width: 36.6rem !important;
         left: 2rem !important; /* Move to left side instead of right */
         right: auto !important; /* Remove right positioning */
