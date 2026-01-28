@@ -115,7 +115,7 @@
         border-radius: 8px; /* Rounded all corners */
         z-index: 1000; /* Very high z-index to ensure visibility */
         box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3); /* Stronger shadow for better visibility */
-        cursor: pointer; /* Ensure cursor changes */
+        pointer-events: auto !important; /* Ensure events are captured */
 
         @include flex-center(center);
 
@@ -134,6 +134,17 @@
             cursor: pointer !important; /* Ensure button is clickable */
             border: none !important;
             text-transform: uppercase; /* Make text more prominent */
+            pointer-events: auto !important; /* Ensure button events work */
+            
+            &:hover {
+                background-color: var(--brand-red-coral) !important;
+                opacity: 0.9;
+                transform: translateY(-1px);
+            }
+            
+            &:active {
+                transform: translateY(0);
+            }
         }
     }
 
