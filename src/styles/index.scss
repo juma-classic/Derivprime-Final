@@ -25,6 +25,38 @@ html {
     overflow-x: hidden;
 }
 
+/* Make floating chat/support widgets 50% smaller */
+#intercom-frame,
+#intercom-container,
+.intercom-launcher,
+.intercom-messenger-frame,
+[id*="intercom"],
+[class*="intercom"],
+#livechat-widget,
+.livechat-widget,
+[id*="livechat"],
+[class*="livechat"],
+iframe[src*="intercom"],
+iframe[src*="livechat"],
+iframe[src*="widget"] {
+    transform: scale(0.5) !important;
+    transform-origin: bottom right !important;
+}
+
+/* Adjust positioning for scaled widgets */
+#intercom-frame,
+#intercom-container,
+.intercom-launcher {
+    bottom: -25% !important;
+    right: -25% !important;
+}
+
+#livechat-widget,
+.livechat-widget {
+    bottom: -25% !important;
+    right: -25% !important;
+}
+
 .icon-general-fill-path {
     path {
         fill: var(--text-general);
