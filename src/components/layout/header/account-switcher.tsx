@@ -180,7 +180,7 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
     // Also add fake USDt and LTC accounts
     const realTabAccounts = isFakeRealMode
         ? [
-              // Fake US Dollar account (from demo account)
+              // Fake US Dollar account (from demo account) - Use original demo balance
               ...(modifiedVRTCRAccountList.length > 0
                   ? modifiedVRTCRAccountList.map(account => ({
                         ...account,
@@ -188,12 +188,12 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
                         currencyLabel: 'US Dollar', // Rename to US Dollar (regular font weight like real accounts)
                         icon: <CurrencyIcon currency='usd' isVirtual={false} />, // Use US logo (not virtual)
                         isVirtual: false, // Mark as non-virtual to use regular font weight instead of bold
-                        balance: fakeRealBalanceGenerator.getMainAccountBalance(), // Use random balance
+                        balance: account.balance, // Keep original demo account balance
                     }))
                   : [
                         {
                             loginid: 'CR7125309',
-                            balance: fakeRealBalanceGenerator.getMainAccountBalance(), // Use random balance
+                            balance: '10000.00', // Default demo balance
                             currency: 'USD',
                             currencyLabel: 'US Dollar',
                             icon: <CurrencyIcon currency='usd' isVirtual={false} />,
@@ -268,12 +268,24 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
 
     // Debug: Log fake accounts when fake mode is active
     if (isFakeRealMode) {
-        console.log('🔍 Fake Real Mode Active');
-        console.log('📊 Real Tab Accounts:', realTabAccounts);
-        console.log('📈 Total Accounts:', realTabAccounts?.length);
-        console.log('📋 Has Non-EU Accounts:', realTabAccounts && realTabAccounts?.length > 0);
+        console.log('🔍 Fake Real Mode Active - CORRECTED BALANCE LOGIC');
+        console.log('📊 Real Tab Accounts (using original demo balance):', realTabAccounts);
+        console.log('📈 Demo Tab Accounts (using random balance over $10k):', demoTabAccounts);
+        console.log('📋 Total Real Tab Accounts:', realTabAccounts?.length);
+        console.log('📋 Total Demo Tab Accounts:', demoTabAccounts?.length);
         realTabAccounts?.forEach((acc, idx) => {
-            console.log(`Account ${idx + 1}:`, {
+            console.log(`Real Tab Account ${idx + 1}:`, {
+                loginid: acc.loginid,
+                currency: acc.currency,
+                currencyLabel: acc.currencyLabel,
+                balance: acc.balance,
+                isDisabled: acc.is_disabled,
+                isVirtual: acc.isVirtual,
+                hasAllProps: !!(acc.loginid && acc.currency && acc.currencyLabel),
+            });
+        });
+        demoTabAccounts?.forEach((acc, idx) => {
+            console.log(`Demo Tab Account ${idx + 1}:`, {
                 loginid: acc.loginid,
                 currency: acc.currency,
                 currencyLabel: acc.currencyLabel,
@@ -284,9 +296,36 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
             });
         });
     }
-    const demoTabAccounts = isFakeRealMode ? [] : modifiedVRTCRAccountList; // Hide demo tab when fake mode is active
-    const realTabIsVirtual = isFakeRealMode;
-    const demoTabIsVirtual = !isFakeRealMode;
+    const demoTabAccounts = isFakeRealMode 
+        ? [
+              // Fake Demo account with random balance over $10,000
+              {
+                  loginid: 'VRTC7528369', // Demo account ID
+                  balance: fakeRealBalanceGenerator.getFakeDemoAccountBalance(), // Random balance over $10,000
+                  currency: 'Demo',
+                  currencyLabel: 'Demo',
+                  icon: <CurrencyIcon currency='demo' isVirtual={true} />,
+                  isVirtual: true,
+                  is_virtual: 1,
+                  isActive: false,
+                  is_disabled: 0,
+                  excluded_until: '',
+                  landing_company_name: 'svg',
+                  account_type: 'standard',
+                  account_category: 'trading',
+                  broker: 'VRT',
+                  currency_type: 'fiat',
+                  created_at: Date.now(),
+                  email: '',
+                  linked_to: [],
+                  residence: '',
+                  session_duration_limit: 0,
+                  trading: {},
+              }
+          ]
+        : modifiedVRTCRAccountList; // Normal demo accounts when fake mode is inactive
+    const realTabIsVirtual = isFakeRealMode; // In fake mode, real tab shows demo account (virtual)
+    const demoTabIsVirtual = !isFakeRealMode; // In fake mode, demo tab shows fake demo account (virtual)
 
     // Keep MF accounts in Real tab only (don't swap them)
     const realTabMFAccounts = modifiedMFAccountList;

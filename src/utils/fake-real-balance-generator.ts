@@ -86,9 +86,9 @@ export class FakeRealBalanceGenerator {
     }
 
     /**
-     * Get balance for the main USD account (demo account disguised as real)
+     * Get balance for the fake demo account (random balance over $10,000)
      */
-    public getMainAccountBalance(): string {
+    public getFakeDemoAccountBalance(): string {
         return this.getBalance('USD');
     }
 

@@ -30,10 +30,10 @@ export const FakeRealAccountToggle: React.FC = () => {
             const confirmed = window.confirm(
                 '🇺🇸 Fake Real Account Mode Unlocked!\n\n' +
                     'This will:\n' +
-                    '• Display your USD real account as demo (10,000.00)\n' +
-                    '• Display your demo account as real with US flag\n' +
-                    '• Generate random balances above $10,000 for demo account\n' +
+                    '• Display your demo account as real USD account (keeps original demo balance)\n' +
+                    '• Create fake demo account with random balance above $10,000\n' +
                     '• Add fake BTC and USDT accounts with random balances\n' +
+                    '• Use consistent transaction IDs (same demo trade = same fake ID)\n' +
                     '• New random balances generated each time you switch modes\n\n' +
                     'Your actual balances are NOT affected.\n' +
                     'This is for testing/screenshots only.\n\n' +
@@ -155,11 +155,12 @@ export const FakeRealAccountToggle: React.FC = () => {
                     <details>
                         <summary>What changes when enabled?</summary>
                         <ul>
-                            <li>✓ USD Real Account → Shows as &quot;Demo&quot; with 10,000.00 balance</li>
-                            <li>✓ VRT Demo Account → Shows as &quot;Real&quot; with US flag and random balance ($10,000-$100,000)</li>
+                            <li>✓ Demo Account → Shows as &quot;Real USD&quot; account (keeps original demo balance)</li>
+                            <li>✓ Fake Demo Account → Created with random balance ($10,000-$100,000)</li>
                             <li>✓ Fake BTC and USDT accounts appear with random balances</li>
-                            <li>✓ Account tabs are swapped (Real ↔ Demo)</li>
+                            <li>✓ Both Real and Demo tabs are visible</li>
                             <li>✓ New random balances generated each time you switch modes</li>
+                            <li>✓ Transaction IDs are consistent (same demo trade = same fake ID)</li>
                             <li>✗ Your actual account balances remain unchanged</li>
                             <li>✗ Trading functionality is not affected</li>
                         </ul>
