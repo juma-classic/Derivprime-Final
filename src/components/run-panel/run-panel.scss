@@ -7,31 +7,10 @@
     height: 0;
 
     &__container {
-        height: calc(100vh - 12rem) !important; /* Adjusted to use viewport height minus header */
-        max-height: calc(100vh - 12rem) !important; /* Ensure it doesn't exceed viewport */
+        height: var(--bot-content-height) !important;
         top: calc(12rem - 15px) !important; /* Moved 15px up from 12rem for better positioning */
         width: 36.6rem !important;
         right: 0;
-
-        /* Ensure the drawer container uses flexbox properly */
-        .dc-drawer__container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        /* Ensure the drawer content takes available space but leaves room for footer */
-        .dc-drawer__content {
-            flex: 1;
-            overflow: auto;
-            min-height: 0;
-        }
-
-        /* Ensure the drawer footer is always visible */
-        .dc-drawer__footer {
-            flex-shrink: 0;
-            margin-top: auto;
-        }
 
         &--mobile {
             height: 100%;
@@ -75,7 +54,6 @@
         width: 35rem;
         background-color: var(--general-section-2);
         flex-shrink: 0; /* Prevent statistics from shrinking */
-        max-height: 140px; /* Limit height to ensure footer is visible */
 
         @include mobile-or-tablet-screen {
             margin: 0;
@@ -125,8 +103,14 @@
 
     &__footer {
         text-align: center;
-        flex-shrink: 0; /* Prevent footer from shrinking */
-        margin-top: auto; /* Push footer to bottom */
+        position: absolute; /* Position footer absolutely at bottom */
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px; /* Fixed height for footer */
+        background-color: var(--general-main-2);
+        border-top: 1px solid var(--general-section-1);
+        z-index: 10;
 
         @include flex-center(space-between);
 
@@ -144,8 +128,7 @@
         justify-content: space-between;
         flex-direction: column;
         overflow: hidden !important;
-        flex: 1; /* Allow content to take available space */
-        min-height: 0; /* Allow content to shrink */
+        height: calc(100% - 60px); /* Reserve 60px for footer */
 
         .dc-tabs {
             &__item {
@@ -166,9 +149,8 @@
 
     &-tab {
         &__content {
-            height: calc(100vh - 20rem); /* Reduced from 42rem to leave more space for footer */
-            overflow: auto; /* Allow scrolling if content is too long */
-            flex: 1; /* Take available space */
+            height: calc(100vh - 42rem);
+            overflow: hidden;
 
             &--no-stat {
                 height: var(--drawer-content-height-no-stat);
@@ -185,6 +167,7 @@
 
             &--summary-tab {
                 padding: 0.8rem 1.6rem;
+                padding-bottom: 70px; /* Add padding to prevent content from being hidden behind footer */
             }
         }
     }
