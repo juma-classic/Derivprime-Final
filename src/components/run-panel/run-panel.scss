@@ -106,29 +106,34 @@
     &__footer {
         text-align: center;
         position: fixed !important; /* Fixed to viewport instead of absolute */
-        bottom: 1rem !important; /* Position from bottom of screen */
+        bottom: 4rem !important; /* Move higher - was 1rem, now 4rem from bottom */
         left: 2rem !important; /* Align with panel position */
         width: 36.6rem !important; /* Match panel width */
-        height: 60px; /* Fixed height for footer */
+        height: 80px !important; /* Increased height for better clickability */
         background-color: var(--general-main-2);
         border-top: 2px solid var(--brand-red-coral); /* Make border more prominent */
-        border-radius: 8px 8px 0 0; /* Rounded top corners */
+        border-radius: 8px; /* Rounded all corners */
         z-index: 1000; /* Very high z-index to ensure visibility */
-        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2); /* Stronger shadow for better visibility */
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3); /* Stronger shadow for better visibility */
+        cursor: pointer; /* Ensure cursor changes */
 
-        @include flex-center(space-between);
+        @include flex-center(center);
 
         flex-direction: column;
 
         &-button {
-            width: 318px;
-            height: 32px !important;
-            margin: 12px 24px;
+            width: 280px !important; /* Slightly smaller to fit better */
+            height: 40px !important; /* Increased height */
+            margin: 8px !important; /* Reduced margin */
             background-color: var(--brand-red-coral) !important; /* Make button more prominent */
             color: white !important;
             font-weight: bold !important;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 16px !important; /* Larger text */
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            cursor: pointer !important; /* Ensure button is clickable */
+            border: none !important;
+            text-transform: uppercase; /* Make text more prominent */
         }
     }
 
