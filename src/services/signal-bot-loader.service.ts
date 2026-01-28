@@ -108,15 +108,15 @@ class SignalBotLoaderService {
                 minConfidence: 65,
             },
             {
-                file: 'Over_Under Ghost - by ElvisTrades.xml',
-                name: 'Over/Under Ghost by Elvis',
+                file: 'Over_Under Ghost - by StatesFX.xml',
+                name: 'Over/Under Ghost by States FX',
                 description: 'Advanced Over/Under bot with ghost patterns from Free Bots',
                 suitability: 92,
                 minConfidence: 70,
             },
             {
-                file: 'Over_Under Ghost v2 - by Elvis Trades.xml',
-                name: 'Over/Under Ghost V2 by Elvis',
+                file: 'Over_Under Ghost v2 - by States FX.xml',
+                name: 'Over/Under Ghost V2 by States FX',
                 description: 'Enhanced Over/Under bot with improved patterns from Free Bots',
                 suitability: 90,
                 minConfidence: 75,
@@ -184,7 +184,7 @@ class SignalBotLoaderService {
                 minConfidence: 65,
             },
             {
-                file: 'Deriv Killer - Elvis Trades.xml',
+                file: 'Deriv Killer - States FX.xml',
                 name: 'Deriv Killer',
                 description: 'High-performance multi-strategy bot',
                 suitability: 85,
@@ -628,8 +628,8 @@ class SignalBotLoaderService {
                 detail: enhancedDetail,
             });
             window.dispatchEvent(event);
-        } else if (config.botFile.includes('Elvis')) {
-            const event = new CustomEvent('load.elvis.bot.enhanced', {
+        } else if (config.botFile.includes('States FX')) {
+            const event = new CustomEvent('load.statesfx.bot.enhanced', {
                 detail: enhancedDetail,
             });
             window.dispatchEvent(event);

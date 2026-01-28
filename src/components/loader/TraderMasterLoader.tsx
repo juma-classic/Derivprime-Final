@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import './DerivPrimeLoader.scss';
+import './TraderMasterLoader.scss';
 
-interface DerivPrimeLoaderProps {
+interface TraderMasterLoaderProps {
     onLoadComplete?: () => void;
     duration?: number;
 }
 
-export const DerivPrimeLoader: React.FC<DerivPrimeLoaderProps> = ({ 
+export const TraderMasterLoader: React.FC<TraderMasterLoaderProps> = ({ 
     onLoadComplete, 
     duration = 4000 
 }) => {
@@ -159,7 +159,7 @@ export const DerivPrimeLoader: React.FC<DerivPrimeLoaderProps> = ({
     }, [duration, onLoadComplete, statuses.length]);
 
     return (
-        <div className={`derivprime-loader ${isComplete ? 'fade-out' : ''}`}>
+        <div className={`tradermaster-loader ${isComplete ? 'fade-out' : ''}`}>
             <canvas ref={particlesRef} className="particles-canvas" />
             
             <div className="loader-content">
@@ -171,8 +171,8 @@ export const DerivPrimeLoader: React.FC<DerivPrimeLoaderProps> = ({
                             <div className="icon-arrow"></div>
                         </div>
                         <h1 className="logo-text">
-                            <span className="deriv">DERIV</span>
-                            <span className="prime">PRIME</span>
+                            <span className="trader">TRADER</span>
+                            <span className="master">MASTER</span>
                         </h1>
                     </div>
                     <p className="tagline">Advanced Trading Platform</p>
@@ -222,4 +222,4 @@ export const DerivPrimeLoader: React.FC<DerivPrimeLoaderProps> = ({
     );
 };
 
-export default DerivPrimeLoader;
+export default TraderMasterLoader;

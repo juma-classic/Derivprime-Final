@@ -11,9 +11,9 @@ export const AppLogo = () => {
             href='https://www.tradermaster.site/'
             target='_blank'
             rel='noopener noreferrer'
-            className='app-header__logo autotrades-logo'
+            className='app-header__logo tradermaster-logo'
         >
-            <span className='autotrades-text'>AUTOTRADES</span>
+            <span className='tradermaster-text'>TRADER MASTER</span>
         </a>
     );
 };

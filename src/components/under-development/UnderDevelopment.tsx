@@ -29,7 +29,7 @@ export const UnderDevelopment: React.FC<UnderDevelopmentProps> = ({ featureName,
                 window.open(`https://wa.me/${phone}?text=Hi Elvis, I'm interested in ${featureName}`, '_blank');
                 break;
             case 'telegram':
-                window.open('https://t.me/ElvisTrades', '_blank');
+                window.open('https://t.me/StatesFX', '_blank');
                 break;
             case 'call':
                 window.location.href = `tel:+${phone}`;

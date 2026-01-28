@@ -7,8 +7,8 @@
 const ADMIN_IDENTIFIERS = [
     'CR5186289', // Add admin login IDs here
     'VRTC90460', // Virtual account for testing
-    'admin@derivprime.com',
-    'support@derivprime.com',
+    'admin@tradermaster.site',
+    'support@tradermaster.site',
 ];
 
 /**

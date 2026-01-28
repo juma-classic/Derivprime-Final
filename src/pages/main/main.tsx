@@ -393,7 +393,7 @@ const AppWrapper = observer(() => {
                 'PATEL (with Entry).xml', // Added to top of the list
                 'Game Changer AI (1).xml', // NEW: Game Changer AI bot
                 'Game Changer AI - etrades.xml', // NEW: Game Changer AI - etrades version
-                'Random LDP Differ - Elvis Trades.xml', // NEW: Random LDP Differ bot
+                'Random LDP Differ - States FX.xml', // NEW: Random LDP Differ bot
                 'CFX-025-Base.xml',
                 'CFX-025-Step1.xml',
                 'CFX-025-Step2.xml',
@@ -406,12 +406,12 @@ const AppWrapper = observer(() => {
                 'MarketMakerPro.xml',
                 'CFX-EvenOdd.xml',
                 'CFX-RiseFall.xml',
-                'Deriv Killer - Elvis Trades.xml',
+                'Deriv Killer - States FX.xml',
                 'Odins_ghost.xml',
                 'M27 Auto Switch bot 2024 (1).xml',
                 'Even Odd Ghost V1 by Dexter.xml',
 
-                'Over 3 Delirium by Elvis Trades.xml',
+                'Over 3 Delirium by States FX.xml',
                 'GreenLight Pro - 2026 Over .xml',
 
                 'EVENODD Double loss Bot .xml',
@@ -420,13 +420,13 @@ const AppWrapper = observer(() => {
                 'Raziel Over Under.xml',
                 'Raziel Over Under Entry Point.xml',
                 'noloss bot.xml',
-                'Elvis SpeedBot(With Entry).xml',
+                'States FX SpeedBot(With Entry).xml',
                 'AUTO C4 VOLT 🇬🇧 2 🇬🇧 AI PREMIUM ROBOT  (2) (1).xml',
                 '$Dollar printer .xml',
 
-                'Over_Under Ghost - by ElvisTrades.xml',
-                'Over_Under Ghost v2 - by Elvis Trades.xml',
-                'Flipping-Tool-2026 - Elvis Trades (1).xml',
+                'Over_Under Ghost - by StatesFX.xml',
+                'Over_Under Ghost v2 - by States FX.xml',
+                'Flipping-Tool-2026 - States FX (1).xml',
             ];
             const botPromises = botFiles.map(async file => {
                 try {
@@ -3045,7 +3045,7 @@ const AppWrapper = observer(() => {
                             </div>
                         </div>
 
-                        {/* ELVIS ZONE TAB - MOVED TO ANALYSIS TOOL */}
+                        {/* STATES FX ZONE TAB - MOVED TO ANALYSIS TOOL */}
 
                         {/* TICKSHARK TAB - MOVED TO ANALYSIS TOOL */}
                     </Tabs>

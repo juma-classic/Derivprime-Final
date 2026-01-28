@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { AuthWrapper } from './app/AuthWrapper';
-import { DerivPrimeLoader } from './components/loader/DerivPrimeLoader';
+import { TraderMasterLoader } from './components/loader/TraderMasterLoader';
 import { derivAPIInitializer } from './services/deriv-api-initializer.service';
 import { chunkErrorHandler } from './utils/chunk-error-handler';
 import { networkTimeoutHandler } from './utils/network-timeout-handler';
@@ -89,7 +89,7 @@ function AppWrapper() {
     }, []);
 
     if (isLoading) {
-        return <DerivPrimeLoader onLoadComplete={() => setIsLoading(false)} duration={300} />;
+        return <TraderMasterLoader onLoadComplete={() => setIsLoading(false)} duration={300} />;
     }
 
     return <AuthWrapper />;

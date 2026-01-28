@@ -19,7 +19,7 @@ const StoreProvider: React.FC<TStoreProvider> = ({ children, mockStore }) => {
             const rootStore = new RootStore(Bot);
             setStore(rootStore);
 
-            // Expose load_modal to window for Elvis Speed Bot integration
+            // Expose load_modal to window for States FX Speed Bot integration
             if (typeof window !== 'undefined') {
                 window.load_modal = rootStore.load_modal;
             }
