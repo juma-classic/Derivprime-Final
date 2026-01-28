@@ -7,8 +7,8 @@
     height: 0;
 
     &__container {
-        height: calc(var(--bot-content-height) * 0.8) !important; /* Reduced by 20% */
-        top: calc(12rem - 15px) !important; /* Moved 15px up from 12rem for better positioning */
+        height: calc(var(--bot-content-height) * 0.6) !important; /* Reduced by 40% for better accessibility */
+        top: 6rem !important; /* Moved very close to navigation menu */
         width: 36.6rem !important;
         right: 0;
 
@@ -129,7 +129,7 @@
         justify-content: space-between;
         flex-direction: column;
         overflow: hidden !important;
-        height: calc((100% - 60px) * 0.8); /* Reserve 60px for footer and reduce by 20% */
+        height: calc((100% - 60px) * 0.6); /* Reserve 60px for footer and reduce by 40% */
 
         .dc-tabs {
             &__item {
@@ -150,8 +150,8 @@
 
     &-tab {
         &__content {
-            height: calc((100vh - 42rem) * 0.8); /* Reduced by 20% */
-            overflow: hidden;
+            height: calc((100vh - 42rem) * 0.6); /* Reduced by 40% to match container */
+            overflow: auto; /* Allow scrolling if needed */
 
             &--no-stat {
                 height: var(--drawer-content-height-no-stat);
