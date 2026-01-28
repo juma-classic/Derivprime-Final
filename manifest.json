@@ -1,8 +1,8 @@
 {
-    "name": "Autotrades by Elvis Trades",
-    "short_name": "Autotrades",
+    "name": "Deriv Prime",
+    "short_name": "Deriv Prime",
     "theme_color": "#14b8a6",
-    "description": "Automated trading with style - Professional trading tools by Elvis Trades.",
+    "description": "Advanced trading platform - Professional-grade automated trading tools.",
     "background_color": "#0f1419",
     "display": "standalone",
     "start_url": "/",

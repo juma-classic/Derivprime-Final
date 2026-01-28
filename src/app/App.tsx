@@ -68,6 +68,9 @@ const RichMotherPage = lazy(() => import('../pages/rich-mother-page').then(m => 
 // Speed Bot Page
 const SpeedBotPage = lazy(() => import('../pages/speed-bot-page').then(m => ({ default: m.default })));
 
+// DTrader Manual Page
+const DTraderManual = lazy(() => import('../pages/dtrader-manual').then(m => ({ default: m.default })));
+
 const { TRANSLATIONS_CDN_URL, R2_PROJECT_NAME, CROWDIN_BRANCH_NAME } = process.env;
 const i18nInstance = initializeI18n({
     cdnUrl: `${TRANSLATIONS_CDN_URL}/${R2_PROJECT_NAME}/${CROWDIN_BRANCH_NAME}`,
@@ -125,6 +128,9 @@ const router = createBrowserRouter(
 
             {/* Speed Bot Page */}
             <Route path='speed-bot' element={<SpeedBotPage />} />
+
+            {/* DTrader Manual Page */}
+            <Route path='dtrader-manual' element={<DTraderManual />} />
 
             {/* Phase 1 Demo Routes */}
             <Route path='live-signals-demo' element={<LiveSignalsDemo />} />
