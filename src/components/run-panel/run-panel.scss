@@ -7,7 +7,7 @@
     height: 0;
 
     &__container {
-        height: var(--bot-content-height) !important;
+        height: calc(var(--bot-content-height) * 0.8) !important; /* Reduced by 20% */
         top: calc(12rem - 15px) !important; /* Moved 15px up from 12rem for better positioning */
         width: 36.6rem !important;
         right: 0;
@@ -54,6 +54,7 @@
         width: 35rem;
         background-color: var(--general-section-2);
         flex-shrink: 0; /* Prevent statistics from shrinking */
+        max-height: 120px; /* Limit height to make panel more compact */
 
         @include mobile-or-tablet-screen {
             margin: 0;
@@ -128,7 +129,7 @@
         justify-content: space-between;
         flex-direction: column;
         overflow: hidden !important;
-        height: calc(100% - 60px); /* Reserve 60px for footer */
+        height: calc((100% - 60px) * 0.8); /* Reserve 60px for footer and reduce by 20% */
 
         .dc-tabs {
             &__item {
@@ -149,7 +150,7 @@
 
     &-tab {
         &__content {
-            height: calc(100vh - 42rem);
+            height: calc((100vh - 42rem) * 0.8); /* Reduced by 20% */
             overflow: hidden;
 
             &--no-stat {
