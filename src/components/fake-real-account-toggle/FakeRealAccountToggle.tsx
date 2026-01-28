@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { fakeRealBalanceGenerator } from '@/utils/fake-real-balance-generator';
 import './FakeRealAccountToggle.scss';
 
