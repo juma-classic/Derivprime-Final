@@ -7,6 +7,7 @@ import { hotColdZoneScannerService } from '@/services/hot-cold-zone-scanner.serv
 import { patternPredictor } from '@/services/pattern-predictor.service';
 import { signalAnalysisService } from '@/services/signal-analysis.service';
 import { SignalTradeResult, signalTradingService } from '@/services/signal-trading.service';
+import { stakeManagerService } from '@/services/stake-manager.service';
 import { aiSignalIntelligence } from '@/services/ai-signal-intelligence.service';
 import { EntryAnalysis, EvenOddEntrySuggester } from '@/utils/evenodd-entry-suggester';
 import { AutoTradeSettings } from './AutoTradeSettings';
