@@ -7,8 +7,8 @@
     height: 0;
 
     &__container {
-        height: calc(var(--bot-content-height) * 0.4) !important; /* Reduced by 60% for maximum accessibility */
-        top: 3rem !important; /* Moved 50% higher (was 6rem, now 3rem) */
+        height: calc(var(--bot-content-height) * 0.5) !important; /* Balanced height - not too small, not too big */
+        top: 4rem !important; /* Moved down slightly for better fit */
         width: 36.6rem !important;
         left: 2rem !important; /* Move to left side instead of right */
         right: auto !important; /* Remove right positioning */
@@ -105,15 +105,16 @@
 
     &__footer {
         text-align: center;
-        position: absolute; /* Position footer absolutely at bottom */
-        bottom: 0;
-        left: 0;
-        right: 0;
+        position: fixed !important; /* Fixed to viewport instead of absolute */
+        bottom: 1rem !important; /* Position from bottom of screen */
+        left: 2rem !important; /* Align with panel position */
+        width: 36.6rem !important; /* Match panel width */
         height: 60px; /* Fixed height for footer */
         background-color: var(--general-main-2);
         border-top: 2px solid var(--brand-red-coral); /* Make border more prominent */
-        z-index: 100; /* Higher z-index to ensure visibility */
-        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1); /* Add shadow for better visibility */
+        border-radius: 8px 8px 0 0; /* Rounded top corners */
+        z-index: 1000; /* Very high z-index to ensure visibility */
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2); /* Stronger shadow for better visibility */
 
         @include flex-center(space-between);
 
@@ -126,6 +127,8 @@
             background-color: var(--brand-red-coral) !important; /* Make button more prominent */
             color: white !important;
             font-weight: bold !important;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
     }
 
@@ -155,7 +158,7 @@
 
     &-tab {
         &__content {
-            height: calc((100vh - 42rem) * 0.4); /* Reduced by 60% to match container */
+            height: calc((100vh - 42rem) * 0.5); /* Increased to match container height */
             overflow: auto; /* Allow scrolling if needed */
 
             &--no-stat {
@@ -173,7 +176,7 @@
 
             &--summary-tab {
                 padding: 0.8rem 1.6rem;
-                padding-bottom: 70px; /* Add padding to prevent content from being hidden behind footer */
+                padding-bottom: 80px; /* More padding to account for fixed footer */
             }
         }
     }
