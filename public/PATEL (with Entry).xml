@@ -61,7 +61,7 @@
             <field name="VAR" id="L@/b)sz/N}%09a72BPX;">Stake</field>
             <value name="VALUE">
               <block type="math_number" id="NXTESPL-dgp,uEC?MS{L">
-                <field name="NUM">0.5</field>
+                <field name="NUM">3.27</field>
               </block>
             </value>
             <next>
@@ -69,7 +69,7 @@
                 <field name="VAR" id="is-FMy]az2Q0g8j+I|5%">Initial Stake</field>
                 <value name="VALUE">
                   <block type="math_number" id="P)ecQL^klyV-vtB4Yl]o">
-                    <field name="NUM">0.5</field>
+                    <field name="NUM">3.27</field>
                   </block>
                 </value>
                 <next>
@@ -101,7 +101,7 @@
                                 <field name="VAR" id="|Ag{[(Qw/K$g1v=k)zNh">Take Profit</field>
                                 <value name="VALUE">
                                   <block type="math_number" id="uJG:nXJwJz3pqsI%as9n">
-                                    <field name="NUM">4</field>
+                                    <field name="NUM">30000</field>
                                   </block>
                                 </value>
                                 <next>
@@ -109,7 +109,7 @@
                                     <field name="VAR" id="2;6+=.#8BX3z,xZDJbjs">Stop Loss</field>
                                     <value name="VALUE">
                                       <block type="math_number" id=";$vRK5[+o$CdaX;`zYGO">
-                                        <field name="NUM">20</field>
+                                        <field name="NUM">30000</field>
                                       </block>
                                     </value>
                                     <next>
