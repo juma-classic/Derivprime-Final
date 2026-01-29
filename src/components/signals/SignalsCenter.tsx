@@ -7,7 +7,6 @@ import { hotColdZoneScannerService } from '@/services/hot-cold-zone-scanner.serv
 import { patternPredictor } from '@/services/pattern-predictor.service';
 import { signalAnalysisService } from '@/services/signal-analysis.service';
 import { SignalTradeResult, signalTradingService } from '@/services/signal-trading.service';
-import { stakeManagerService } from '@/services/stake-manager.service';
 import { aiSignalIntelligence } from '@/services/ai-signal-intelligence.service';
 import { EntryAnalysis, EvenOddEntrySuggester } from '@/utils/evenodd-entry-suggester';
 import { AutoTradeSettings } from './AutoTradeSettings';
@@ -496,7 +495,7 @@ export const SignalsCenter: React.FC = () => {
 
         // Get current stake from StakeManager (centralized)
         const { stakeManager } = await import('@/services/stake-manager.service');
-        const currentStake = stakeManager.getStake();
+        let currentStake = stakeManager.getStake();
         const currentMartingale = stakeManager.getMartingale();
 
         console.log('💰 Using centralized stake settings:', {
@@ -878,7 +877,7 @@ export const SignalsCenter: React.FC = () => {
         }, 10000);
 
         return () => {
-            if (unsubscribeFunc) {
+            if (unsubscribeFunc && typeof unsubscribeFunc === 'function') {
                 try {
                     unsubscribeFunc();
                 } catch (error) {
@@ -1394,7 +1393,7 @@ export const SignalsCenter: React.FC = () => {
     const executeTradeBatch = async (signal: SignalsCenterSignal, batchNumber: number, totalBatches: number) => {
         // Get current stake from StakeManager (centralized)
         const { stakeManager } = await import('@/services/stake-manager.service');
-        const currentStake = stakeManager.getStake();
+        let currentStake = stakeManager.getStake();
         const currentMartingale = stakeManager.getMartingale();
 
         const numberOfRuns = tradeRuns[signal.id] || 1;
@@ -1420,7 +1419,6 @@ export const SignalsCenter: React.FC = () => {
         let totalProfit = 0;
         let successfulRuns = 0;
         let failedRuns = 0;
-        let currentAutoStake = currentStake; // Start with StakeManager stake
 
         for (let run = 1; run <= maxTrades; run++) {
             const tradeWon = false;
@@ -1442,7 +1440,7 @@ export const SignalsCenter: React.FC = () => {
                         successfulRuns++;
                         // Reset stake on win if martingale is enabled
                         if (enableMartingale) {
-                            currentStake = defaultStake;
+                            currentStake = stakeManager.getStake();
                             console.log(`✅ Win! Stake reset to $${currentStake.toFixed(2)}`);
                         }
                     } else {
@@ -2496,7 +2494,7 @@ export const SignalsCenter: React.FC = () => {
 
         // Get current stake from StakeManager (centralized)
         const { stakeManager } = await import('@/services/stake-manager.service');
-        const currentStake = stakeManager.getStake();
+        let currentStake = stakeManager.getStake();
         const currentMartingale = stakeManager.getMartingale();
 
         // Get settings for this signal - Use Auto-Loop as max trades
@@ -2538,7 +2536,6 @@ export const SignalsCenter: React.FC = () => {
         let totalProfit = 0;
         let successfulRuns = 0;
         let failedRuns = 0;
-        let currentTradeStake = currentStake; // Start with StakeManager stake
 
         for (let run = 1; run <= maxTrades; run++) {
             let tradeWon = false;
@@ -2562,7 +2559,7 @@ export const SignalsCenter: React.FC = () => {
                         successfulRuns++;
                         // Reset stake on win if martingale is enabled
                         if (enableMartingale) {
-                            currentStake = defaultStake;
+                            currentStake = stakeManager.getStake();
                             console.log(`✅ Win! Stake reset to $${currentStake.toFixed(2)}`);
                         }
                     } else {
@@ -2663,7 +2660,21 @@ export const SignalsCenter: React.FC = () => {
                 </div>
                 <button
                     className='collapse-toggle-btn'
-                    onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
+                    onClick={() => {
+                        try {
+                            console.log('🔄 Toggling header collapse state from:', isHeaderCollapsed);
+                            setIsHeaderCollapsed(!isHeaderCollapsed);
+                            console.log('✅ Header collapse state toggled to:', !isHeaderCollapsed);
+                        } catch (error) {
+                            console.error('❌ Error toggling header collapse:', error);
+                            // Fallback: try to reset to a known good state
+                            try {
+                                setIsHeaderCollapsed(true);
+                            } catch (fallbackError) {
+                                console.error('❌ Fallback error:', fallbackError);
+                            }
+                        }
+                    }}
                     title={isHeaderCollapsed ? 'Show controls' : 'Hide controls'}
                 >
                     {isHeaderCollapsed ? '▼ Show Controls' : '▲ Hide Controls'}
@@ -2697,8 +2708,12 @@ export const SignalsCenter: React.FC = () => {
 
             {/* Collapsible Header Content */}
             {!isHeaderCollapsed && (
-                <>
-                    <div className='signals-header'>
+                <React.Fragment>
+                    {(() => {
+                        try {
+                            return (
+                                <>
+                                    <div className='signals-header'>
                         <div className='header-controls'>
                             <button
                                 className={`control-btn ${autoTradeEnabled ? 'active' : ''}`}
@@ -2731,7 +2746,7 @@ export const SignalsCenter: React.FC = () => {
                             <button
                                 className='control-btn stake-settings-btn'
                                 onClick={() => setShowStakeModal(true)}
-                                title={`Configure stake and martingale settings (Current: $${stakeManager.getFormattedStake()}, ${stakeManager.getFormattedMartingale()})`}
+                                title='Configure stake and martingale settings'
                             >
                                 💰 Stake Settings
                             </button>
@@ -3023,6 +3038,20 @@ export const SignalsCenter: React.FC = () => {
                         </div>
                     )}
                 </>
+            );
+        } catch (error) {
+            console.error('❌ Error rendering collapsible controls:', error);
+            return (
+                <div className='error-fallback'>
+                    <div className='error-message'>
+                        <span className='error-icon'>⚠️</span>
+                        <span>Error loading controls. Please refresh the page.</span>
+                    </div>
+                </div>
+            );
+        }
+    })()}
+                </React.Fragment>
             )}
 
             {/* Hidden Signal Scanners */}
