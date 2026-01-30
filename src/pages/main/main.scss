@@ -1259,6 +1259,22 @@ html:has(.main--fast-lane) {
     }
 }
 
+// DTrader Container
+.dtrader-container {
+    width: 100%;
+    height: calc(100vh - 120px);
+    min-height: calc(100vh - 120px);
+    overflow: hidden;
+    background: #0e0e0e;
+    padding: 0;
+    
+    // Ensure the DTrader clone component fills the container
+    .dtrader-clone {
+        height: 100%;
+        width: 100%;
+    }
+}
+
 // Patel Prime Container
 .patel-prime-container {
     width: 100%;
