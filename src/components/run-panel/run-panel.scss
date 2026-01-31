@@ -7,7 +7,7 @@
     height: 0;
 
     &__container {
-        height: calc(var(--bot-content-height) * 0.5) !important; /* Balanced height - not too small, not too big */
+        height: calc(var(--bot-content-height) * 0.7) !important; /* Increased height from 0.5 to 0.7 for more space */
         top: 2rem !important; /* Moved higher - was 4rem, now 2rem for more space */
         width: 36.6rem !important;
         left: 2rem !important; /* Move to left side instead of right */
@@ -55,8 +55,8 @@
         width: 35rem;
         background-color: var(--general-section-2);
         flex-shrink: 0; /* Prevent statistics from shrinking */
-        max-height: 120px; /* Limit height to make panel more compact */
-        margin-bottom: 100px !important; /* Add margin to prevent overlap with RESET button */
+        max-height: 100px; /* Reduced from 120px to 100px for more content space */
+        margin-bottom: 80px !important; /* Reduced from 100px to 80px */
 
         @include mobile-or-tablet-screen {
             margin: 0;
@@ -107,10 +107,10 @@
     &__footer {
         text-align: center;
         position: fixed !important; /* Fixed to viewport instead of absolute */
-        bottom: 4rem !important; /* Move higher - was 1rem, now 4rem from bottom */
+        bottom: 3rem !important; /* Reduced from 4rem to 3rem for more content space */
         left: 2rem !important; /* Align with panel position */
         width: 36.6rem !important; /* Match panel width */
-        height: 90px !important; /* Increased height for better visibility */
+        height: 70px !important; /* Reduced height from 90px to 70px */
         background: linear-gradient(
             135deg,
             rgb(15 23 42 / 95%) 0%,
@@ -138,8 +138,8 @@
 
         &-button {
             width: 280px !important; /* Slightly smaller to fit better */
-            height: 50px !important; /* Increased height for better visibility */
-            margin: 8px !important; /* Reduced margin */
+            height: 40px !important; /* Reduced height from 50px to 40px for more content space */
+            margin: 6px !important; /* Reduced margin from 8px to 6px */
             background: linear-gradient(
                 135deg,
                 #0d9488 0%,
@@ -148,7 +148,7 @@
 
             color: #fff !important; /* Pure white text - forced with high specificity */
             font-weight: 700 !important; /* Bolder text */
-            font-size: 18px !important; /* Larger text for better visibility */
+            font-size: 16px !important; /* Reduced from 18px to 16px */
             border-radius: 8px !important; /* More rounded corners */
             box-shadow:
                 0 4px 12px rgb(13 148 136 / 40%),
@@ -220,8 +220,8 @@
         justify-content: space-between;
         flex-direction: column;
         overflow: hidden !important;
-        height: calc((100% - 60px) * 0.4); /* Reserve 60px for footer and reduce by 60% */
-        padding-bottom: 100px !important; /* Add padding to prevent overlap with fixed RESET button */
+        height: calc(100% - 40px); /* Increased available height by reducing reserved space from 60px to 40px */
+        padding-bottom: 80px !important; /* Reduced padding from 100px to 80px */
 
         .dc-tabs {
             &__item {
@@ -242,7 +242,7 @@
 
     &-tab {
         &__content {
-            height: calc((100vh - 42rem) * 0.5); /* Increased to match container height */
+            height: calc(100vh - 35rem); /* Increased available height by reducing from 42rem to 35rem */
             overflow: auto; /* Allow scrolling if needed */
 
             &--no-stat {
@@ -260,7 +260,7 @@
 
             &--summary-tab {
                 padding: 0.8rem 1.6rem;
-                padding-bottom: 80px; /* More padding to account for fixed footer */
+                padding-bottom: 60px; /* Reduced padding from 80px to 60px */
             }
         }
     }
