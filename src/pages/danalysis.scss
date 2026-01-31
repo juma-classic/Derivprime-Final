@@ -3,10 +3,18 @@
     background: #f8f9fa;
     min-height: 100vh;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 100vw;
+    margin: 0 auto;
 
     &__header {
         text-align: center;
         margin-bottom: 30px;
+        width: 100%;
 
         h1 {
             color: #333;
@@ -21,6 +29,9 @@
         justify-content: center;
         gap: 20px;
         margin-bottom: 30px;
+        width: 100%;
+        max-width: 800px;
+        flex-wrap: wrap;
 
         .control-group {
             .control-select {
@@ -69,7 +80,8 @@
     }
 
     &__stats {
-        max-width: 800px;
+        width: 100%;
+        max-width: 900px;
         margin: 0 auto;
         background: white;
         border-radius: 12px;
@@ -297,14 +309,18 @@
 @media (max-width: 768px) {
     .danalysis {
         padding: 15px;
+        align-items: center;
 
         &__controls {
             flex-direction: column;
             align-items: center;
+            width: 100%;
         }
 
         &__stats {
             padding: 20px;
+            width: 100%;
+            max-width: 100%;
 
             .stats-header {
                 flex-direction: column;
@@ -381,4 +397,17 @@
     60% {
         transform: translateX(-50%) translateY(-4px);
     }
+}
+
+// Container styling for the tab wrapper
+.danalysis-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0;
+    margin: 0;
+    overflow-x: auto;
+    overflow-y: auto;
 }

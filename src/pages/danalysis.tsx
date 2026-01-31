@@ -26,10 +26,47 @@ const DAnalysis: React.FC = () => {
     // Update price and recent ticks periodically
     useEffect(() => {
         const updateLiveData = () => {
-            // Generate new price
-            const basePrice = 5428.603;
-            const variation = (Math.random() - 0.5) * 100; // ±50 price variation
-            const newPrice = (basePrice + variation).toFixed(3);
+            // Generate new price based on selected index
+            let basePrice = 5428.603;
+            let variation = 50; // Default variation
+            
+            if (selectedIndex.includes('Volatility 10')) {
+                basePrice = Math.random() > 0.5 ? 5428.603 : 4892.156;
+                variation = 30;
+            } else if (selectedIndex.includes('Volatility 25')) {
+                basePrice = Math.random() > 0.5 ? 6234.891 : 5678.234;
+                variation = 75;
+            } else if (selectedIndex.includes('Volatility 50')) {
+                basePrice = Math.random() > 0.5 ? 7891.456 : 7234.789;
+                variation = 125;
+            } else if (selectedIndex.includes('Volatility 75')) {
+                basePrice = Math.random() > 0.5 ? 8456.123 : 7890.456;
+                variation = 175;
+            } else if (selectedIndex.includes('Volatility 100')) {
+                basePrice = Math.random() > 0.5 ? 9123.789 : 8567.234;
+                variation = 225;
+            } else if (selectedIndex.includes('Jump')) {
+                basePrice = Math.random() > 0.5 ? 12345.67 : 11234.56;
+                variation = 500;
+            } else if (selectedIndex.includes('Crash')) {
+                basePrice = Math.random() > 0.5 ? 987.654 : 876.543;
+                variation = 100;
+            } else if (selectedIndex.includes('Boom')) {
+                basePrice = Math.random() > 0.5 ? 1234.567 : 1123.456;
+                variation = 150;
+            } else if (selectedIndex.includes('Step')) {
+                basePrice = Math.random() > 0.5 ? 2345.678 : 2234.567;
+                variation = 25;
+            } else if (selectedIndex.includes('Bear')) {
+                basePrice = Math.random() > 0.5 ? 3456.789 : 3345.678;
+                variation = 80;
+            } else if (selectedIndex.includes('Bull')) {
+                basePrice = Math.random() > 0.5 ? 4567.890 : 4456.789;
+                variation = 90;
+            }
+            
+            const priceVariation = (Math.random() - 0.5) * variation;
+            const newPrice = (basePrice + priceVariation).toFixed(3);
             setCurrentPrice(newPrice);
 
             // Extract last digit from price
@@ -46,22 +83,42 @@ const DAnalysis: React.FC = () => {
         // Update every 2 seconds
         const interval = setInterval(updateLiveData, 2000);
         return () => clearInterval(interval);
-    }, []);
+    }, [selectedIndex]);
 
     // Generate mock digit statistics
     useEffect(() => {
         const generateStats = () => {
-            // Generate different base percentages based on selected market
+            // Generate different base percentages based on selected market and index
             let baseCounts: number[];
-            switch (selectedMarket) {
-                case 'Matches':
-                    baseCounts = [8.5, 11.2, 9.8, 12.1, 8.9, 6.8, 10.5, 9.1, 8.2, 14.9];
-                    break;
-                case 'Differs':
-                    baseCounts = [11.1, 9.3, 10.8, 8.7, 10.5, 8.9, 9.6, 10.2, 9.8, 11.1];
-                    break;
-                default: // Circles
-                    baseCounts = [9.9, 10.3, 10.5, 10.9, 9.5, 7.6, 9.8, 9.4, 7.9, 9.2];
+            
+            // Different patterns based on index type
+            if (selectedIndex.includes('Jump')) {
+                baseCounts = [8.2, 9.8, 11.5, 9.1, 8.7, 12.3, 9.4, 8.9, 10.6, 11.5];
+            } else if (selectedIndex.includes('Crash')) {
+                baseCounts = [12.1, 8.5, 9.2, 11.8, 8.9, 7.6, 10.4, 9.7, 10.8, 11.0];
+            } else if (selectedIndex.includes('Boom')) {
+                baseCounts = [9.5, 11.2, 8.8, 9.6, 12.1, 8.4, 9.9, 10.3, 8.7, 11.5];
+            } else if (selectedIndex.includes('Step')) {
+                baseCounts = [10.5, 10.5, 10.5, 10.5, 9.8, 9.8, 9.8, 9.8, 9.6, 9.6];
+            } else if (selectedIndex.includes('Bear')) {
+                baseCounts = [11.8, 9.2, 8.5, 10.6, 9.1, 8.8, 10.2, 9.4, 10.7, 11.7];
+            } else if (selectedIndex.includes('Bull')) {
+                baseCounts = [8.9, 10.8, 11.4, 9.3, 10.6, 11.2, 9.1, 8.7, 9.5, 10.5];
+            } else if (selectedIndex.includes('(1s)')) {
+                // 1-second volatility indices have different patterns
+                baseCounts = [9.2, 10.8, 9.6, 11.1, 8.9, 9.7, 10.4, 9.3, 10.5, 10.5];
+            } else {
+                // Standard volatility indices
+                switch (selectedMarket) {
+                    case 'Matches':
+                        baseCounts = [8.5, 11.2, 9.8, 12.1, 8.9, 6.8, 10.5, 9.1, 8.2, 14.9];
+                        break;
+                    case 'Differs':
+                        baseCounts = [11.1, 9.3, 10.8, 8.7, 10.5, 8.9, 9.6, 10.2, 9.8, 11.1];
+                        break;
+                    default: // Circles
+                        baseCounts = [9.9, 10.3, 10.5, 10.9, 9.5, 7.6, 9.8, 9.4, 7.9, 9.2];
+                }
             }
 
             // Add some randomness to simulate live data
@@ -103,7 +160,7 @@ const DAnalysis: React.FC = () => {
         }, 3000);
 
         return () => clearInterval(interval);
-    }, [tickCount, selectedMarket]);
+    }, [tickCount, selectedMarket, selectedIndex]);
 
     const getDigitClass = (stat: DigitStats) => {
         if (stat.isHighest) return 'highest';
@@ -114,7 +171,32 @@ const DAnalysis: React.FC = () => {
     };
 
     const marketOptions = ['Circles', 'Matches', 'Differs'];
-    const indexOptions = ['Volatility 10 Index', 'Volatility 25 Index', 'Volatility 50 Index', 'Volatility 75 Index', 'Volatility 100 Index'];
+    const indexOptions = [
+        'Volatility 10 Index',
+        'Volatility 25 Index', 
+        'Volatility 50 Index',
+        'Volatility 75 Index',
+        'Volatility 100 Index',
+        'Volatility 10 (1s) Index',
+        'Volatility 25 (1s) Index',
+        'Volatility 50 (1s) Index',
+        'Volatility 75 (1s) Index',
+        'Volatility 100 (1s) Index',
+        'Jump 10 Index',
+        'Jump 25 Index',
+        'Jump 50 Index',
+        'Jump 75 Index',
+        'Jump 100 Index',
+        'Crash 300 Index',
+        'Crash 500 Index',
+        'Crash 1000 Index',
+        'Boom 300 Index',
+        'Boom 500 Index',
+        'Boom 1000 Index',
+        'Step Index',
+        'Bear Market Index',
+        'Bull Market Index'
+    ];
 
     return (
         <div className="danalysis">
