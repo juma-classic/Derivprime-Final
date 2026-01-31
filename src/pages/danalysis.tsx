@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { derivAPIService } from '@/services/deriv-api.service';
-import { TTicksSubscribeResponse } from '@/types/deriv-api.types';
 import './danalysis.scss';
 
 interface DigitStats {
@@ -40,6 +38,161 @@ const SYMBOL_MAP: Record<string, string> = {
     'Jump 100 Index': 'JD100',
 };
 
+// Direct WebSocket connection for DAnalysis
+class DAnalysisAPI {
+    private ws: WebSocket | null = null;
+    private subscriptions: Map<string, (data: any) => void> = new Map();
+    private reconnectAttempts = 0;
+    private maxReconnectAttempts = 5;
+    private reconnectDelay = 1000;
+
+    constructor() {
+        this.connect();
+    }
+
+    private connect() {
+        try {
+            // Use the same app ID as the rest of the site
+            const appId = '82255';
+            const wsUrl = `wss://ws.derivws.com/websockets/v3?app_id=${appId}`;
+            
+            console.log('🔌 DAnalysis connecting to Deriv API with App ID:', appId);
+            
+            this.ws = new WebSocket(wsUrl);
+            
+            this.ws.onopen = () => {
+                console.log('✅ DAnalysis WebSocket connected successfully');
+                this.reconnectAttempts = 0;
+            };
+            
+            this.ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    // Handle tick data
+                    if (data.tick) {
+                        const callback = this.subscriptions.get(`tick_${data.tick.symbol}`);
+                        if (callback) {
+                            callback(data);
+                        }
+                    }
+                    
+                    // Handle history data
+                    if (data.history) {
+                        const callback = this.subscriptions.get(`history_${data.echo_req?.ticks_history}`);
+                        if (callback) {
+                            callback(data);
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Error parsing WebSocket message:', error);
+                }
+            };
+            
+            this.ws.onclose = () => {
+                console.log('🔌 DAnalysis WebSocket connection closed');
+                this.reconnect();
+            };
+            
+            this.ws.onerror = (error) => {
+                console.error('❌ DAnalysis WebSocket error:', error);
+            };
+            
+        } catch (error) {
+            console.error('❌ Failed to create DAnalysis WebSocket connection:', error);
+            this.reconnect();
+        }
+    }
+
+    private reconnect() {
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            this.reconnectAttempts++;
+            console.log(`🔄 Attempting to reconnect DAnalysis WebSocket (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+            
+            setTimeout(() => {
+                this.connect();
+            }, this.reconnectDelay * this.reconnectAttempts);
+        } else {
+            console.error('❌ Max reconnection attempts reached for DAnalysis WebSocket');
+        }
+    }
+
+    public async getTicksHistory(symbol: string, count: number = 1000): Promise<any> {
+        return new Promise((resolve, reject) => {
+            if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+                reject(new Error('WebSocket not connected'));
+                return;
+            }
+
+            const requestId = `history_${symbol}`;
+            const request = {
+                ticks_history: symbol,
+                adjust_start_time: 1,
+                count: count,
+                end: 'latest',
+                style: 'ticks',
+                req_id: requestId
+            };
+
+            // Set up callback for this request
+            this.subscriptions.set(requestId, (data) => {
+                this.subscriptions.delete(requestId);
+                resolve(data);
+            });
+
+            // Send request
+            this.ws.send(JSON.stringify(request));
+
+            // Set timeout
+            setTimeout(() => {
+                if (this.subscriptions.has(requestId)) {
+                    this.subscriptions.delete(requestId);
+                    reject(new Error('Request timeout'));
+                }
+            }, 10000);
+        });
+    }
+
+    public async subscribeToTicks(symbol: string, callback: (data: any) => void): Promise<string> {
+        return new Promise((resolve, reject) => {
+            if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+                reject(new Error('WebSocket not connected'));
+                return;
+            }
+
+            const subscriptionId = `tick_${symbol}`;
+            const request = {
+                ticks: symbol,
+                subscribe: 1,
+                req_id: subscriptionId
+            };
+
+            // Set up callback for this subscription
+            this.subscriptions.set(subscriptionId, callback);
+
+            // Send request
+            this.ws.send(JSON.stringify(request));
+            resolve(subscriptionId);
+        });
+    }
+
+    public async unsubscribe(subscriptionId: string) {
+        if (this.subscriptions.has(subscriptionId)) {
+            this.subscriptions.delete(subscriptionId);
+        }
+        
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({
+                forget_all: 'ticks'
+            }));
+        }
+    }
+
+    public isConnected(): boolean {
+        return this.ws?.readyState === WebSocket.OPEN;
+    }
+}
+
 const DAnalysis: React.FC = () => {
     const [selectedMarket, setSelectedMarket] = useState('Circles');
     const [selectedIndex, setSelectedIndex] = useState('Volatility 10 Index');
@@ -51,6 +204,7 @@ const DAnalysis: React.FC = () => {
     const [isConnected, setIsConnected] = useState(false);
     const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
     const [connectionStatus, setConnectionStatus] = useState<string>('Connecting...');
+    const [danalysisAPI] = useState(() => new DAnalysisAPI());
 
     // Extract last digit from price
     const extractDigit = useCallback((price: number): number => {
@@ -123,7 +277,7 @@ const DAnalysis: React.FC = () => {
     }, [selectedMarket]);
 
     // Handle real-time tick data
-    const handleTickData = useCallback((response: TTicksSubscribeResponse) => {
+    const handleTickData = useCallback((response: any) => {
         if (response.tick) {
             const price = parseFloat(response.tick.quote);
             const digit = extractDigit(price);
@@ -131,6 +285,7 @@ const DAnalysis: React.FC = () => {
 
             setCurrentPrice(price.toFixed(3));
             setConnectionStatus('Connected - Live Data');
+            setIsConnected(true);
             
             // Update recent ticks
             setRecentTicks(prev => {
@@ -161,19 +316,26 @@ const DAnalysis: React.FC = () => {
                 
                 // Unsubscribe from previous subscription
                 if (subscriptionId) {
-                    await derivAPIService.unsubscribe(subscriptionId);
+                    await danalysisAPI.unsubscribe(subscriptionId);
+                }
+
+                // Wait for connection if not connected
+                let attempts = 0;
+                while (!danalysisAPI.isConnected() && attempts < 10) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    attempts++;
+                }
+
+                if (!danalysisAPI.isConnected()) {
+                    throw new Error('Failed to connect to Deriv API');
                 }
 
                 // Load historical data first
                 setConnectionStatus('Loading historical data...');
-                const historyResponse = await derivAPIService.getTicksHistory({
-                    symbol,
-                    count: tickCount,
-                    style: 'ticks'
-                });
+                const historyResponse = await danalysisAPI.getTicksHistory(symbol, tickCount);
 
                 if (historyResponse.history && historyResponse.history.prices) {
-                    const historicalTicks: TickData[] = historyResponse.history.prices.map((price, index) => ({
+                    const historicalTicks: TickData[] = historyResponse.history.prices.map((price: string, index: number) => ({
                         digit: extractDigit(parseFloat(price)),
                         price: parseFloat(price),
                         timestamp: (historyResponse.history!.times![index] || 0) * 1000
@@ -189,8 +351,8 @@ const DAnalysis: React.FC = () => {
 
                 // Subscribe to real-time updates
                 setConnectionStatus('Subscribing to live data...');
-                const newSubscriptionId = await derivAPIService.subscribeToTicks(symbol, handleTickData);
-                setSubscriptionId(newSubscriptionId || null);
+                const newSubscriptionId = await danalysisAPI.subscribeToTicks(symbol, handleTickData);
+                setSubscriptionId(newSubscriptionId);
                 setIsConnected(true);
                 setConnectionStatus('Connected - Live Data');
 
@@ -210,10 +372,10 @@ const DAnalysis: React.FC = () => {
 
         return () => {
             if (subscriptionId) {
-                derivAPIService.unsubscribe(subscriptionId);
+                danalysisAPI.unsubscribe(subscriptionId);
             }
         };
-    }, [selectedIndex, tickCount, handleTickData, subscriptionId, extractDigit]);
+    }, [selectedIndex, tickCount, handleTickData, subscriptionId, extractDigit, danalysisAPI]);
 
     // Update digit statistics when tick history changes
     useEffect(() => {

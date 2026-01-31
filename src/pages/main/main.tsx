@@ -29,7 +29,6 @@ import RunStrategy from '../dashboard/run-strategy';
 const Chart = lazy(() => import('../chart'));
 const Tutorial = lazy(() => import('../tutorials'));
 const AdvancedAlgo = lazy(() => import('../advanced-algo'));
-const DTraderClone = lazy(() => import('../dtrader-clone'));
 const DAnalysis = lazy(() => import('../danalysis'));
 const XDtrader = lazy(() => import('../xdtrader'));
 
@@ -199,33 +198,7 @@ const RichMotherIcon = () => (
 
 
 
-const DTraderIcon = () => (
-    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-        {/* Trading chart background */}
-        <rect x='2' y='4' width='20' height='16' rx='2' stroke='currentColor' strokeWidth='1.5' fill='none' />
-        <rect x='2' y='4' width='20' height='16' rx='2' fill='#1e40af' opacity='0.05' />
-        
-        {/* Chart grid */}
-        <path d='M2 8h20M2 12h20M2 16h20' stroke='currentColor' strokeWidth='0.5' opacity='0.3' />
-        <path d='M6 4v16M10 4v16M14 4v16M18 4v16' stroke='currentColor' strokeWidth='0.5' opacity='0.3' />
-        
-        {/* Trading candlesticks */}
-        <rect x='5' y='10' width='2' height='6' fill='#ef4444' />
-        <rect x='9' y='8' width='2' height='8' fill='#10b981' />
-        <rect x='13' y='12' width='2' height='4' fill='#ef4444' />
-        <rect x='17' y='6' width='2' height='10' fill='#10b981' />
-        
-        {/* Trading indicators */}
-        <circle cx='6' cy='13' r='1' fill='#ffd700' />
-        <circle cx='10' cy='12' r='1' fill='#ffd700' />
-        <circle cx='14' cy='14' r='1' fill='#ffd700' />
-        <circle cx='18' cy='11' r='1' fill='#ffd700' />
-        
-        {/* DTrader badge */}
-        <rect x='16' y='2' width='6' height='3' rx='1' fill='#1e40af' />
-        <text x='19' y='4' textAnchor='middle' fontSize='6' fill='#fff' fontWeight='bold'>DT</text>
-    </svg>
-);
+
 
 const DAnalysisIcon = () => (
     <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -2044,22 +2017,7 @@ const AppWrapper = observer(() => {
                                 <Tutorial handleTabChange={setActiveTab} />
                             </Suspense>
                         </div>
-                        {/* DTRADER TAB */}
-                        <div
-                            label={
-                                <>
-                                    <DTraderIcon />
-                                    <Localize i18n_default_text='DTrader' />
-                                </>
-                            }
-                            id='id-dtrader'
-                        >
-                            <div className='dtrader-container'>
-                                <Suspense fallback={<ChunkLoader message={localize('Please wait, loading DTrader...')} />}>
-                                    <DTraderClone />
-                                </Suspense>
-                            </div>
-                        </div>
+
 
                         {/* DANALYSIS TAB */}
                         <div
