@@ -10,16 +10,18 @@ export function delayedLazy<T extends React.ComponentType<any>>(
     importFn: () => Promise<{ default: T }>,
     minDelay: number = 1000
 ): React.LazyExoticComponent<T> {
-    return lazy(() => {
+    return lazy(async () => {
         const startTime = Date.now();
         
-        return Promise.all([
+        const [moduleExports] = await Promise.all([
             importFn(),
             new Promise(resolve => {
                 const elapsedTime = Date.now() - startTime;
                 const remainingTime = Math.max(0, minDelay - elapsedTime);
                 setTimeout(resolve, remainingTime);
             })
-        ]).then(([moduleExports]) => moduleExports);
+        ]);
+        
+        return moduleExports;
     });
 }

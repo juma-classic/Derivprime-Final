@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import './DigitStats.scss';
 
 interface DigitStat {
@@ -268,10 +268,9 @@ const DigitStats: React.FC<DigitStatsProps> = ({ symbol = 'R_100', className = '
         };
     }, [symbol, digitStatsAPI, handleTickData, extractDigit]);
 
-    // Update stats when tick history changes
-    useEffect(() => {
-        const stats = calculateDigitStats(tickHistory);
-        setDigitStats(stats);
+    // Update stats when tick history changes - memoized for performance
+    const digitStats = useMemo(() => {
+        return calculateDigitStats(tickHistory);
     }, [tickHistory, calculateDigitStats]);
 
     if (isLoading) {

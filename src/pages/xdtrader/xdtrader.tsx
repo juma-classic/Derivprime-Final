@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, Suspense, useMemo, useCallback, memo } from 'react';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import chart_api from '@/external/bot-skeleton/services/api/chart-api';
@@ -13,8 +13,12 @@ import {
 import { ChartTitle, SmartChart } from '@deriv/deriv-charts';
 import { useDevice } from '@deriv-com/ui';
 import ToolbarWidgets from './toolbar-widgets';
-import DigitStats from '@/components/digit-stats';
+import { delayedLazy } from '@/utils/delayed-lazy';
+import { performanceMonitor } from '@/utils/performance-monitor';
 import '@deriv/deriv-charts/dist/smartcharts.css';
+
+// Lazy load DigitStats to improve initial loading
+const DigitStats = delayedLazy(() => import('@/components/digit-stats'), 500);
 
 type TSubscription = {
     [key: string]: null | {
@@ -31,10 +35,54 @@ type TError = null | {
 
 const subscriptions: TSubscription = {};
 
+// Loading component for better UX
+const ChartLoader = memo(() => (
+    <div className="chart-loader" style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '400px',
+        background: 'var(--general-main-1)',
+        borderRadius: '8px',
+        flexDirection: 'column',
+        gap: '16px'
+    }}>
+        <div className="spinner" style={{
+            width: '40px',
+            height: '40px',
+            border: '4px solid #f3f3f3',
+            borderTop: '4px solid #ff444f',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+        }}></div>
+        <p style={{ color: 'var(--text-general)', fontSize: '14px' }}>Loading Chart...</p>
+        <style>{`
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `}</style>
+    </div>
+));
+
+ChartLoader.displayName = 'ChartLoader';
+
 const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }) => {
     const barriers: [] = [];
     const { common, ui } = useStore();
     const { chart_store, run_panel, dashboard } = useStore();
+    const [isChartReady, setIsChartReady] = useState(false);
+    const [isApiReady, setIsApiReady] = useState(false);
+    const [apiError, setApiError] = useState<string | null>(null);
+
+    // Performance monitoring
+    useEffect(() => {
+        performanceMonitor.start('xdtrader_total_load');
+        return () => {
+            performanceMonitor.end('xdtrader_total_load');
+            performanceMonitor.logSummary();
+        };
+    }, []);
 
     const {
         chart_type,
@@ -53,18 +101,50 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
     const { isDesktop, isMobile } = useDevice();
     const { is_drawer_open } = run_panel;
     const { is_chart_modal_visible } = dashboard;
-    const settings = {
-        assetInformation: false, // ui.is_chart_asset_info_visible,
+    
+    // Memoize settings to prevent unnecessary re-renders
+    const settings = useMemo(() => ({
+        assetInformation: false,
         countdown: true,
-        isHighestLowestMarkerEnabled: false, // TODO: Pending UI,
+        isHighestLowestMarkerEnabled: false,
         language: common.current_language.toLowerCase(),
         position: ui.is_chart_layout_default ? 'bottom' : 'left',
         theme: ui.is_dark_mode_on ? 'dark' : 'light',
-    };
+    }), [common.current_language, ui.is_chart_layout_default, ui.is_dark_mode_on]);
 
+    // Memoize class names to prevent unnecessary re-renders
+    const wrapperClassName = useMemo(() => classNames('dashboard__chart-wrapper', {
+        'dashboard__chart-wrapper--expanded': is_drawer_open && isDesktop,
+        'dashboard__chart-wrapper--modal': is_chart_modal_visible && isDesktop,
+    }), [is_drawer_open, isDesktop, is_chart_modal_visible]);
+
+    // Initialize API connection asynchronously with better error handling
     useEffect(() => {
+        const initializeAPI = async () => {
+            try {
+                performanceMonitor.start('api_initialization');
+                setApiError(null);
+                if (!chart_api.api) {
+                    await chart_api.init();
+                }
+                performanceMonitor.end('api_initialization');
+                setIsApiReady(true);
+            } catch (error) {
+                performanceMonitor.end('api_initialization');
+                console.error('Failed to initialize chart API:', error);
+                setApiError(error instanceof Error ? error.message : 'Failed to initialize API');
+                // Continue with fallback
+                setIsApiReady(true);
+            }
+        };
+
+        initializeAPI();
+
         return () => {
-            chart_api.api.forgetAll('ticks');
+            // Cleanup subscriptions on unmount
+            if (chart_api.api) {
+                chart_api.api.forgetAll('ticks').catch(console.error);
+            }
         };
     }, []);
 
@@ -76,21 +156,41 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
         if (!symbol) updateSymbol();
     }, [symbol, updateSymbol]);
 
-    const requestAPI = (req: ServerTimeRequest | ActiveSymbolsRequest | TradingTimesRequest) => {
-        return chart_api.api.send(req);
-    };
-    const requestForgetStream = (subscription_id: string) => {
-        subscription_id && chart_api.api.forget(subscription_id);
-    };
+    // Optimized API request function with error handling and retry logic
+    const requestAPI = useCallback(async (req: ServerTimeRequest | ActiveSymbolsRequest | TradingTimesRequest) => {
+        try {
+            if (!chart_api.api) {
+                await chart_api.init();
+            }
+            return await chart_api.api.send(req);
+        } catch (error) {
+            console.error('API request failed:', error);
+            setApiError(error instanceof Error ? error.message : 'API request failed');
+            return null;
+        }
+    }, []);
 
-    const requestSubscribe = async (req: TicksStreamRequest, callback: (data: any) => void) => {
+    const requestForgetStream = useCallback((subscription_id: string) => {
+        if (subscription_id && chart_api.api) {
+            chart_api.api.forget(subscription_id).catch(console.error);
+        }
+    }, []);
+
+    const requestSubscribe = useCallback(async (req: TicksStreamRequest, callback: (data: any) => void) => {
         try {
             requestForgetStream(chartSubscriptionIdRef.current);
+            
+            if (!chart_api.api) {
+                await chart_api.init();
+            }
+            
             const history = await chart_api.api.send(req);
             setChartSubscriptionId(history?.subscription.id);
+            
             if (history) {
                 callback(history);
             }
+            
             if (req.subscribe === 1) {
                 subscriptions[history?.subscription.id] = chart_api.api
                     .onMessage()
@@ -99,57 +199,112 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
                     });
             }
         } catch (e) {
-            // eslint-disable-next-line no-console
-            (e as TError)?.error?.code === 'MarketIsClosed' && callback([]); //if market is closed sending a empty array  to resolve
-            console.log((e as TError)?.error?.message);
+            const error = e as TError;
+            if (error?.error?.code === 'MarketIsClosed') {
+                callback([]);
+            } else {
+                console.error('Subscription failed:', error?.error?.message);
+                setApiError(error?.error?.message || 'Subscription failed');
+            }
         }
-    };
+    }, [requestForgetStream, setChartSubscriptionId]);
 
-    if (!symbol) return null;
+    // Memoize toolbar widget to prevent unnecessary re-renders
+    const toolbarWidget = useCallback(() => (
+        <ToolbarWidgets
+            updateChartType={updateChartType}
+            updateGranularity={updateGranularity}
+            position={!isDesktop ? 'bottom' : 'top'}
+            isDesktop={isDesktop}
+        />
+    ), [updateChartType, updateGranularity, isDesktop]);
+
+    // Memoize top widgets to prevent unnecessary re-renders
+    const topWidgets = useCallback(() => <ChartTitle onChange={onSymbolChange} />, [onSymbolChange]);
+
+    // Don't render until we have basic requirements
+    if (!symbol || !isApiReady) {
+        return <ChartLoader />;
+    }
+
     const is_connection_opened = !!chart_api?.api;
+
+    // Show error state if API failed to initialize
+    if (apiError && !is_connection_opened) {
+        return (
+            <div className="chart-error" style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '400px',
+                background: 'var(--general-main-1)',
+                borderRadius: '8px',
+                flexDirection: 'column',
+                gap: '16px',
+                color: 'var(--text-general)'
+            }}>
+                <p>⚠️ Chart connection failed</p>
+                <p style={{ fontSize: '12px', opacity: 0.7 }}>{apiError}</p>
+                <button 
+                    onClick={() => window.location.reload()} 
+                    style={{
+                        padding: '8px 16px',
+                        background: '#ff444f',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                    }}
+                >
+                    Retry
+                </button>
+            </div>
+        );
+    }
+
     return (
         <>
             <div
-                className={classNames('dashboard__chart-wrapper', {
-                    'dashboard__chart-wrapper--expanded': is_drawer_open && isDesktop,
-                    'dashboard__chart-wrapper--modal': is_chart_modal_visible && isDesktop,
-                })}
+                className={wrapperClassName}
                 dir='ltr'
                 style={{ position: 'relative', paddingBottom: '80px' }}
             >
-                <SmartChart
-                    id='dbot'
-                    barriers={barriers}
-                    showLastDigitStats={show_digits_stats}
-                    chartControlsWidgets={null}
-                    enabledChartFooter={false}
-                    chartStatusListener={(v: boolean) => setChartStatus(!v)}
-                    toolbarWidget={() => (
-                        <ToolbarWidgets
-                            updateChartType={updateChartType}
-                            updateGranularity={updateGranularity}
-                            position={!isDesktop ? 'bottom' : 'top'}
-                            isDesktop={isDesktop}
-                        />
-                    )}
-                    chartType={chart_type}
-                    isMobile={isMobile}
-                    enabledNavigationWidget={isDesktop}
-                    granularity={granularity}
-                    requestAPI={requestAPI}
-                    requestForget={() => {}}
-                    requestForgetStream={() => {}}
-                    requestSubscribe={requestSubscribe}
-                    settings={settings}
-                    symbol={symbol}
-                    topWidgets={() => <ChartTitle onChange={onSymbolChange} />}
-                    isConnectionOpened={is_connection_opened}
-                    getMarketsOrder={getMarketsOrder}
-                    isLive
-                    leftMargin={80}
-                />
+                <Suspense fallback={<ChartLoader />}>
+                    <SmartChart
+                        id='dbot'
+                        barriers={barriers}
+                        showLastDigitStats={false} // Disable built-in digit stats for performance
+                        chartControlsWidgets={null}
+                        enabledChartFooter={false}
+                        chartStatusListener={(v: boolean) => {
+                            setChartStatus(!v);
+                            setIsChartReady(v);
+                        }}
+                        toolbarWidget={toolbarWidget}
+                        chartType={chart_type}
+                        isMobile={isMobile}
+                        enabledNavigationWidget={isDesktop}
+                        granularity={granularity}
+                        requestAPI={requestAPI}
+                        requestForget={() => {}}
+                        requestForgetStream={() => {}}
+                        requestSubscribe={requestSubscribe}
+                        settings={settings}
+                        symbol={symbol}
+                        topWidgets={topWidgets}
+                        isConnectionOpened={is_connection_opened}
+                        getMarketsOrder={getMarketsOrder}
+                        isLive
+                        leftMargin={80}
+                    />
+                </Suspense>
             </div>
-            <DigitStats symbol={symbol} className="xdtrader-digit-stats" />
+            {/* Only load DigitStats after chart is ready and if enabled */}
+            {show_digits_stats && isChartReady && (
+                <Suspense fallback={<div style={{ height: '60px' }} />}>
+                    <DigitStats symbol={symbol} className="xdtrader-digit-stats" />
+                </Suspense>
+            )}
         </>
     );
 });
