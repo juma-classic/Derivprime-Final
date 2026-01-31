@@ -31,6 +31,7 @@ const Tutorial = lazy(() => import('../tutorials'));
 const AdvancedAlgo = lazy(() => import('../advanced-algo'));
 const DTraderClone = lazy(() => import('../dtrader-clone'));
 const DAnalysis = lazy(() => import('../danalysis'));
+const XDtrader = lazy(() => import('../xdtrader'));
 
 const DashboardIcon = () => (
     <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -247,6 +248,37 @@ const DAnalysisIcon = () => (
         
         {/* Statistical lines */}
         <path d='M8 8L16 16M16 8L8 16' stroke='#6366f1' strokeWidth='1' opacity='0.4' />
+    </svg>
+);
+
+const XDtraderIcon = () => (
+    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+        {/* Advanced trading chart background */}
+        <rect x='2' y='4' width='20' height='16' rx='2' stroke='currentColor' strokeWidth='1.5' fill='none' />
+        <rect x='2' y='4' width='20' height='16' rx='2' fill='#8b5cf6' opacity='0.05' />
+        
+        {/* Chart grid */}
+        <path d='M2 8h20M2 12h20M2 16h20' stroke='currentColor' strokeWidth='0.5' opacity='0.3' />
+        <path d='M6 4v16M10 4v16M14 4v16M18 4v16' stroke='currentColor' strokeWidth='0.5' opacity='0.3' />
+        
+        {/* Advanced candlesticks with different patterns */}
+        <rect x='5' y='9' width='2' height='8' fill='#10b981' />
+        <rect x='9' y='7' width='2' height='10' fill='#ef4444' />
+        <rect x='13' y='11' width='2' height='6' fill='#10b981' />
+        <rect x='17' y='5' width='2' height='12' fill='#ef4444' />
+        
+        {/* Technical indicators */}
+        <circle cx='6' cy='13' r='1' fill='#8b5cf6' />
+        <circle cx='10' cy='12' r='1' fill='#8b5cf6' />
+        <circle cx='14' cy='14' r='1' fill='#8b5cf6' />
+        <circle cx='18' cy='11' r='1' fill='#8b5cf6' />
+        
+        {/* Trend lines */}
+        <path d='M4 16L8 12L12 14L16 8L20 10' stroke='#8b5cf6' strokeWidth='1.5' strokeLinecap='round' opacity='0.7' />
+        
+        {/* xDtrader badge */}
+        <rect x='15' y='2' width='7' height='3' rx='1' fill='#8b5cf6' />
+        <text x='18.5' y='4' textAnchor='middle' fontSize='5' fill='#fff' fontWeight='bold'>xDT</text>
     </svg>
 );
 
@@ -2042,6 +2074,23 @@ const AppWrapper = observer(() => {
                             <div className='danalysis-container'>
                                 <Suspense fallback={<ChunkLoader message={localize('Please wait, loading DAnalysis...')} />}>
                                     <DAnalysis />
+                                </Suspense>
+                            </div>
+                        </div>
+
+                        {/* XDTRADER TAB */}
+                        <div
+                            label={
+                                <>
+                                    <XDtraderIcon />
+                                    <Localize i18n_default_text='xDtrader' />
+                                </>
+                            }
+                            id='id-xdtrader'
+                        >
+                            <div className='xdtrader-container'>
+                                <Suspense fallback={<ChunkLoader message={localize('Please wait, loading xDtrader...')} />}>
+                                    <XDtrader show_digits_stats={false} />
                                 </Suspense>
                             </div>
                         </div>

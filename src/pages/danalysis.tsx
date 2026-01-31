@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { derivAPIService } from '@/services/deriv-api.service';
+import { TTicksSubscribeResponse } from '@/types/deriv-api.types';
 import './danalysis.scss';
 
 interface DigitStats {
@@ -11,156 +13,213 @@ interface DigitStats {
     is2ndLowest: boolean;
 }
 
+interface TickData {
+    digit: number;
+    price: number;
+    timestamp: number;
+}
+
+// Symbol mapping for Deriv API
+const SYMBOL_MAP: Record<string, string> = {
+    'Volatility 10 Index': 'R_10',
+    'Volatility 25 Index': 'R_25',
+    'Volatility 50 Index': 'R_50',
+    'Volatility 75 Index': 'R_75',
+    'Volatility 100 Index': 'R_100',
+    'Volatility 10 (1s) Index': '1HZ10V',
+    'Volatility 15 (1s) Index': '1HZ15V',
+    'Volatility 25 (1s) Index': '1HZ25V',
+    'Volatility 50 (1s) Index': '1HZ50V',
+    'Volatility 75 (1s) Index': '1HZ75V',
+    'Volatility 90 (1s) Index': '1HZ90V',
+    'Volatility 100 (1s) Index': '1HZ100V',
+    'Jump 10 Index': 'JD10',
+    'Jump 25 Index': 'JD25',
+    'Jump 50 Index': 'JD50',
+    'Jump 75 Index': 'JD75',
+    'Jump 100 Index': 'JD100',
+};
+
 const DAnalysis: React.FC = () => {
     const [selectedMarket, setSelectedMarket] = useState('Circles');
     const [selectedIndex, setSelectedIndex] = useState('Volatility 10 Index');
     const [tickCount, setTickCount] = useState(1000);
-    const [currentPrice, setCurrentPrice] = useState('5428.603');
-    const [recentTicks, setRecentTicks] = useState<number[]>([4, 3, 9, 1, 2, 2, 1, 4, 4, 4, 8, 2, 1, 6, 7, 3, 5, 9, 6, 3]);
+    const [currentPrice, setCurrentPrice] = useState('0.000');
+    const [recentTicks, setRecentTicks] = useState<number[]>([]);
     const [digitStats, setDigitStats] = useState<DigitStats[]>([]);
-    const [lastDigit, setLastDigit] = useState<number>(() => {
-        // Initialize with the last digit of the initial price
-        return parseInt('5428.603'.slice(-1));
-    });
+    const [tickHistory, setTickHistory] = useState<TickData[]>([]);
+    const [isConnected, setIsConnected] = useState(false);
+    const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
+    const [connectionStatus, setConnectionStatus] = useState<string>('Connecting...');
 
-    // Update price and recent ticks periodically
-    useEffect(() => {
-        const updateLiveData = () => {
-            // Generate new price based on selected index
-            let basePrice = 5428.603;
-            let variation = 50; // Default variation
-            
-            if (selectedIndex.includes('Volatility 10')) {
-                basePrice = Math.random() > 0.5 ? 5428.603 : 4892.156;
-                variation = 30;
-            } else if (selectedIndex.includes('Volatility 25')) {
-                basePrice = Math.random() > 0.5 ? 6234.891 : 5678.234;
-                variation = 75;
-            } else if (selectedIndex.includes('Volatility 50')) {
-                basePrice = Math.random() > 0.5 ? 7891.456 : 7234.789;
-                variation = 125;
-            } else if (selectedIndex.includes('Volatility 75')) {
-                basePrice = Math.random() > 0.5 ? 8456.123 : 7890.456;
-                variation = 175;
-            } else if (selectedIndex.includes('Volatility 100')) {
-                basePrice = Math.random() > 0.5 ? 9123.789 : 8567.234;
-                variation = 225;
-            } else if (selectedIndex.includes('Jump')) {
-                basePrice = Math.random() > 0.5 ? 12345.67 : 11234.56;
-                variation = 500;
-            } else if (selectedIndex.includes('Crash')) {
-                basePrice = Math.random() > 0.5 ? 987.654 : 876.543;
-                variation = 100;
-            } else if (selectedIndex.includes('Boom')) {
-                basePrice = Math.random() > 0.5 ? 1234.567 : 1123.456;
-                variation = 150;
-            } else if (selectedIndex.includes('Step')) {
-                basePrice = Math.random() > 0.5 ? 2345.678 : 2234.567;
-                variation = 25;
-            } else if (selectedIndex.includes('Bear')) {
-                basePrice = Math.random() > 0.5 ? 3456.789 : 3345.678;
-                variation = 80;
-            } else if (selectedIndex.includes('Bull')) {
-                basePrice = Math.random() > 0.5 ? 4567.890 : 4456.789;
-                variation = 90;
-            }
-            
-            const priceVariation = (Math.random() - 0.5) * variation;
-            const newPrice = (basePrice + priceVariation).toFixed(3);
-            setCurrentPrice(newPrice);
+    // Extract last digit from price
+    const extractDigit = useCallback((price: number): number => {
+        const priceStr = price.toString();
+        const lastChar = priceStr.charAt(priceStr.length - 1);
+        return parseInt(lastChar) || 0;
+    }, []);
 
-            // Extract last digit from price
-            const priceLastDigit = parseInt(newPrice.slice(-1));
-            setLastDigit(priceLastDigit);
-
-            // Add new tick to recent ticks (use the last digit)
-            setRecentTicks(prev => {
-                const updated = [priceLastDigit, ...prev];
-                return updated.slice(0, 20); // Keep only last 20 ticks
-            });
-        };
-
-        // Update every 2 seconds
-        const interval = setInterval(updateLiveData, 2000);
-        return () => clearInterval(interval);
-    }, [selectedIndex]);
-
-    // Generate mock digit statistics
-    useEffect(() => {
-        const generateStats = () => {
-            // Generate different base percentages based on selected market and index
-            let baseCounts: number[];
-            
-            // Different patterns based on index type
-            if (selectedIndex.includes('Jump')) {
-                baseCounts = [8.2, 9.8, 11.5, 9.1, 8.7, 12.3, 9.4, 8.9, 10.6, 11.5];
-            } else if (selectedIndex.includes('Crash')) {
-                baseCounts = [12.1, 8.5, 9.2, 11.8, 8.9, 7.6, 10.4, 9.7, 10.8, 11.0];
-            } else if (selectedIndex.includes('Boom')) {
-                baseCounts = [9.5, 11.2, 8.8, 9.6, 12.1, 8.4, 9.9, 10.3, 8.7, 11.5];
-            } else if (selectedIndex.includes('Step')) {
-                baseCounts = [10.5, 10.5, 10.5, 10.5, 9.8, 9.8, 9.8, 9.8, 9.6, 9.6];
-            } else if (selectedIndex.includes('Bear')) {
-                baseCounts = [11.8, 9.2, 8.5, 10.6, 9.1, 8.8, 10.2, 9.4, 10.7, 11.7];
-            } else if (selectedIndex.includes('Bull')) {
-                baseCounts = [8.9, 10.8, 11.4, 9.3, 10.6, 11.2, 9.1, 8.7, 9.5, 10.5];
-            } else if (selectedIndex.includes('(1s)')) {
-                // 1-second volatility indices have different patterns
-                baseCounts = [9.2, 10.8, 9.6, 11.1, 8.9, 9.7, 10.4, 9.3, 10.5, 10.5];
-            } else {
-                // Standard volatility indices
-                switch (selectedMarket) {
-                    case 'Matches':
-                        baseCounts = [8.5, 11.2, 9.8, 12.1, 8.9, 6.8, 10.5, 9.1, 8.2, 14.9];
-                        break;
-                    case 'Differs':
-                        baseCounts = [11.1, 9.3, 10.8, 8.7, 10.5, 8.9, 9.6, 10.2, 9.8, 11.1];
-                        break;
-                    default: // Circles
-                        baseCounts = [9.9, 10.3, 10.5, 10.9, 9.5, 7.6, 9.8, 9.4, 7.9, 9.2];
-                }
-            }
-
-            // Add some randomness to simulate live data
-            const randomizedCounts = baseCounts.map(count => {
-                const variation = (Math.random() - 0.5) * 2; // ±1% variation
-                return Math.max(0, Math.min(20, count + variation));
-            });
-
-            const stats: DigitStats[] = randomizedCounts.map((percentage, index) => ({
-                digit: index,
-                count: Math.round((percentage / 100) * tickCount),
-                percentage: parseFloat(percentage.toFixed(1)),
+    // Calculate digit statistics from tick history
+    const calculateDigitStats = useCallback((ticks: TickData[]): DigitStats[] => {
+        if (ticks.length === 0) {
+            return Array.from({ length: 10 }, (_, i) => ({
+                digit: i,
+                count: 0,
+                percentage: 0,
                 isHighest: false,
                 is2ndHighest: false,
                 isLowest: false,
-                is2ndLowest: false
+                is2ndLowest: false,
             }));
+        }
 
-            // Sort to find highest and lowest
-            const sortedByPercentage = [...stats].sort((a, b) => b.percentage - a.percentage);
-            
-            // Mark highest and 2nd highest
-            if (sortedByPercentage[0]) sortedByPercentage[0].isHighest = true;
-            if (sortedByPercentage[1]) sortedByPercentage[1].is2ndHighest = true;
-            
-            // Mark lowest and 2nd lowest
-            const sortedAsc = [...stats].sort((a, b) => a.percentage - b.percentage);
-            if (sortedAsc[0]) sortedAsc[0].isLowest = true;
-            if (sortedAsc[1]) sortedAsc[1].is2ndLowest = true;
+        const digitCounts = new Array(10).fill(0);
+        
+        // Apply market-specific filtering
+        let filteredTicks = ticks;
+        if (selectedMarket === 'Matches') {
+            // For matches, look for consecutive same digits
+            filteredTicks = ticks.filter((tick, index) => {
+                if (index === 0) return false;
+                return tick.digit === ticks[index - 1].digit;
+            });
+        } else if (selectedMarket === 'Differs') {
+            // For differs, look for consecutive different digits
+            filteredTicks = ticks.filter((tick, index) => {
+                if (index === 0) return false;
+                return tick.digit !== ticks[index - 1].digit;
+            });
+        }
 
-            setDigitStats(stats);
+        // Count digits
+        filteredTicks.forEach(tick => {
+            digitCounts[tick.digit]++;
+        });
+
+        const totalCount = filteredTicks.length || 1;
+        const stats: DigitStats[] = digitCounts.map((count, digit) => ({
+            digit,
+            count,
+            percentage: parseFloat(((count / totalCount) * 100).toFixed(1)),
+            isHighest: false,
+            is2ndHighest: false,
+            isLowest: false,
+            is2ndLowest: false,
+        }));
+
+        // Sort to find highest and lowest
+        const sortedByPercentage = [...stats].sort((a, b) => b.percentage - a.percentage);
+        
+        // Mark highest and 2nd highest
+        if (sortedByPercentage[0]) sortedByPercentage[0].isHighest = true;
+        if (sortedByPercentage[1]) sortedByPercentage[1].is2ndHighest = true;
+        
+        // Mark lowest and 2nd lowest
+        const sortedAsc = [...stats].sort((a, b) => a.percentage - b.percentage);
+        if (sortedAsc[0]) sortedAsc[0].isLowest = true;
+        if (sortedAsc[1]) sortedAsc[1].is2ndLowest = true;
+
+        return stats;
+    }, [selectedMarket]);
+
+    // Handle real-time tick data
+    const handleTickData = useCallback((response: TTicksSubscribeResponse) => {
+        if (response.tick) {
+            const price = parseFloat(response.tick.quote);
+            const digit = extractDigit(price);
+            const timestamp = response.tick.epoch * 1000;
+
+            setCurrentPrice(price.toFixed(3));
+            setConnectionStatus('Connected - Live Data');
+            
+            // Update recent ticks
+            setRecentTicks(prev => {
+                const updated = [digit, ...prev];
+                return updated.slice(0, 20);
+            });
+
+            // Update tick history
+            const newTick: TickData = { digit, price, timestamp };
+            setTickHistory(prev => {
+                const updated = [newTick, ...prev];
+                return updated.slice(0, tickCount);
+            });
+        }
+    }, [extractDigit, tickCount]);
+
+    // Subscribe to real-time ticks
+    useEffect(() => {
+        const symbol = SYMBOL_MAP[selectedIndex];
+        if (!symbol) {
+            setConnectionStatus('Invalid symbol selected');
+            return;
+        }
+
+        const subscribeToTicks = async () => {
+            try {
+                setConnectionStatus('Connecting to Deriv API...');
+                
+                // Unsubscribe from previous subscription
+                if (subscriptionId) {
+                    await derivAPIService.unsubscribe(subscriptionId);
+                }
+
+                // Load historical data first
+                setConnectionStatus('Loading historical data...');
+                const historyResponse = await derivAPIService.getTicksHistory({
+                    symbol,
+                    count: tickCount,
+                    style: 'ticks'
+                });
+
+                if (historyResponse.history && historyResponse.history.prices) {
+                    const historicalTicks: TickData[] = historyResponse.history.prices.map((price, index) => ({
+                        digit: extractDigit(parseFloat(price)),
+                        price: parseFloat(price),
+                        timestamp: (historyResponse.history!.times![index] || 0) * 1000
+                    }));
+
+                    setTickHistory(historicalTicks.reverse());
+                    setRecentTicks(historicalTicks.slice(-20).map(tick => tick.digit));
+                    
+                    if (historicalTicks.length > 0) {
+                        setCurrentPrice(historicalTicks[historicalTicks.length - 1].price.toFixed(3));
+                    }
+                }
+
+                // Subscribe to real-time updates
+                setConnectionStatus('Subscribing to live data...');
+                const newSubscriptionId = await derivAPIService.subscribeToTicks(symbol, handleTickData);
+                setSubscriptionId(newSubscriptionId || null);
+                setIsConnected(true);
+                setConnectionStatus('Connected - Live Data');
+
+            } catch (error) {
+                console.error('Failed to subscribe to ticks:', error);
+                setIsConnected(false);
+                setConnectionStatus('Connection failed - Using demo data');
+                
+                // Fallback to demo data
+                const demoTicks = Array.from({ length: 20 }, () => Math.floor(Math.random() * 10));
+                setRecentTicks(demoTicks);
+                setCurrentPrice((Math.random() * 1000 + 5000).toFixed(3));
+            }
         };
 
-        generateStats();
-        
-        // Update stats every 3 seconds to simulate live data
-        const interval = setInterval(() => {
-            generateStats();
-        }, 3000);
+        subscribeToTicks();
 
-        return () => clearInterval(interval);
-    }, [tickCount, selectedMarket, selectedIndex]);
+        return () => {
+            if (subscriptionId) {
+                derivAPIService.unsubscribe(subscriptionId);
+            }
+        };
+    }, [selectedIndex, tickCount, handleTickData, subscriptionId, extractDigit]);
+
+    // Update digit statistics when tick history changes
+    useEffect(() => {
+        const stats = calculateDigitStats(tickHistory);
+        setDigitStats(stats);
+    }, [tickHistory, calculateDigitStats]);
 
     const getDigitClass = (stat: DigitStats) => {
         if (stat.isHighest) return 'highest';
@@ -178,30 +237,30 @@ const DAnalysis: React.FC = () => {
         'Volatility 75 Index',
         'Volatility 100 Index',
         'Volatility 10 (1s) Index',
+        'Volatility 15 (1s) Index',
         'Volatility 25 (1s) Index',
         'Volatility 50 (1s) Index',
         'Volatility 75 (1s) Index',
+        'Volatility 90 (1s) Index',
         'Volatility 100 (1s) Index',
         'Jump 10 Index',
         'Jump 25 Index',
         'Jump 50 Index',
         'Jump 75 Index',
         'Jump 100 Index',
-        'Crash 300 Index',
-        'Crash 500 Index',
-        'Crash 1000 Index',
-        'Boom 300 Index',
-        'Boom 500 Index',
-        'Boom 1000 Index',
-        'Step Index',
-        'Bear Market Index',
-        'Bull Market Index'
     ];
 
     return (
         <div className="danalysis">
             <div className="danalysis__header">
                 <h1>DAnalysis - Digit Statistics</h1>
+                <div className="connection-status" style={{
+                    color: isConnected ? '#27ae60' : '#e74c3c',
+                    fontSize: '14px',
+                    marginTop: '10px'
+                }}>
+                    {connectionStatus}
+                </div>
             </div>
 
             <div className="danalysis__controls">
@@ -233,9 +292,8 @@ const DAnalysis: React.FC = () => {
                     <button 
                         onClick={() => {
                             setTickCount(1000);
-                            setRecentTicks([4, 3, 9, 1, 2, 2, 1, 4, 4, 4, 8, 2, 1, 6, 7, 3, 5, 9, 6, 3]);
-                            setCurrentPrice('5428.603');
-                            setLastDigit(3);
+                            setRecentTicks([]);
+                            setTickHistory([]);
                         }}
                         className="reset-button"
                     >
@@ -253,6 +311,8 @@ const DAnalysis: React.FC = () => {
                             value={tickCount} 
                             onChange={(e) => setTickCount(parseInt(e.target.value) || 1000)}
                             className="ticks-input"
+                            min="100"
+                            max="5000"
                         />
                     </div>
                     <div className="price-section">
@@ -273,23 +333,17 @@ const DAnalysis: React.FC = () => {
                 </div>
 
                 <div className="digit-analysis">
-                    <div className="digit-circles-container">
-                        <div className="digit-circles">
-                            {digitStats.map((stat) => (
-                                <div 
-                                    key={stat.digit} 
-                                    className={`digit-circle ${getDigitClass(stat)} ${lastDigit === stat.digit ? 'active' : ''}`}
-                                >
-                                    <div className="digit-number">{stat.digit}</div>
-                                    <div className="digit-percentage">{stat.percentage}%</div>
-                                    {lastDigit === stat.digit && (
-                                        <div className="triangle-indicator">
-                                            <div className="triangle"></div>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                    <div className="digit-circles">
+                        {digitStats.map((stat) => (
+                            <div 
+                                key={stat.digit} 
+                                className={`digit-circle ${getDigitClass(stat)}`}
+                                title={`Digit ${stat.digit}: ${stat.count} occurrences (${stat.percentage}%)`}
+                            >
+                                <div className="digit-number">{stat.digit}</div>
+                                <div className="digit-percentage">{stat.percentage}%</div>
+                            </div>
+                        ))}
                     </div>
 
                     <div className="legend">
