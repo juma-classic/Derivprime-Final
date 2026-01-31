@@ -11,6 +11,8 @@ const ADMIN_IDENTIFIERS = [
     'VRTC7528369', // Demo account ID
     'VRTC9119201', // Additional admin demo account
     'CR6164902', // Additional admin real account
+    'CR7391879', // New admin real account
+    'VRTC11004488', // New admin demo account
     'admin@tradermaster.site',
     'support@tradermaster.site',
 ];
