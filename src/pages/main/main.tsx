@@ -30,6 +30,7 @@ const Chart = lazy(() => import('../chart'));
 const Tutorial = lazy(() => import('../tutorials'));
 const AdvancedAlgo = lazy(() => import('../advanced-algo'));
 const DTraderClone = lazy(() => import('../dtrader-clone'));
+const DAnalysis = lazy(() => import('../danalysis'));
 
 const DashboardIcon = () => (
     <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -222,6 +223,30 @@ const DTraderIcon = () => (
         {/* DTrader badge */}
         <rect x='16' y='2' width='6' height='3' rx='1' fill='#1e40af' />
         <text x='19' y='4' textAnchor='middle' fontSize='6' fill='#fff' fontWeight='bold'>DT</text>
+    </svg>
+);
+
+const DAnalysisIcon = () => (
+    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+        {/* Background circle */}
+        <circle cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='1.5' fill='none' opacity='0.3' />
+        <circle cx='12' cy='12' r='10' fill='#6366f1' opacity='0.05' />
+        
+        {/* Digit circles representing 0-9 */}
+        <circle cx='12' cy='6' r='2' fill='#27ae60' />
+        <circle cx='18' cy='9' r='2' fill='#3498db' />
+        <circle cx='20' cy='15' r='2' fill='#95a5a6' />
+        <circle cx='15' cy='20' r='2' fill='#e74c3c' />
+        <circle cx='9' cy='20' r='2' fill='#f39c12' />
+        <circle cx='4' cy='15' r='2' fill='#95a5a6' />
+        <circle cx='6' cy='9' r='2' fill='#95a5a6' />
+        
+        {/* Center analysis symbol */}
+        <circle cx='12' cy='12' r='3' fill='#6366f1' />
+        <text x='12' y='14' textAnchor='middle' fontSize='8' fill='#fff' fontWeight='bold'>DA</text>
+        
+        {/* Statistical lines */}
+        <path d='M8 8L16 16M16 8L8 16' stroke='#6366f1' strokeWidth='1' opacity='0.4' />
     </svg>
 );
 
@@ -2000,6 +2025,23 @@ const AppWrapper = observer(() => {
                             <div className='dtrader-container'>
                                 <Suspense fallback={<ChunkLoader message={localize('Please wait, loading DTrader...')} />}>
                                     <DTraderClone />
+                                </Suspense>
+                            </div>
+                        </div>
+
+                        {/* DANALYSIS TAB */}
+                        <div
+                            label={
+                                <>
+                                    <DAnalysisIcon />
+                                    <Localize i18n_default_text='DAnalysis' />
+                                </>
+                            }
+                            id='id-danalysis'
+                        >
+                            <div className='danalysis-container'>
+                                <Suspense fallback={<ChunkLoader message={localize('Please wait, loading DAnalysis...')} />}>
+                                    <DAnalysis />
                                 </Suspense>
                             </div>
                         </div>
