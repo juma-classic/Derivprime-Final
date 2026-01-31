@@ -10,6 +10,7 @@ import { analyticsManager } from '@/services/analytics-manager.service';
 import { masterTradeIntegrationService } from '@/services/master-trade-integration.service';
 import { TAuthData } from '@/types/api-types';
 import { initAntiInspect } from '@/utils/anti-inspect';
+import { delayedLazy } from '@/utils/delayed-lazy';
 import { initializeFastLaneViewport } from '@/utils/fast-lane-viewport';
 import { initializeI18n, localize, TranslationProvider } from '@deriv-com/translations';
 import { Analytics } from '@vercel/analytics/react';
@@ -27,8 +28,9 @@ if (process.env.NODE_ENV === 'development') {
     }, 2000);
 }
 
-const Layout = lazy(() => import('../components/layout'));
-const AppRoot = lazy(() => import('./app-root'));
+// Main components with delayed loading (1 second minimum)
+const Layout = delayedLazy(() => import('../components/layout'), 1000);
+const AppRoot = delayedLazy(() => import('./app-root'), 1000);
 
 // Phase 1 Demo Pages
 const LiveSignalsDemo = lazy(() => import('../pages/live-signals-demo').then(m => ({ default: m.LiveSignalsDemo })));
