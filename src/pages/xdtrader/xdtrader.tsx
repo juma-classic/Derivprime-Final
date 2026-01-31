@@ -13,6 +13,7 @@ import {
 import { ChartTitle, SmartChart } from '@deriv/deriv-charts';
 import { useDevice } from '@deriv-com/ui';
 import ToolbarWidgets from './toolbar-widgets';
+import DigitStats from '@/components/digit-stats';
 import '@deriv/deriv-charts/dist/smartcharts.css';
 
 type TSubscription = {
@@ -107,46 +108,49 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
     if (!symbol) return null;
     const is_connection_opened = !!chart_api?.api;
     return (
-        <div
-            className={classNames('dashboard__chart-wrapper', {
-                'dashboard__chart-wrapper--expanded': is_drawer_open && isDesktop,
-                'dashboard__chart-wrapper--modal': is_chart_modal_visible && isDesktop,
-            })}
-            dir='ltr'
-            style={{ position: 'relative' }}
-        >
-            <SmartChart
-                id='dbot'
-                barriers={barriers}
-                showLastDigitStats={show_digits_stats}
-                chartControlsWidgets={null}
-                enabledChartFooter={false}
-                chartStatusListener={(v: boolean) => setChartStatus(!v)}
-                toolbarWidget={() => (
-                    <ToolbarWidgets
-                        updateChartType={updateChartType}
-                        updateGranularity={updateGranularity}
-                        position={!isDesktop ? 'bottom' : 'top'}
-                        isDesktop={isDesktop}
-                    />
-                )}
-                chartType={chart_type}
-                isMobile={isMobile}
-                enabledNavigationWidget={isDesktop}
-                granularity={granularity}
-                requestAPI={requestAPI}
-                requestForget={() => {}}
-                requestForgetStream={() => {}}
-                requestSubscribe={requestSubscribe}
-                settings={settings}
-                symbol={symbol}
-                topWidgets={() => <ChartTitle onChange={onSymbolChange} />}
-                isConnectionOpened={is_connection_opened}
-                getMarketsOrder={getMarketsOrder}
-                isLive
-                leftMargin={80}
-            />
-        </div>
+        <>
+            <div
+                className={classNames('dashboard__chart-wrapper', {
+                    'dashboard__chart-wrapper--expanded': is_drawer_open && isDesktop,
+                    'dashboard__chart-wrapper--modal': is_chart_modal_visible && isDesktop,
+                })}
+                dir='ltr'
+                style={{ position: 'relative', paddingBottom: '80px' }}
+            >
+                <SmartChart
+                    id='dbot'
+                    barriers={barriers}
+                    showLastDigitStats={show_digits_stats}
+                    chartControlsWidgets={null}
+                    enabledChartFooter={false}
+                    chartStatusListener={(v: boolean) => setChartStatus(!v)}
+                    toolbarWidget={() => (
+                        <ToolbarWidgets
+                            updateChartType={updateChartType}
+                            updateGranularity={updateGranularity}
+                            position={!isDesktop ? 'bottom' : 'top'}
+                            isDesktop={isDesktop}
+                        />
+                    )}
+                    chartType={chart_type}
+                    isMobile={isMobile}
+                    enabledNavigationWidget={isDesktop}
+                    granularity={granularity}
+                    requestAPI={requestAPI}
+                    requestForget={() => {}}
+                    requestForgetStream={() => {}}
+                    requestSubscribe={requestSubscribe}
+                    settings={settings}
+                    symbol={symbol}
+                    topWidgets={() => <ChartTitle onChange={onSymbolChange} />}
+                    isConnectionOpened={is_connection_opened}
+                    getMarketsOrder={getMarketsOrder}
+                    isLive
+                    leftMargin={80}
+                />
+            </div>
+            <DigitStats symbol={symbol} className="xdtrader-digit-stats" />
+        </>
     );
 });
 

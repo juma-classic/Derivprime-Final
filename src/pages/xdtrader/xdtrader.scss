@@ -129,3 +129,16 @@
     left: 0;
     top: 0;
 }
+
+// xDtrader specific styles
+.xdtrader-digit-stats {
+    // Ensure it appears above other elements
+    z-index: 1001;
+}
+
+// Adjust chart wrapper to accommodate digit stats
+.dashboard__chart-wrapper {
+    &.xdtrader-wrapper {
+        padding-bottom: 80px;
+    }
+}
