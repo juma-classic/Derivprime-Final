@@ -552,35 +552,17 @@ class UnifiedBotManagerService {
         // Ensure correct app ID is set (82255 for production trading)
         this.ensureCorrectAppId(xmlContent);
 
-        // Method 1: Direct Blockly injection
-        if (typeof window !== 'undefined' && (window as any).Blockly) {
-            const blockly = (window as any).Blockly;
-            if (blockly.getMainWorkspace) {
-                const workspace = blockly.getMainWorkspace();
-                if (workspace && workspace.clear && blockly.Xml) {
-                    // Switch to Bot Builder tab first
-                    await this.switchToBotBuilderTab();
-                    
-                    // Clear workspace and load XML
-                    workspace.clear();
-                    const domXml = blockly.Xml.textToDom(xmlContent);
-                    blockly.Xml.domToWorkspace(domXml, workspace);
-                    
-                    console.log('✅ Bot loaded directly into Blockly workspace');
-                    return;
-                }
-            }
-        }
-
-        // Method 2: Use load modal
+        // Method 1: Use load modal (most reliable)
         if (typeof window !== 'undefined') {
             const windowGlobals = window as any;
             if (windowGlobals.load_modal?.loadStrategyToBuilder) {
+                // Switch to Bot Builder tab first
+                await this.switchToBotBuilderTab();
+                
                 const botObject = {
                     id: `${config.botName.toLowerCase()}-unified-${Date.now()}`,
-                    filePath: config.xmlFile,
-                    title: `${config.botName} Bot (Unified)`,
-                    xmlContent: xmlContent,
+                    name: `${config.botName} Bot (Unified)`,
+                    xml: xmlContent,
                     save_type: 'LOCAL'
                 };
 
@@ -590,7 +572,72 @@ class UnifiedBotManagerService {
             }
         }
 
-        // Method 3: Event dispatch
+        // Method 2: Try alternative load modal store
+        if (typeof window !== 'undefined') {
+            const windowGlobals = window as any;
+            if (windowGlobals.load_modal_store?.loadStrategyToBuilder) {
+                await this.switchToBotBuilderTab();
+                
+                const botObject = {
+                    id: `${config.botName.toLowerCase()}-unified-${Date.now()}`,
+                    name: `${config.botName} Bot (Unified)`,
+                    xml: xmlContent,
+                    save_type: 'LOCAL'
+                };
+
+                await windowGlobals.load_modal_store.loadStrategyToBuilder(botObject);
+                console.log('✅ Bot loaded via load modal store');
+                return;
+            }
+        }
+
+        // Method 3: Direct Blockly injection (with improved error handling)
+        if (typeof window !== 'undefined' && (window as any).Blockly) {
+            const blockly = (window as any).Blockly;
+            if (blockly.getMainWorkspace) {
+                const workspace = blockly.getMainWorkspace();
+                if (workspace && workspace.clear) {
+                    try {
+                        // Switch to Bot Builder tab first
+                        await this.switchToBotBuilderTab();
+                        
+                        // Clear workspace
+                        workspace.clear();
+                        
+                        // Try different Blockly XML methods
+                        let domXml;
+                        if (blockly.Xml?.textToDom) {
+                            domXml = blockly.Xml.textToDom(xmlContent);
+                        } else if (blockly.utils?.xml?.textToDom) {
+                            domXml = blockly.utils.xml.textToDom(xmlContent);
+                        } else if (blockly.Xml?.textToDomDocument) {
+                            domXml = blockly.Xml.textToDomDocument(xmlContent);
+                        } else {
+                            // Fallback: use browser DOMParser
+                            const parser = new DOMParser();
+                            domXml = parser.parseFromString(xmlContent, 'text/xml');
+                        }
+                        
+                        // Load XML into workspace
+                        if (blockly.Xml?.domToWorkspace) {
+                            blockly.Xml.domToWorkspace(domXml, workspace);
+                        } else if (blockly.serialization?.workspaces?.load) {
+                            blockly.serialization.workspaces.load(domXml, workspace);
+                        } else {
+                            throw new Error('No suitable Blockly XML loading method found');
+                        }
+                        
+                        console.log('✅ Bot loaded directly into Blockly workspace');
+                        return;
+                    } catch (error) {
+                        console.warn('❌ Direct Blockly injection failed:', error);
+                        // Continue to next method
+                    }
+                }
+            }
+        }
+
+        // Method 4: Event dispatch (fallback)
         const loadEvent = new CustomEvent('unified.bot.load', {
             detail: {
                 botName: config.botName,
@@ -645,8 +692,30 @@ class UnifiedBotManagerService {
                 console.log('✅ Switched to Bot Builder tab');
                 
                 // Wait for tab to load
-                await new Promise(resolve => setTimeout(resolve, 300));
+                await new Promise(resolve => setTimeout(resolve, 500));
             }
+        }
+    }
+
+    /**
+     * Debug Blockly API availability
+     */
+    private debugBlocklyAPI(): void {
+        if (typeof window !== 'undefined' && (window as any).Blockly) {
+            const blockly = (window as any).Blockly;
+            console.log('🔍 Blockly API Debug:', {
+                hasBlockly: !!blockly,
+                hasXml: !!blockly.Xml,
+                hasTextToDom: !!blockly.Xml?.textToDom,
+                hasUtilsXml: !!blockly.utils?.xml,
+                hasUtilsTextToDom: !!blockly.utils?.xml?.textToDom,
+                hasSerialization: !!blockly.serialization,
+                hasWorkspaces: !!blockly.serialization?.workspaces,
+                hasGetMainWorkspace: !!blockly.getMainWorkspace,
+                availableMethods: Object.keys(blockly.Xml || {})
+            });
+        } else {
+            console.log('🔍 Blockly not available on window');
         }
     }
 
