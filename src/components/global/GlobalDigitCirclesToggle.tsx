@@ -510,58 +510,28 @@ export const GlobalDigitCirclesToggle: React.FC = () => {
     };
 
     const showDistributionScanningNotification = () => {
-        const notification = createNotification(
-            'Scanning Markets...',
-            'Analyzing Distribution Deviations across all markets',
-            '#8b5cf6'
-        );
-
-        // Auto-remove after 3 seconds
-        setTimeout(() => notification.remove(), 3000);
+        // Notification removed for client privacy - no strategy details exposed
+        return;
     };
 
     const showDistributionSignalFoundNotification = (signal: DigitDistributionSignal) => {
-        const notification = createNotification(
-            'Distribution Deviation Found!',
-            `${signal.marketName}: ${signal.recommendation.action} ${signal.recommendation.barrier} (${signal.confidence.toFixed(1)}% confidence)`,
-            '#8b5cf6'
-        );
-
-        // Auto-remove after 5 seconds
-        setTimeout(() => notification.remove(), 5000);
+        // Notification removed for client privacy - no strategy details exposed
+        return;
     };
 
     const showNoDistributionSignalNotification = () => {
-        const notification = createNotification(
-            'No Distribution Deviations',
-            'All markets showing normal distribution patterns. Try again later.',
-            '#f59e0b'
-        );
-
-        // Auto-remove after 4 seconds
-        setTimeout(() => notification.remove(), 4000);
+        // Notification removed for client privacy - no strategy details exposed
+        return;
     };
 
     const showScanningNotification = () => {
-        const notification = createNotification(
-            'Scanning Markets...',
-            'Analyzing Hot/Cold Zones across all markets',
-            '#3b82f6'
-        );
-
-        // Auto-remove after 3 seconds
-        setTimeout(() => notification.remove(), 3000);
+        // Notification removed for client privacy - no strategy details exposed
+        return;
     };
 
     const showSignalFoundNotification = (signal: HotColdZoneSignal) => {
-        const notification = createNotification(
-            'Hot/Cold Zone Found!',
-            `${signal.marketName}: ${signal.recommendation.action} ${signal.recommendation.barrier} (${signal.confidence.toFixed(1)}% confidence)`,
-            '#10b981'
-        );
-
-        // Auto-remove after 5 seconds
-        setTimeout(() => notification.remove(), 5000);
+        // Notification removed for client privacy - no strategy details exposed
+        return;
     };
 
     const showEnhancedSignalFoundNotification = (
@@ -570,14 +540,8 @@ export const GlobalDigitCirclesToggle: React.FC = () => {
             enhancedPredictions: { beforeLoss: number; afterLoss: number };
         }
     ) => {
-        const notification = createNotification(
-            '🔥 Enhanced Hot/Cold Zone Found!',
-            `${signal.marketName}: ${signal.recommendation.action} ${signal.recommendation.barrier} (${signal.confidence.toFixed(1)}% confidence) - Long Press Mode: ${signal.enhancedPredictions.beforeLoss}/${signal.enhancedPredictions.afterLoss}`,
-            '#10b981'
-        );
-
-        // Auto-remove after 5 seconds
-        setTimeout(() => notification.remove(), 5000);
+        // Notification removed for client privacy - no strategy details exposed
+        return;
     };
 
     const showEnhancedDistributionSignalFoundNotification = (
@@ -586,25 +550,13 @@ export const GlobalDigitCirclesToggle: React.FC = () => {
             enhancedPredictions: { beforeLoss: number; afterLoss: number };
         }
     ) => {
-        const notification = createNotification(
-            '🔥 Enhanced Distribution Deviation Found!',
-            `${signal.marketName}: ${signal.recommendation.action} ${signal.recommendation.barrier} (${signal.confidence.toFixed(1)}% confidence) - Long Press Mode: ${signal.enhancedPredictions.beforeLoss}/${signal.enhancedPredictions.afterLoss}`,
-            '#8b5cf6'
-        );
-
-        // Auto-remove after 5 seconds
-        setTimeout(() => notification.remove(), 5000);
+        // Notification removed for client privacy - no strategy details exposed
+        return;
     };
 
     const showNoSignalNotification = () => {
-        const notification = createNotification(
-            'No Hot/Cold Zones',
-            'All markets showing balanced distribution. Try again later.',
-            '#f59e0b'
-        );
-
-        // Auto-remove after 4 seconds
-        setTimeout(() => notification.remove(), 4000);
+        // Notification removed for client privacy - no strategy details exposed
+        return;
     };
 
     const showErrorNotification = (error: Error) => {

@@ -213,82 +213,15 @@ class EnhancedSignalProcessorService {
     }
 
     /**
-     * Show signal processed notification
+     * Show signal processed notification - DISABLED FOR CLIENT PRIVACY
      */
     private showSignalProcessedNotification(
         signalType: 'HOT_COLD_ZONE' | 'DISTRIBUTION_DEVIATION',
         botName: 'RAZIEL' | 'PATEL',
         confidence: number
     ): void {
-        
-        const signalTypeDisplay = signalType === 'HOT_COLD_ZONE' ? 'Hot/Cold Zone' : 'Distribution Deviation';
-        const emoji = signalType === 'HOT_COLD_ZONE' ? '🔥' : '🎯';
-        const color = signalType === 'HOT_COLD_ZONE' ? '#f59e0b' : '#8b5cf6';
-
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, ${color}, ${color}dd);
-            color: white;
-            padding: 16px 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px ${color}40;
-            z-index: 10001;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            font-size: 14px;
-            max-width: 350px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            animation: slideInRight 0.3s ease-out;
-        `;
-
-        notification.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="font-size: 24px;">${emoji}</div>
-                <div>
-                    <div style="font-weight: 700; margin-bottom: 4px;">
-                        ${botName} Bot Auto-Loaded
-                    </div>
-                    <div style="font-size: 12px; opacity: 0.9;">
-                        ${signalTypeDisplay} Signal • ${confidence.toFixed(1)}% Confidence
-                    </div>
-                    <div style="font-size: 11px; opacity: 0.7; margin-top: 2px;">
-                        Bot started automatically with unified parameters
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Add animation styles
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideInRight {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOutRight {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
-
-        document.body.appendChild(notification);
-
-        // Auto-remove after 4 seconds
-        setTimeout(() => {
-            notification.style.animation = 'slideOutRight 0.3s ease-in';
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-                if (style.parentNode) {
-                    style.parentNode.removeChild(style);
-                }
-            }, 300);
-        }, 4000);
+        // Notifications disabled to protect trading strategy privacy
+        return;
     }
 
     /**
