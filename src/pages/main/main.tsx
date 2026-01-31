@@ -11,7 +11,6 @@ import { ProtectedSignalsCenter } from '@/components/signals/ProtectedSignalsCen
 import { ProtectedPatelSignals } from '@/components/auth/ProtectedPatelSignals';
 import { PatelSignalCenter } from '@/components/signals/PatelSignalCenter';
 import { ProtectedPatelSignalCenter } from '@/components/auth/ProtectedPatelSignalCenter';
-import { ProtectedSignalSavvy } from '@/components/auth/ProtectedSignalSavvy';
 import PatelPrime from '@/components/signals/PatelPrime';
 import TradingViewModal from '@/components/trading-view-chart/trading-view-modal';
 import { DBOT_TABS } from '@/constants/bot-contents';
@@ -30,9 +29,6 @@ import RunStrategy from '../dashboard/run-strategy';
 const Chart = lazy(() => import('../chart'));
 const Tutorial = lazy(() => import('../tutorials'));
 const AdvancedAlgo = lazy(() => import('../advanced-algo'));
-const ZenPage = lazy(() => import('../zen'));
-const AccumulatorPage = lazy(() => import('../accumulator/accumulator').then(m => ({ default: m.default })));
-const DigitHackerPage = lazy(() => import('../digit-hacker-page').then(m => ({ default: m.DigitHackerPage })));
 const DTraderClone = lazy(() => import('../dtrader-clone'));
 
 const DashboardIcon = () => (
@@ -166,50 +162,9 @@ const FreeBotsIcon = () => (
     </svg>
 );
 
-const ZenIcon = () => (
-    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-        {/* Zen circle */}
-        <circle cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='2' fill='none' />
-        <circle cx='12' cy='12' r='10' fill='#4caf50' opacity='0.1' />
-        {/* Yin-Yang symbol */}
-        <path
-            d='M12 2C12 7 7 12 12 12C17 12 12 17 12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2Z'
-            fill='currentColor'
-            opacity='0.8'
-        />
-        <circle cx='12' cy='7' r='2' fill='#4caf50' />
-        <circle cx='12' cy='17' r='2' fill='currentColor' />
-        {/* Meditation dots */}
-        <circle cx='6' cy='6' r='1' fill='#4caf50' opacity='0.6' />
-        <circle cx='18' cy='6' r='1' fill='#4caf50' opacity='0.6' />
-        <circle cx='6' cy='18' r='1' fill='#4caf50' opacity='0.6' />
-        <circle cx='18' cy='18' r='1' fill='#4caf50' opacity='0.6' />
-    </svg>
-);
 
-const AccumulatorIcon = () => (
-    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-        {/* Accumulator base */}
-        <rect x='4' y='16' width='16' height='6' rx='2' stroke='currentColor' strokeWidth='2' fill='none' />
-        <rect x='4' y='16' width='16' height='6' rx='2' fill='#10b981' opacity='0.1' />
 
-        {/* Growth bars */}
-        <rect x='6' y='12' width='2' height='4' rx='1' fill='#10b981' />
-        <rect x='9' y='8' width='2' height='8' rx='1' fill='#10b981' />
-        <rect x='12' y='6' width='2' height='10' rx='1' fill='#10b981' />
-        <rect x='15' y='4' width='2' height='12' rx='1' fill='#10b981' />
 
-        {/* Percentage indicators */}
-        <circle cx='7' cy='10' r='1' fill='#ffd700' />
-        <circle cx='10' cy='6' r='1' fill='#ffd700' />
-        <circle cx='13' cy='4' r='1' fill='#ffd700' />
-        <circle cx='16' cy='2' r='1' fill='#ffd700' />
-
-        {/* Target symbol */}
-        <circle cx='19' cy='19' r='2' stroke='#10b981' strokeWidth='1.5' fill='none' />
-        <circle cx='19' cy='19' r='1' fill='#10b981' />
-    </svg>
-);
 
 const RichMotherIcon = () => (
     <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -240,42 +195,7 @@ const RichMotherIcon = () => (
     </svg>
 );
 
-const DigitHackerIcon = () => (
-    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-        {/* Target circles */}
-        <circle cx='12' cy='12' r='9' stroke='#a78bfa' strokeWidth='2' fill='none' opacity='0.3' />
-        <circle cx='12' cy='12' r='6' stroke='#a78bfa' strokeWidth='2' fill='none' opacity='0.5' />
-        <circle cx='12' cy='12' r='3' stroke='#a78bfa' strokeWidth='2' fill='none' opacity='0.7' />
 
-        {/* Center bullseye */}
-        <circle cx='12' cy='12' r='1.5' fill='#ffd700' />
-
-        {/* Crosshair */}
-        <path
-            d='M12 2V8M12 16V22M2 12H8M16 12H22'
-            stroke='#a78bfa'
-            strokeWidth='1.5'
-            strokeLinecap='round'
-            opacity='0.6'
-        />
-
-        {/* AI indicators */}
-        <circle cx='12' cy='5' r='1' fill='#ffd700' opacity='0.8' />
-        <circle cx='19' cy='12' r='1' fill='#ffd700' opacity='0.8' />
-        <circle cx='12' cy='19' r='1' fill='#ffd700' opacity='0.8' />
-        <circle cx='5' cy='12' r='1' fill='#ffd700' opacity='0.8' />
-
-        {/* Scanning effect */}
-        <path
-            d='M8 8L12 12L16 8'
-            stroke='#a78bfa'
-            strokeWidth='1.5'
-            strokeLinecap='round'
-            strokeLinejoin='round'
-            opacity='0.7'
-        />
-    </svg>
-);
 
 const DTraderIcon = () => (
     <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -2975,106 +2895,13 @@ const AppWrapper = observer(() => {
                             </div>
                         </div>
 
-                        {/* SIGNAL SAVVY TAB */}
-                        <div
-                            label={
-                                <>
-                                    📡
-                                    <Localize i18n_default_text='Signal Savvy' />
-                                    <span
-                                        className='tab-badge'
-                                        style={{
-                                            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                                            color: '#fff',
-                                            padding: '2px 8px',
-                                            borderRadius: '12px',
-                                            fontSize: '10px',
-                                            fontWeight: '700',
-                                            marginLeft: '8px',
-                                        }}
-                                    >
-                                        PRO
-                                    </span>
-                                </>
-                            }
-                            id='id-signal-savvy'
-                        >
-                            <ProtectedSignalSavvy>
-                                <div
-                                    className='signal-savvy-container'
-                                    style={{
-                                        width: '100%',
-                                        height: 'calc(100vh - 120px)',
-                                        minHeight: 'calc(100vh - 120px)',
-                                        overflow: 'hidden',
-                                        background: 'transparent',
-                                        position: 'relative',
-                                    }}
-                                >
-                                    <iframe
-                                        src='/signals/signal-savvy/dist/index.html'
-                                        title='Signal Savvy Application'
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            border: 'none',
-                                            display: 'block',
-                                            background: '#fff',
-                                        }}
-                                        allow='clipboard-write'
-                                        sandbox='allow-same-origin allow-scripts allow-forms allow-popups allow-modals'
-                                    />
-                                </div>
-                            </ProtectedSignalSavvy>
-                        </div>
 
-                        {/* ZEN TAB */}
-                        <div
-                            label={
-                                <>
-                                    <ZenIcon />
-                                    <Localize i18n_default_text='Zen' />
-                                </>
-                            }
-                            id='id-zen'
-                            className='zen-tab-content'
-                        >
-                            <Suspense fallback={<div>Loading Zen Trading...</div>}>
-                                <ZenPage />
-                            </Suspense>
-                        </div>
 
-                        {/* ACCUMULATOR TAB */}
-                        <div
-                            label={
-                                <>
-                                    <AccumulatorIcon />
-                                    <Localize i18n_default_text='Accumulator' />
-                                </>
-                            }
-                            id='id-accumulator'
-                            className='accumulator-tab-content'
-                        >
-                            <Suspense fallback={<div>Loading Accumulator...</div>}>
-                                <AccumulatorPage />
-                            </Suspense>
-                        </div>
 
-                        {/* DIGIT HACKER TAB */}
-                        <div
-                            label={
-                                <>
-                                    <DigitHackerIcon />
-                                    <Localize i18n_default_text='Digit Hacker AI' />
-                                </>
-                            }
-                            id='id-digit-hacker'
-                            className='digit-hacker-tab-content'
-                        >
-                            <Suspense fallback={<div>Loading Digit Hacker AI...</div>}>
-                                <DigitHackerPage />
-                            </Suspense>
-                        </div>
+
+
+
+
 
                         {/* RICH MOTHER TAB */}
                         <div
