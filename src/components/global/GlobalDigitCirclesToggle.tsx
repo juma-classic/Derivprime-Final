@@ -4,7 +4,8 @@ import {
     DigitDistributionSignal,
 } from '@/services/digit-distribution-scanner.service';
 import { hotColdZoneScannerService, HotColdZoneSignal } from '@/services/hot-cold-zone-scanner.service';
-import { razielBotLoaderService } from '@/services/raziel-bot-loader.service';
+import { enhancedSignalProcessor, CustomBotSettings } from '@/services/enhanced-signal-processor.service';
+import { unifiedBotManager } from '@/services/unified-bot-manager.service';
 import './GlobalDigitCirclesToggle.scss';
 
 const SETTINGS_STORAGE_KEY = 'fibonacci-bot-settings';
@@ -251,16 +252,28 @@ export const GlobalDigitCirclesToggle: React.FC = () => {
         setIsLoadingBot(true);
 
         try {
-            console.log('Loading Raziel Over Under bot with Distribution Deviation signal...');
+            console.log('🎯 Auto-loading Patel bot with Distribution Deviation signal...');
 
-            // Load Raziel Over Under bot with signal parameters and custom settings
-            await razielBotLoaderService.loadRazielBotWithDistributionSignal(currentDistributionSignal, botSettings);
+            // Use enhanced signal processor for unified bot loading
+            const result = await enhancedSignalProcessor.processDistributionDeviationSignal(
+                currentDistributionSignal,
+                botSettings as CustomBotSettings,
+                true // Auto-start
+            );
 
-            // Close popup
-            setShowDistributionPopup(false);
-            setCurrentDistributionSignal(null);
+            if (result.success) {
+                console.log('✅ Patel bot loaded and started automatically');
+                
+                // Close popup
+                setShowDistributionPopup(false);
+                setCurrentDistributionSignal(null);
+            } else {
+                console.error('❌ Failed to load Patel bot:', result.errors);
+                showErrorNotification(new Error(result.errors.join(', ')));
+            }
+
         } catch (error) {
-            console.error('Error loading bot:', error);
+            console.error('❌ Error loading Patel bot:', error);
             showErrorNotification(error as Error);
         } finally {
             setIsLoadingBot(false);
@@ -359,16 +372,28 @@ export const GlobalDigitCirclesToggle: React.FC = () => {
         setIsLoadingBot(true);
 
         try {
-            console.log('Loading Raziel Over Under bot with Hot/Cold Zone signal...');
+            console.log('🔥 Auto-loading Raziel bot with Hot/Cold Zone signal...');
 
-            // Load Raziel Over Under bot with signal parameters and custom settings
-            await razielBotLoaderService.loadRazielBotWithHotColdSignal(currentSignal, botSettings);
+            // Use enhanced signal processor for unified bot loading
+            const result = await enhancedSignalProcessor.processHotColdZoneSignal(
+                currentSignal,
+                botSettings as CustomBotSettings,
+                true // Auto-start
+            );
 
-            // Close popup
-            setShowSignalPopup(false);
-            setCurrentSignal(null);
+            if (result.success) {
+                console.log('✅ Raziel bot loaded and started automatically');
+                
+                // Close popup
+                setShowSignalPopup(false);
+                setCurrentSignal(null);
+            } else {
+                console.error('❌ Failed to load Raziel bot:', result.errors);
+                showErrorNotification(new Error(result.errors.join(', ')));
+            }
+
         } catch (error) {
-            console.error('Error loading bot:', error);
+            console.error('❌ Error loading Raziel bot:', error);
             showErrorNotification(error as Error);
         } finally {
             setIsLoadingBot(false);

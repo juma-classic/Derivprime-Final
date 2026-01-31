@@ -1881,6 +1881,68 @@ const AppWrapper = observer(() => {
         };
     }, [bots, handleBotClick, setActiveTab]);
 
+    // Listen for unified bot loading events from enhanced signal processor
+    useEffect(() => {
+        const handleUnifiedBotLoad = async (event: Event) => {
+            const customEvent = event as CustomEvent;
+            const { botName, xmlContent, parameters } = customEvent.detail;
+            
+            console.log('🤖 Received unified bot load request:', { botName, parameters });
+
+            try {
+                // Switch to Bot Builder tab first
+                setActiveTab(DBOT_TABS.BOT_BUILDER);
+
+                // Wait for tab to load
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                // Create bot object for loading
+                const botObject = {
+                    id: `unified-${botName.toLowerCase()}-${Date.now()}`,
+                    name: `${botName} Bot (Unified)`,
+                    xml: xmlContent,
+                    save_type: 'LOCAL',
+                };
+
+                console.log('📋 Loading unified bot:', botObject.name);
+
+                // Load the strategy
+                await load_modal.loadStrategyToBuilder(botObject);
+
+                console.log('✅ Unified bot loaded successfully');
+
+                // Update workspace name
+                if (typeof updateWorkspaceName === 'function') {
+                    updateWorkspaceName();
+                }
+
+                // Auto-start the bot after a delay
+                setTimeout(() => {
+                    console.log('🚀 Auto-starting unified bot...');
+                    try {
+                        const runButton = document.getElementById('db-animation__run-button');
+                        if (runButton) {
+                            runButton.click();
+                            console.log('✅ Unified bot auto-started successfully');
+                        } else {
+                            console.warn('⚠️ Run button not found for auto-start');
+                        }
+                    } catch (error) {
+                        console.error('❌ Failed to auto-start unified bot:', error);
+                    }
+                }, 2000);
+
+            } catch (error) {
+                console.error('❌ Failed to load unified bot:', error);
+            }
+        };
+
+        window.addEventListener('unified.bot.load', handleUnifiedBotLoad);
+        return () => {
+            window.removeEventListener('unified.bot.load', handleUnifiedBotLoad);
+        };
+    }, [load_modal, setActiveTab]);
+
     // Listen for tab switching events from components
     useEffect(() => {
         const handleTabSwitch = (event: Event) => {

@@ -10,7 +10,6 @@ import { FakeRealModeIndicator } from '../fake-real-account-toggle/FakeRealModeI
 import { crypto_currencies_display_order, fiat_currencies_display_order } from '../shared';
 import { GlobalDigitCircles } from '../global/GlobalDigitCircles';
 import { GlobalDigitCirclesToggle } from '../global/GlobalDigitCirclesToggle';
-import FloatingActionButtons from '../floating-buttons';
 import Footer from './footer';
 import AppHeader from './header';
 import Body from './main-body';
@@ -92,18 +91,6 @@ const Layout = () => {
         clientHasCurrency,
     ]);
 
-    const handlePatelClick = () => {
-        console.log('🟣 Patel AI button clicked - Opening Patel Signals');
-        // Add your Patel functionality here
-        // For example: navigate to Patel signals page or open modal
-    };
-
-    const handleRazielClick = () => {
-        console.log('🟠 Raziel Scanner button clicked - Opening Raziel Scanner');
-        // Add your Raziel functionality here
-        // For example: navigate to Raziel scanner page or open modal
-    };
-
     return (
         <div className={clsx('layout', { responsive: isDesktop })}>
             {!isCallbackPage && <AppHeader />}
@@ -119,14 +106,6 @@ const Layout = () => {
                     <GlobalDigitCircles />
                     <GlobalDigitCirclesToggle />
                 </>
-            )}
-            
-            {/* Futuristic Floating Action Buttons */}
-            {!isCallbackPage && (
-                <FloatingActionButtons 
-                    onPatelClick={handlePatelClick}
-                    onRazielClick={handleRazielClick}
-                />
             )}
         </div>
     );
