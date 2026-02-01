@@ -1,0 +1,265 @@
+.trade-indicators {
+    position: relative;
+    pointer-events: none; // Don't interfere with chart interactions
+    
+    .trade-flag {
+        position: fixed;
+        right: 360px; // Position to the left of trading panel
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1000;
+        pointer-events: auto;
+        animation: slide-in 0.3s ease-out;
+        
+        &.winning {
+            .flag-content {
+                background: linear-gradient(135deg, #28a745, #20c997);
+                border-color: #28a745;
+                box-shadow: 0 4px 20px rgba(40, 167, 69, 0.3);
+            }
+            
+            .flag-pole {
+                background: #28a745;
+            }
+        }
+        
+        &.losing {
+            .flag-content {
+                background: linear-gradient(135deg, #dc3545, #e74c3c);
+                border-color: #dc3545;
+                box-shadow: 0 4px 20px rgba(220, 53, 69, 0.3);
+            }
+            
+            .flag-pole {
+                background: #dc3545;
+            }
+        }
+        
+        &.won {
+            .flag-content {
+                background: linear-gradient(135deg, #28a745, #20c997);
+                border-color: #28a745;
+                box-shadow: 0 4px 20px rgba(40, 167, 69, 0.4);
+                animation: pulse 2s infinite;
+            }
+            
+            .flag-pole {
+                background: #28a745;
+            }
+        }
+        
+        &.lost {
+            .flag-content {
+                background: linear-gradient(135deg, #6c757d, #495057);
+                border-color: #6c757d;
+                box-shadow: 0 4px 20px rgba(108, 117, 125, 0.3);
+                opacity: 0.8;
+            }
+            
+            .flag-pole {
+                background: #6c757d;
+            }
+        }
+        
+        .flag-pole {
+            width: 3px;
+            height: 40px;
+            background: #007bff;
+            position: absolute;
+            left: -3px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .flag-content {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 12px;
+            min-width: 200px;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            
+            &::before {
+                content: '';
+                position: absolute;
+                left: -8px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 0;
+                height: 0;
+                border-top: 8px solid transparent;
+                border-bottom: 8px solid transparent;
+                border-right: 8px solid currentColor;
+            }
+            
+            .flag-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 8px;
+                
+                .trade-icon {
+                    font-size: 16px;
+                }
+                
+                .trade-type {
+                    font-weight: 600;
+                    font-size: 13px;
+                    flex: 1;
+                    text-align: center;
+                }
+                
+                .trade-status-indicator {
+                    font-size: 16px;
+                    animation: bounce 1s infinite;
+                }
+            }
+            
+            .flag-details {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 4px;
+                font-size: 11px;
+                
+                .price-info,
+                .stake-info,
+                .payout-info,
+                .time-info {
+                    display: flex;
+                    justify-content: space-between;
+                    
+                    .label {
+                        opacity: 0.8;
+                    }
+                    
+                    .value {
+                        font-weight: 600;
+                    }
+                }
+            }
+            
+            .progress-bar {
+                margin-top: 8px;
+                height: 4px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 2px;
+                overflow: hidden;
+                
+                .progress-fill {
+                    height: 100%;
+                    background: rgba(255, 255, 255, 0.8);
+                    border-radius: 2px;
+                    transition: width 1s ease;
+                }
+            }
+        }
+    }
+}
+
+// Multiple trade flags positioning
+.trade-indicators .trade-flag:nth-child(1) { top: 30%; }
+.trade-indicators .trade-flag:nth-child(2) { top: 50%; }
+.trade-indicators .trade-flag:nth-child(3) { top: 70%; }
+.trade-indicators .trade-flag:nth-child(4) { top: 20%; }
+.trade-indicators .trade-flag:nth-child(5) { top: 80%; }
+
+// Animations
+@keyframes slide-in {
+    from {
+        transform: translateY(-50%) translateX(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(-50%) translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: translateY(-50%) scale(1);
+    }
+    50% {
+        transform: translateY(-50%) scale(1.05);
+    }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-3px);
+    }
+    60% {
+        transform: translateY(-2px);
+    }
+}
+
+// Responsive design
+@media (max-width: 1200px) {
+    .trade-indicators .trade-flag {
+        right: 340px;
+        
+        .flag-content {
+            min-width: 180px;
+            padding: 10px;
+            font-size: 11px;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .trade-indicators .trade-flag {
+        position: fixed;
+        right: 10px;
+        top: auto;
+        bottom: 100px;
+        transform: none;
+        
+        .flag-content {
+            min-width: 160px;
+            padding: 8px;
+            font-size: 10px;
+        }
+        
+        .flag-pole {
+            display: none;
+        }
+    }
+    
+    // Stack mobile flags vertically
+    .trade-indicators .trade-flag:nth-child(1) { bottom: 180px; }
+    .trade-indicators .trade-flag:nth-child(2) { bottom: 140px; }
+    .trade-indicators .trade-flag:nth-child(3) { bottom: 100px; }
+    .trade-indicators .trade-flag:nth-child(4) { bottom: 220px; }
+    .trade-indicators .trade-flag:nth-child(5) { bottom: 60px; }
+}
+
+// Dark mode support
+.dark-mode {
+    .trade-indicators .trade-flag {
+        .flag-content {
+            color: #f8f9fa;
+            
+            &::before {
+                filter: brightness(0.9);
+            }
+        }
+        
+        &.losing .flag-content {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+        
+        &.winning .flag-content {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+        }
+    }
+}

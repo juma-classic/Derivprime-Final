@@ -75,11 +75,21 @@ const ManualTradingPanel: React.FC<ManualTradingPanelProps> = observer(({ symbol
     useEffect(() => {
         if (!symbol || !validateSymbolOrWarn(symbol, 'manual trading')) return;
 
-        const unsubscribe = manualTradingService.subscribeToPrice(symbol, (price) => {
-            setCurrentPrice(price);
-        });
+        let unsubscribe: (() => void) | undefined;
 
-        return unsubscribe;
+        const setupSubscription = async () => {
+            unsubscribe = await manualTradingService.subscribeToPrice(symbol, (price) => {
+                setCurrentPrice(price);
+            });
+        };
+
+        setupSubscription();
+
+        return () => {
+            if (unsubscribe) {
+                unsubscribe();
+            }
+        };
     }, [symbol]);
 
     // Get proposals when parameters change
@@ -160,6 +170,9 @@ const ManualTradingPanel: React.FC<ManualTradingPanelProps> = observer(({ symbol
                     stake: stake,
                     payout: result.payout,
                     buy_price: result.buyPrice,
+                    duration: duration,
+                    duration_type: durationType,
+                    barrier: barrier,
                     timestamp: Date.now(),
                 };
 
@@ -208,15 +221,10 @@ const ManualTradingPanel: React.FC<ManualTradingPanelProps> = observer(({ symbol
     };
 
     return (
-        <div className="manual-trading-panel" style={{ minHeight: '600px', border: '2px solid #007bff' }}>
+        <div className="manual-trading-panel">
             <div className="panel-header">
                 <span className="info-icon">ℹ️</span>
                 <span className="header-text">Learn about this trade type</span>
-            </div>
-
-            {/* Debug info */}
-            <div style={{ padding: '8px', background: '#e3f2fd', marginBottom: '16px', fontSize: '12px' }}>
-                Symbol: {symbol || 'No symbol'} | Price: {currentPrice || 'Loading...'}
             </div>
 
             {/* Trade Type Selector */}

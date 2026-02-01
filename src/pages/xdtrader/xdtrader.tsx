@@ -14,6 +14,8 @@ import { ChartTitle, SmartChart } from '@deriv/deriv-charts';
 import { useDevice } from '@deriv-com/ui';
 import ToolbarWidgets from './toolbar-widgets';
 import ManualTradingPanel from '@/components/xdtrader/ManualTradingPanel';
+import TradeIndicators from '@/components/xdtrader/TradeIndicators';
+import { tradePositionManager } from '@/services/trade-position-manager.service';
 import { delayedLazy } from '@/utils/delayed-lazy';
 import { performanceMonitor } from '@/utils/performance-monitor';
 import '@deriv/deriv-charts/dist/smartcharts.css';
@@ -75,6 +77,25 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
     const [isChartReady, setIsChartReady] = useState(false);
     const [isApiReady, setIsApiReady] = useState(false);
     const [apiError, setApiError] = useState<string | null>(null);
+    const [currentPrice, setCurrentPrice] = useState<number>(0);
+
+    // Subscribe to price updates for trade indicators
+    useEffect(() => {
+        if (!symbol) return;
+
+        const subscription = chart_api.api?.onMessage()?.subscribe(({ data }: { data: any }) => {
+            if (data.tick && data.tick.symbol === symbol) {
+                const price = data.tick.quote;
+                setCurrentPrice(price);
+                // Update all trade positions with current price
+                tradePositionManager.updateAllPositionsPrice(price);
+            }
+        });
+
+        return () => {
+            subscription?.unsubscribe();
+        };
+    }, [symbol]);
 
     // Performance monitoring
     useEffect(() => {
@@ -268,13 +289,9 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
             <div
                 className={wrapperClassName}
                 dir='ltr'
-                style={{ position: 'relative', paddingBottom: '80px' }}
             >
-                <div className="xdtrader-main-content" style={{ border: '3px solid green', minHeight: '500px' }}>
-                    <div className="xdtrader-chart-container" style={{ border: '2px solid blue' }}>
-                        <div style={{ padding: '10px', background: 'lightblue' }}>
-                            DEBUG: Chart Container
-                        </div>
+                <div className="xdtrader-main-content">
+                    <div className="xdtrader-chart-container">
                         <Suspense fallback={<ChartLoader />}>
                             <SmartChart
                                 id='dbot'
@@ -303,19 +320,39 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
                                 isLive
                                 leftMargin={80}
                             />
+                            
+                            {/* Trade Indicators Overlay */}
+                            <TradeIndicators 
+                                trades={tradePositionManager.positions}
+                                currentPrice={currentPrice}
+                                onTradeUpdate={(trade) => {
+                                    console.log('Trade updated:', trade);
+                                }}
+                            />
                         </Suspense>
                     </div>
                     
                     {/* Manual Trading Panel on the right side */}
-                    <div className="xdtrader-trading-panel" style={{ border: '2px solid red', minHeight: '400px' }}>
-                        <div style={{ padding: '10px', background: 'yellow', marginBottom: '10px' }}>
-                            DEBUG: Trading Panel Container - Symbol: {symbol}
-                        </div>
+                    <div className="xdtrader-trading-panel">
                         <ManualTradingPanel 
                             symbol={symbol}
                             onTradeExecuted={(trade) => {
                                 console.log('Trade executed:', trade);
-                                // You can add additional trade handling logic here
+                                
+                                // Add trade position to manager for visual indicators
+                                tradePositionManager.addPosition({
+                                    contractId: trade.contract_id,
+                                    transactionId: trade.transaction_id,
+                                    contractType: trade.contract_type,
+                                    symbol: trade.symbol,
+                                    stake: trade.stake,
+                                    payout: trade.payout,
+                                    buyPrice: trade.buy_price,
+                                    entryPrice: currentPrice || 0,
+                                    duration: trade.duration || 5,
+                                    durationType: trade.duration_type || 'ticks',
+                                    barrier: trade.barrier,
+                                });
                             }}
                         />
                     </div>
