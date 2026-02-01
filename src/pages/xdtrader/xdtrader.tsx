@@ -100,6 +100,7 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
     const [apiError, setApiError] = useState<string | null>(null);
     const [currentPrice, setCurrentPrice] = useState<number>(0);
     const [tradePositionManager, setTradePositionManager] = useState<any>(null);
+    const [isMobilePanelOpen, setIsMobilePanelOpen] = useState(false);
 
     // Lazy load trade position manager to avoid import issues
     useEffect(() => {
@@ -306,6 +307,23 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
                 dir='ltr'
             >
                 <div className="xdtrader-main-content">
+                    {/* Mobile Panel Toggle Button */}
+                    {isMobile && (
+                        <>
+                            <button 
+                                className={`mobile-panel-toggle ${isMobilePanelOpen ? 'panel-open' : ''}`}
+                                onClick={() => setIsMobilePanelOpen(!isMobilePanelOpen)}
+                                aria-label="Toggle trading panel"
+                            >
+                                {isMobilePanelOpen ? '✕' : '📊'}
+                            </button>
+                            <div 
+                                className={`mobile-overlay ${isMobilePanelOpen ? 'active' : ''}`}
+                                onClick={() => setIsMobilePanelOpen(false)}
+                            />
+                        </>
+                    )}
+                    
                     <div className="xdtrader-chart-container">
                         <Suspense fallback={<ChartLoader />}>
                             <SmartChart
@@ -333,7 +351,8 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
                                 isConnectionOpened={is_connection_opened}
                                 getMarketsOrder={getMarketsOrder}
                                 isLive
-                                leftMargin={80}
+                                leftMargin={20} // Reduced left margin
+                                rightMargin={20} // Add right margin to prevent overlap
                             />
                             
                             {/* Trade Indicators Overlay */}
@@ -350,7 +369,7 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
                     </div>
                     
                     {/* Manual Trading Panel on the right side */}
-                    <div className="xdtrader-trading-panel">
+                    <div className={`xdtrader-trading-panel ${isMobile && isMobilePanelOpen ? 'mobile-open' : ''}`}>
                         <Suspense fallback={<div>Loading trading panel...</div>}>
                             <ManualTradingPanel 
                                 symbol={symbol}

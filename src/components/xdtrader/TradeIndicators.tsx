@@ -155,7 +155,7 @@ const TradeIndicators: React.FC<TradeIndicatorsProps> = observer(({ trades, curr
                     style={{
                         position: 'absolute',
                         top: '50%',
-                        right: '20px',
+                        right: '380px', // Position relative to trading panel width
                         transform: 'translateY(-50%)',
                         zIndex: 1000,
                     }}
