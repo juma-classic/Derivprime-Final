@@ -10,6 +10,19 @@ import './styles/index.scss';
 // Initialize error handlers immediately
 console.log('🛡️ Error handlers initialized');
 
+// Temporarily suppress findDOMNode warning from react-transition-group
+// This will be resolved when the library updates to use refs instead of findDOMNode
+// The warning doesn't affect functionality, just indicates deprecated API usage
+if (process.env.NODE_ENV !== 'production') {
+    const originalConsoleWarn = console.warn;
+    console.warn = (...args) => {
+        if (typeof args[0] === 'string' && args[0].includes('findDOMNode is deprecated')) {
+            return; // Suppress this specific warning in development
+        }
+        originalConsoleWarn.apply(console, args);
+    };
+}
+
 // Lazy load non-critical scripts
 const loadNonCriticalScripts = () => {
     // Use requestIdleCallback for better performance
