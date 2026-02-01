@@ -4,6 +4,7 @@
  */
 
 import { api_base } from '@/external/bot-skeleton';
+import { validateSymbolOrThrow } from '@/utils/symbol-validator';
 
 interface ConnectionConfig {
     appId: string;
@@ -257,6 +258,9 @@ export class RobustDerivConnectionService {
      * Subscribe to tick data for a symbol
      */
     public async subscribeToTicks(symbol: string, callback: (tickData: unknown) => void): Promise<() => void> {
+        // Validate symbol before subscribing
+        validateSymbolOrThrow(symbol, 'tick subscription');
+
         const subscriptionKey = `ticks_${symbol}`;
 
         // Store subscription for restoration after reconnect

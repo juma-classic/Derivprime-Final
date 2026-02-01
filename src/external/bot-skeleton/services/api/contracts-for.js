@@ -186,7 +186,8 @@ export default class ContractsFor {
     }
 
     async getContractsFor(symbol) {
-        if (!symbol || symbol === 'na') {
+        if (!symbol || symbol === 'na' || symbol === 'undefined' || symbol === 'null') {
+            console.warn('⚠️ Invalid symbol provided to getContractsFor:', symbol);
             return [];
         }
 

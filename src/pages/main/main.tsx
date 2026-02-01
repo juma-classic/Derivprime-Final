@@ -21,6 +21,7 @@ import { useStore } from '@/hooks/useStore';
 import { Localize, localize } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
 import { BotLoadingErrorHandler, withBotLoadingErrorHandling } from '@/utils/bot-loading-error-handler';
+import { setupAPIErrorMonitoring } from '@/utils/api-error-handler';
 import RunPanel from '../../components/run-panel';
 import ChartModal from '../chart/chart-modal';
 import Dashboard from '../dashboard';
@@ -354,6 +355,11 @@ const AppWrapper = observer(() => {
     };
     const [bots, setBots] = useState<BotType[]>([]);
     const [analysisToolUrl, setAnalysisToolUrl] = useState('ai');
+
+    // Initialize API error monitoring
+    useEffect(() => {
+        setupAPIErrorMonitoring();
+    }, []);
 
     useEffect(() => {
         if (connectionStatus !== CONNECTION_STATUS.OPENED) {

@@ -123,6 +123,12 @@ export const ZenUltraFastEngine = forwardRef<any, ZenUltraFastEngineProps>(
         const initializeTickDrivenEngine = useCallback(() => {
             console.log('🚀 Initializing tick-driven trading engine');
 
+            // Validate market symbol before initialization
+            if (!settings.market || settings.market === 'na' || settings.market === 'undefined' || settings.market === 'null') {
+                console.error('❌ Invalid market symbol in settings:', settings.market);
+                return;
+            }
+
             // Initialize Deriv WebSocket service
             derivSocketRef.current = new DerivSocketService({
                 symbol: settings.market,

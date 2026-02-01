@@ -31,6 +31,12 @@ export class DerivSocketService {
     private listeners: Map<string, ((data: TickData) => void)[]> = new Map();
 
     constructor(config: SocketConfig) {
+        // Validate symbol in config
+        if (!config.symbol || config.symbol === 'na' || config.symbol === 'undefined' || config.symbol === 'null') {
+            console.error('❌ Invalid symbol in DerivSocketService config:', config.symbol);
+            throw new Error(`Invalid symbol in DerivSocketService config: ${config.symbol}`);
+        }
+
         this.config = config;
         this.listeners.set('tick', []);
         this.listeners.set('connect', []);

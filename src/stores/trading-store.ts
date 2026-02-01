@@ -220,6 +220,12 @@ export class TradingStore {
     private subscribeToTicks = (symbol: string) => {
         if (!this.webSocket) return;
 
+        // Validate symbol before subscribing
+        if (!symbol || symbol === 'na' || symbol === 'undefined' || symbol === 'null') {
+            console.error('❌ Invalid symbol for tick subscription:', symbol);
+            return;
+        }
+
         this.webSocket.send(JSON.stringify({
             ticks: symbol,
             subscribe: 1,
@@ -228,6 +234,12 @@ export class TradingStore {
 
     private loadChartData = (symbol: string) => {
         if (!this.webSocket) return;
+
+        // Validate symbol before making API call
+        if (!symbol || symbol === 'na' || symbol === 'undefined' || symbol === 'null') {
+            console.error('❌ Invalid symbol for chart data:', symbol);
+            return;
+        }
 
         const granularity = this.getGranularity(this.timeframe);
         

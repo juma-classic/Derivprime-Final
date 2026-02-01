@@ -91,6 +91,13 @@ class DigitStatsAPI {
                 return;
             }
 
+            // Validate symbol before making API call
+            if (!symbol || symbol === 'na' || symbol === 'undefined' || symbol === 'null') {
+                console.error('❌ Invalid symbol for tick history:', symbol);
+                reject(new Error(`Invalid symbol for tick history: ${symbol}`));
+                return;
+            }
+
             const requestId = `history_${symbol}`;
             const request = {
                 ticks_history: symbol,
