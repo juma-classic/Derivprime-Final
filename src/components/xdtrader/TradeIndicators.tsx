@@ -170,9 +170,9 @@ const TradeIndicators: React.FC<TradeIndicatorsProps> = observer(({ trades, curr
             case 'LOWER':
                 return '↘';
             case 'OVER':
-                return '↑';
+                return '🔺';
             case 'UNDER':
-                return '↓';
+                return '🔻';
             case 'EVEN':
                 return 'E';
             case 'ODD':

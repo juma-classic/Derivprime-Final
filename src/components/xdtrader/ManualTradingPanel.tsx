@@ -35,7 +35,7 @@ const TRADE_TYPES: TradeType[] = [
     {
         id: 'over_under',
         name: 'Over/Under',
-        icon: '⌄',
+        icon: '🔺🔻',
         contracts: { primary: 'DIGITOVER', secondary: 'DIGITUNDER' }
     },
     {
@@ -192,7 +192,7 @@ const ManualTradingPanel: React.FC<ManualTradingPanelProps> = observer(({ symbol
         switch (selectedTradeType.id) {
             case 'rise_fall': return 'Rise';
             case 'higher_lower': return 'Higher';
-            case 'over_under': return `Over ${barrier}`;
+            case 'over_under': return 'Over';
             case 'even_odd': return 'Even';
             case 'matches_differs': return `Matches ${barrier}`;
             default: return 'Buy';
@@ -203,7 +203,7 @@ const ManualTradingPanel: React.FC<ManualTradingPanelProps> = observer(({ symbol
         switch (selectedTradeType.id) {
             case 'rise_fall': return 'Fall';
             case 'higher_lower': return 'Lower';
-            case 'over_under': return `Under ${barrier}`;
+            case 'over_under': return 'Under';
             case 'even_odd': return 'Odd';
             case 'matches_differs': return `Differs ${barrier}`;
             default: return 'Sell';
@@ -285,18 +285,18 @@ const ManualTradingPanel: React.FC<ManualTradingPanelProps> = observer(({ symbol
 
             {/* Barrier Input (for Over/Under and Matches/Differs) */}
             {(selectedTradeType.id === 'over_under' || selectedTradeType.id === 'matches_differs') && (
-                <div className="barrier-input">
-                    <label>Barrier</label>
-                    <div className="input-group">
-                        <button onClick={() => setBarrier(Math.max(0, barrier - 1))}>-</button>
-                        <input
-                            type="number"
-                            value={barrier}
-                            onChange={(e) => setBarrier(parseInt(e.target.value) || 0)}
-                            min="0"
-                            max="9"
-                        />
-                        <button onClick={() => setBarrier(Math.min(9, barrier + 1))}>+</button>
+                <div className="digit-prediction-section">
+                    <div className="section-title">Last Digit Prediction</div>
+                    <div className="digit-grid">
+                        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(digit => (
+                            <button
+                                key={digit}
+                                className={`digit-button ${barrier === digit ? 'selected' : ''}`}
+                                onClick={() => setBarrier(digit)}
+                            >
+                                {digit}
+                            </button>
+                        ))}
                     </div>
                 </div>
             )}
@@ -351,7 +351,7 @@ const ManualTradingPanel: React.FC<ManualTradingPanelProps> = observer(({ symbol
                         onClick={() => executeTrade('primary')}
                         disabled={isLoading || !proposals.primary}
                     >
-                        <span className="btn-icon">↗</span>
+                        <span className="btn-icon">🔺</span>
                         <span className="btn-text">{getPrimaryButtonText()}</span>
                         <span className="probability">
                             {calculateProbability(proposals.primary?.payout || 0, stake)}
@@ -369,7 +369,7 @@ const ManualTradingPanel: React.FC<ManualTradingPanelProps> = observer(({ symbol
                         onClick={() => executeTrade('secondary')}
                         disabled={isLoading || !proposals.secondary}
                     >
-                        <span className="btn-icon">↘</span>
+                        <span className="btn-icon">🔻</span>
                         <span className="btn-text">{getSecondaryButtonText()}</span>
                         <span className="probability">
                             {calculateProbability(proposals.secondary?.payout || 0, stake)}
