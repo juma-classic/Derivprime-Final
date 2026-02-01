@@ -23,31 +23,31 @@ const TRADE_TYPES: TradeType[] = [
     {
         id: 'rise_fall',
         name: 'Rise/Fall',
-        icon: '📈',
+        icon: '↗',
         contracts: { primary: 'CALL', secondary: 'PUT' }
     },
     {
         id: 'higher_lower',
         name: 'Higher/Lower',
-        icon: '⬆️',
+        icon: '↕',
         contracts: { primary: 'CALLE', secondary: 'PUTE' }
     },
     {
         id: 'over_under',
         name: 'Over/Under',
-        icon: '🎯',
+        icon: '⌄',
         contracts: { primary: 'DIGITOVER', secondary: 'DIGITUNDER' }
     },
     {
         id: 'even_odd',
         name: 'Even/Odd',
-        icon: '🔢',
+        icon: '#',
         contracts: { primary: 'DIGITEVEN', secondary: 'DIGITODD' }
     },
     {
         id: 'matches_differs',
         name: 'Matches/Differs',
-        icon: '🎲',
+        icon: '=',
         contracts: { primary: 'DIGITMATCHES', secondary: 'DIGITDIFFERS' }
     }
 ];
@@ -223,7 +223,7 @@ const ManualTradingPanel: React.FC<ManualTradingPanelProps> = observer(({ symbol
     return (
         <div className="manual-trading-panel">
             <div className="panel-header">
-                <span className="info-icon">ℹ️</span>
+                <span className="info-icon">i</span>
                 <span className="header-text">Learn about this trade type</span>
             </div>
 
@@ -329,7 +329,7 @@ const ManualTradingPanel: React.FC<ManualTradingPanelProps> = observer(({ symbol
                     onChange={(e) => setAllowEquals(e.target.checked)}
                 />
                 <label htmlFor="allow-equals">Allow equals</label>
-                <span className="info-icon">ℹ️</span>
+                <span className="info-icon">i</span>
             </div>
 
             {/* Current Price Display */}
@@ -344,14 +344,14 @@ const ManualTradingPanel: React.FC<ManualTradingPanelProps> = observer(({ symbol
                 <div className="trade-option primary">
                     <div className="payout-info">
                         Payout {formatPayout(proposals.primary?.payout || 0)}
-                        <span className="info-icon">ℹ️</span>
+                        <span className="info-icon">i</span>
                     </div>
                     <button
                         className="trade-btn primary-btn"
                         onClick={() => executeTrade('primary')}
                         disabled={isLoading || !proposals.primary}
                     >
-                        <span className="btn-icon">📈</span>
+                        <span className="btn-icon">↗</span>
                         <span className="btn-text">{getPrimaryButtonText()}</span>
                         <span className="probability">
                             {calculateProbability(proposals.primary?.payout || 0, stake)}
@@ -362,14 +362,14 @@ const ManualTradingPanel: React.FC<ManualTradingPanelProps> = observer(({ symbol
                 <div className="trade-option secondary">
                     <div className="payout-info">
                         Payout {formatPayout(proposals.secondary?.payout || 0)}
-                        <span className="info-icon">ℹ️</span>
+                        <span className="info-icon">i</span>
                     </div>
                     <button
                         className="trade-btn secondary-btn"
                         onClick={() => executeTrade('secondary')}
                         disabled={isLoading || !proposals.secondary}
                     >
-                        <span className="btn-icon">📉</span>
+                        <span className="btn-icon">↘</span>
                         <span className="btn-text">{getSecondaryButtonText()}</span>
                         <span className="probability">
                             {calculateProbability(proposals.secondary?.payout || 0, stake)}

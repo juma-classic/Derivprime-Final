@@ -32,7 +32,17 @@
         color: #6c757d;
         
         .info-icon {
-            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #007bff;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: help;
         }
         
         .header-text {
@@ -298,8 +308,16 @@
         }
         
         .info-icon {
-            font-size: 14px;
-            color: #6c757d;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #007bff;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
             cursor: help;
         }
     }
@@ -330,6 +348,16 @@
                 color: #6c757d;
                 
                 .info-icon {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 16px;
+                    height: 16px;
+                    border-radius: 50%;
+                    background: #007bff;
+                    color: white;
+                    font-size: 10px;
+                    font-weight: bold;
                     cursor: help;
                 }
             }

@@ -165,24 +165,24 @@ const TradeIndicators: React.FC<TradeIndicatorsProps> = observer(({ trades, curr
         switch (prediction) {
             case 'RISE':
             case 'HIGHER':
-                return '📈';
+                return '↗';
             case 'FALL':
             case 'LOWER':
-                return '📉';
+                return '↘';
             case 'OVER':
-                return '⬆️';
+                return '↑';
             case 'UNDER':
-                return '⬇️';
+                return '↓';
             case 'EVEN':
-                return '2️⃣';
+                return 'E';
             case 'ODD':
-                return '1️⃣';
+                return 'O';
             case 'MATCHES':
-                return '🎯';
+                return '=';
             case 'DIFFERS':
-                return '❌';
+                return '≠';
             default:
-                return '📊';
+                return '•';
         }
     };
 
@@ -235,10 +235,10 @@ const TradeIndicators: React.FC<TradeIndicatorsProps> = observer(({ trades, curr
                                 <span className="trade-type">{getTradeLabel(trade)}</span>
                                 <span className="trade-status-indicator">
                                     {trade.status === 'OPEN' && (
-                                        trade.isWinning ? '✅' : '❌'
+                                        trade.isWinning ? '✓' : '✗'
                                     )}
-                                    {trade.status === 'WON' && '🎉'}
-                                    {trade.status === 'LOST' && '💔'}
+                                    {trade.status === 'WON' && '✓'}
+                                    {trade.status === 'LOST' && '✗'}
                                 </span>
                             </div>
                             

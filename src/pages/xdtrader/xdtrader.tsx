@@ -94,6 +94,14 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
     const { is_drawer_open } = run_panel;
     const { is_chart_modal_visible } = dashboard;
     
+    // Hide the run panel in xDtrader since we're replacing it with manual trading panel
+    useEffect(() => {
+        // Force close the run panel drawer for xDtrader
+        if (run_panel && run_panel.is_drawer_open) {
+            run_panel.is_drawer_open = false;
+        }
+    }, [run_panel]);
+    
     // Component state
     const [isChartReady, setIsChartReady] = useState(false);
     const [isApiReady, setIsApiReady] = useState(false);
@@ -303,7 +311,7 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
     return (
         <>
             <div
-                className={wrapperClassName}
+                className={`${wrapperClassName} xdtrader-wrapper`}
                 dir='ltr'
             >
                 <div className="xdtrader-main-content">
@@ -315,7 +323,7 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
                                 onClick={() => setIsMobilePanelOpen(!isMobilePanelOpen)}
                                 aria-label="Toggle trading panel"
                             >
-                                {isMobilePanelOpen ? '✕' : '📊'}
+                                {isMobilePanelOpen ? '✕' : '≡'}
                             </button>
                             <div 
                                 className={`mobile-overlay ${isMobilePanelOpen ? 'active' : ''}`}

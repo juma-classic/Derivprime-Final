@@ -148,6 +148,11 @@
     height: 100vh;
     overflow: hidden;
     
+    // Hide the bot run panel in xDtrader page
+    .run-panel {
+        display: none !important;
+    }
+    
     // Force chart to respect container boundaries
     .ciq-chart-area {
         width: 100% !important;
