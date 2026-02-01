@@ -19,6 +19,7 @@ import '@deriv/deriv-charts/dist/smartcharts.css';
 // Lazy load components to avoid potential import issues
 const ManualTradingPanel = delayedLazy(() => import('@/components/xdtrader/ManualTradingPanel'), 100);
 const TradeIndicators = delayedLazy(() => import('@/components/xdtrader/TradeIndicators'), 100);
+const TradeProfitLoss = delayedLazy(() => import('@/components/xdtrader/TradeProfitLoss'), 100);
 const DigitStats = delayedLazy(() => import('@/components/digit-stats'), 500);
 
 type TSubscription = {
@@ -96,10 +97,9 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
     
     // Hide the run panel in xDtrader since we're replacing it with manual trading panel
     useEffect(() => {
-        if (run_panel.setDrawerVisibility) {
-            run_panel.setDrawerVisibility(false);
-        }
-    }, [run_panel]);
+        // Run panel is hidden via CSS in xDtrader layout
+        console.log('XDtrader: Run panel hidden for manual trading mode');
+    }, []);
     
     // Component state
     const [isChartReady, setIsChartReady] = useState(false);
@@ -309,6 +309,13 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
 
     return (
         <>
+            {/* Trade Profit/Loss Panel on the left side */}
+            {tradePositionManager && tradePositionManager.positions.length > 0 && (
+                <Suspense fallback={null}>
+                    <TradeProfitLoss currentPrice={currentPrice} />
+                </Suspense>
+            )}
+            
             <div
                 className={wrapperClassName}
                 dir='ltr'

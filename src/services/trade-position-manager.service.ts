@@ -90,6 +90,9 @@ class TradePositionManagerService {
         if (position) {
             const updatedPosition = { ...position, ...updates };
             this.activePositions.set(contractId, updatedPosition);
+            
+            // Trigger observable update
+            this.activePositions = new Map(this.activePositions);
         }
     }
 
@@ -269,15 +272,24 @@ class TradePositionManagerService {
      * Update all positions with current price (for real-time updates)
      */
     updateAllPositionsPrice(currentPrice: number): void {
+        let hasUpdates = false;
         this.activePositions.forEach((position, contractId) => {
             if (position.status === 'OPEN') {
                 const isWinning = this.calculateIsWinning(position, currentPrice);
-                this.updatePosition(contractId, {
-                    currentPrice,
-                    isWinning,
-                });
+                if (position.currentPrice !== currentPrice || position.isWinning !== isWinning) {
+                    this.updatePosition(contractId, {
+                        currentPrice,
+                        isWinning,
+                    });
+                    hasUpdates = true;
+                }
             }
         });
+        
+        // Trigger observable update if there were changes
+        if (hasUpdates) {
+            this.activePositions = new Map(this.activePositions);
+        }
     }
 
     /**
