@@ -13,14 +13,12 @@ import {
 import { ChartTitle, SmartChart } from '@deriv/deriv-charts';
 import { useDevice } from '@deriv-com/ui';
 import ToolbarWidgets from './toolbar-widgets';
-import ManualTradingPanel from '@/components/xdtrader/ManualTradingPanel';
-import TradeIndicators from '@/components/xdtrader/TradeIndicators';
-import { tradePositionManager } from '@/services/trade-position-manager.service';
 import { delayedLazy } from '@/utils/delayed-lazy';
-import { performanceMonitor } from '@/utils/performance-monitor';
 import '@deriv/deriv-charts/dist/smartcharts.css';
 
-// Lazy load DigitStats to improve initial loading
+// Lazy load components to avoid potential import issues
+const ManualTradingPanel = delayedLazy(() => import('@/components/xdtrader/ManualTradingPanel'), 100);
+const TradeIndicators = delayedLazy(() => import('@/components/xdtrader/TradeIndicators'), 100);
 const DigitStats = delayedLazy(() => import('@/components/digit-stats'), 500);
 
 type TSubscription = {
@@ -74,38 +72,8 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
     const barriers: [] = [];
     const { common, ui } = useStore();
     const { chart_store, run_panel, dashboard } = useStore();
-    const [isChartReady, setIsChartReady] = useState(false);
-    const [isApiReady, setIsApiReady] = useState(false);
-    const [apiError, setApiError] = useState<string | null>(null);
-    const [currentPrice, setCurrentPrice] = useState<number>(0);
-
-    // Subscribe to price updates for trade indicators
-    useEffect(() => {
-        if (!symbol) return;
-
-        const subscription = chart_api.api?.onMessage()?.subscribe(({ data }: { data: any }) => {
-            if (data.tick && data.tick.symbol === symbol) {
-                const price = data.tick.quote;
-                setCurrentPrice(price);
-                // Update all trade positions with current price
-                tradePositionManager.updateAllPositionsPrice(price);
-            }
-        });
-
-        return () => {
-            subscription?.unsubscribe();
-        };
-    }, [symbol]);
-
-    // Performance monitoring
-    useEffect(() => {
-        performanceMonitor.start('xdtrader_total_load');
-        return () => {
-            performanceMonitor.end('xdtrader_total_load');
-            performanceMonitor.logSummary();
-        };
-    }, []);
-
+    
+    // Destructure chart_store properties
     const {
         chart_type,
         getMarketsOrder,
@@ -119,11 +87,66 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
         setChartSubscriptionId,
         chart_subscription_id,
     } = chart_store;
+    
+    // Other store properties
     const chartSubscriptionIdRef = useRef(chart_subscription_id);
     const { isDesktop, isMobile } = useDevice();
     const { is_drawer_open } = run_panel;
     const { is_chart_modal_visible } = dashboard;
     
+    // Component state
+    const [isChartReady, setIsChartReady] = useState(false);
+    const [isApiReady, setIsApiReady] = useState(false);
+    const [apiError, setApiError] = useState<string | null>(null);
+    const [currentPrice, setCurrentPrice] = useState<number>(0);
+    const [tradePositionManager, setTradePositionManager] = useState<any>(null);
+
+    // Lazy load trade position manager to avoid import issues
+    useEffect(() => {
+        import('@/services/trade-position-manager.service').then(module => {
+            setTradePositionManager(module.tradePositionManager);
+        }).catch(error => {
+            console.warn('Failed to load trade position manager:', error);
+        });
+    }, []);
+
+    // Subscribe to price updates for trade indicators
+    useEffect(() => {
+        if (!symbol || !tradePositionManager) return;
+
+        const subscription = chart_api.api?.onMessage()?.subscribe(({ data }: { data: any }) => {
+            if (data.tick && data.tick.symbol === symbol) {
+                const price = data.tick.quote;
+                setCurrentPrice(price);
+                // Update all trade positions with current price
+                tradePositionManager.updateAllPositionsPrice(price);
+            }
+        });
+
+        return () => {
+            subscription?.unsubscribe();
+        };
+    }, [symbol, tradePositionManager]);
+
+    // Performance monitoring
+    useEffect(() => {
+        const startTime = performance.now();
+        console.log('🚀 XDtrader component mounted');
+        
+        return () => {
+            const endTime = performance.now();
+            console.log(`⚡ XDtrader total load time: ${(endTime - startTime).toFixed(2)}ms`);
+        };
+    }, []);
+
+    useEffect(() => {
+        chartSubscriptionIdRef.current = chart_subscription_id;
+    }, [chart_subscription_id]);
+
+    useEffect(() => {
+        if (!symbol) updateSymbol();
+    }, [symbol, updateSymbol]);
+
     // Memoize settings to prevent unnecessary re-renders
     const settings = useMemo(() => ({
         assetInformation: false,
@@ -144,15 +167,15 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
     useEffect(() => {
         const initializeAPI = async () => {
             try {
-                performanceMonitor.start('api_initialization');
+                const startTime = performance.now();
                 setApiError(null);
                 if (!chart_api.api) {
                     await chart_api.init();
                 }
-                performanceMonitor.end('api_initialization');
+                const endTime = performance.now();
+                console.log(`⚡ API initialization: ${(endTime - startTime).toFixed(2)}ms`);
                 setIsApiReady(true);
             } catch (error) {
-                performanceMonitor.end('api_initialization');
                 console.error('Failed to initialize chart API:', error);
                 setApiError(error instanceof Error ? error.message : 'Failed to initialize API');
                 // Continue with fallback
@@ -169,14 +192,6 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
             }
         };
     }, []);
-
-    useEffect(() => {
-        chartSubscriptionIdRef.current = chart_subscription_id;
-    }, [chart_subscription_id]);
-
-    useEffect(() => {
-        if (!symbol) updateSymbol();
-    }, [symbol, updateSymbol]);
 
     // Optimized API request function with error handling and retry logic
     const requestAPI = useCallback(async (req: ServerTimeRequest | ActiveSymbolsRequest | TradingTimesRequest) => {
@@ -322,39 +337,45 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
                             />
                             
                             {/* Trade Indicators Overlay */}
-                            <TradeIndicators 
-                                trades={tradePositionManager.positions}
-                                currentPrice={currentPrice}
-                                onTradeUpdate={(trade) => {
-                                    console.log('Trade updated:', trade);
-                                }}
-                            />
+                            <Suspense fallback={null}>
+                                <TradeIndicators 
+                                    trades={tradePositionManager?.positions || []}
+                                    currentPrice={currentPrice}
+                                    onTradeUpdate={(trade) => {
+                                        console.log('Trade updated:', trade);
+                                    }}
+                                />
+                            </Suspense>
                         </Suspense>
                     </div>
                     
                     {/* Manual Trading Panel on the right side */}
                     <div className="xdtrader-trading-panel">
-                        <ManualTradingPanel 
-                            symbol={symbol}
-                            onTradeExecuted={(trade) => {
-                                console.log('Trade executed:', trade);
-                                
-                                // Add trade position to manager for visual indicators
-                                tradePositionManager.addPosition({
-                                    contractId: trade.contract_id,
-                                    transactionId: trade.transaction_id,
-                                    contractType: trade.contract_type,
-                                    symbol: trade.symbol,
-                                    stake: trade.stake,
-                                    payout: trade.payout,
-                                    buyPrice: trade.buy_price,
-                                    entryPrice: currentPrice || 0,
-                                    duration: trade.duration || 5,
-                                    durationType: trade.duration_type || 'ticks',
-                                    barrier: trade.barrier,
-                                });
-                            }}
-                        />
+                        <Suspense fallback={<div>Loading trading panel...</div>}>
+                            <ManualTradingPanel 
+                                symbol={symbol}
+                                onTradeExecuted={(trade) => {
+                                    console.log('Trade executed:', trade);
+                                    
+                                    // Add trade position to manager for visual indicators
+                                    if (tradePositionManager) {
+                                        tradePositionManager.addPosition({
+                                            contractId: trade.contract_id,
+                                            transactionId: trade.transaction_id,
+                                            contractType: trade.contract_type,
+                                            symbol: trade.symbol,
+                                            stake: trade.stake,
+                                            payout: trade.payout,
+                                            buyPrice: trade.buy_price,
+                                            entryPrice: currentPrice || 0,
+                                            duration: trade.duration || 5,
+                                            durationType: trade.duration_type || 'ticks',
+                                            barrier: trade.barrier,
+                                        });
+                                    }
+                                }}
+                            />
+                        </Suspense>
                     </div>
                 </div>
             </div>
