@@ -13,6 +13,7 @@ import {
 import { ChartTitle, SmartChart } from '@deriv/deriv-charts';
 import { useDevice } from '@deriv-com/ui';
 import ToolbarWidgets from './toolbar-widgets';
+import ManualTradingPanel from '@/components/xdtrader/ManualTradingPanel';
 import { delayedLazy } from '@/utils/delayed-lazy';
 import { performanceMonitor } from '@/utils/performance-monitor';
 import '@deriv/deriv-charts/dist/smartcharts.css';
@@ -269,35 +270,56 @@ const XDtrader = observer(({ show_digits_stats }: { show_digits_stats: boolean }
                 dir='ltr'
                 style={{ position: 'relative', paddingBottom: '80px' }}
             >
-                <Suspense fallback={<ChartLoader />}>
-                    <SmartChart
-                        id='dbot'
-                        barriers={barriers}
-                        showLastDigitStats={false} // Disable built-in digit stats for performance
-                        chartControlsWidgets={null}
-                        enabledChartFooter={false}
-                        chartStatusListener={(v: boolean) => {
-                            setChartStatus(!v);
-                            setIsChartReady(v);
-                        }}
-                        toolbarWidget={toolbarWidget}
-                        chartType={chart_type}
-                        isMobile={isMobile}
-                        enabledNavigationWidget={isDesktop}
-                        granularity={granularity}
-                        requestAPI={requestAPI}
-                        requestForget={() => {}}
-                        requestForgetStream={() => {}}
-                        requestSubscribe={requestSubscribe}
-                        settings={settings}
-                        symbol={symbol}
-                        topWidgets={topWidgets}
-                        isConnectionOpened={is_connection_opened}
-                        getMarketsOrder={getMarketsOrder}
-                        isLive
-                        leftMargin={80}
-                    />
-                </Suspense>
+                <div className="xdtrader-main-content" style={{ border: '3px solid green', minHeight: '500px' }}>
+                    <div className="xdtrader-chart-container" style={{ border: '2px solid blue' }}>
+                        <div style={{ padding: '10px', background: 'lightblue' }}>
+                            DEBUG: Chart Container
+                        </div>
+                        <Suspense fallback={<ChartLoader />}>
+                            <SmartChart
+                                id='dbot'
+                                barriers={barriers}
+                                showLastDigitStats={false} // Disable built-in digit stats for performance
+                                chartControlsWidgets={null}
+                                enabledChartFooter={false}
+                                chartStatusListener={(v: boolean) => {
+                                    setChartStatus(!v);
+                                    setIsChartReady(v);
+                                }}
+                                toolbarWidget={toolbarWidget}
+                                chartType={chart_type}
+                                isMobile={isMobile}
+                                enabledNavigationWidget={isDesktop}
+                                granularity={granularity}
+                                requestAPI={requestAPI}
+                                requestForget={() => {}}
+                                requestForgetStream={() => {}}
+                                requestSubscribe={requestSubscribe}
+                                settings={settings}
+                                symbol={symbol}
+                                topWidgets={topWidgets}
+                                isConnectionOpened={is_connection_opened}
+                                getMarketsOrder={getMarketsOrder}
+                                isLive
+                                leftMargin={80}
+                            />
+                        </Suspense>
+                    </div>
+                    
+                    {/* Manual Trading Panel on the right side */}
+                    <div className="xdtrader-trading-panel" style={{ border: '2px solid red', minHeight: '400px' }}>
+                        <div style={{ padding: '10px', background: 'yellow', marginBottom: '10px' }}>
+                            DEBUG: Trading Panel Container - Symbol: {symbol}
+                        </div>
+                        <ManualTradingPanel 
+                            symbol={symbol}
+                            onTradeExecuted={(trade) => {
+                                console.log('Trade executed:', trade);
+                                // You can add additional trade handling logic here
+                            }}
+                        />
+                    </div>
+                </div>
             </div>
             {/* Only load DigitStats after chart is ready and if enabled */}
             {show_digits_stats && isChartReady && (
