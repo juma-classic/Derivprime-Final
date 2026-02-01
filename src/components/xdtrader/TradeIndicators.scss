@@ -124,6 +124,15 @@
             
             .trade-status-indicator {
                 font-size: 14px;
+                font-weight: bold;
+                
+                &:contains('✓') {
+                    color: #00a652;
+                }
+                
+                &:contains('✗') {
+                    color: #ec3f3f;
+                }
             }
         }
         
