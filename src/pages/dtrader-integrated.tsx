@@ -1,92 +1,57 @@
-import React, { lazy, Suspense, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useStore } from '@/hooks/useStore';
-import { api_base } from '@/external/bot-skeleton';
-import { TradingPanel } from '@/components/trading/TradingPanel';
-import ChunkLoader from '@/components/loader/chunk-loader';
-import { localize } from '@deriv-com/translations';
 import './dtrader-integrated.scss';
-
-const Chart = lazy(() => import('./chart/chart'));
 
 /**
  * Integrated DTrader Component
  * 
- * Chart and interface are always visible.
- * Trading requires login.
+ * Loads DTrader with custom app_id configuration
+ * Uses external DTrader but with localStorage override for app_id
  */
 const DTraderIntegrated: React.FC = () => {
     const { client } = useStore();
-    const [isLoading, setIsLoading] = useState(true);
-    const [symbol] = useState('R_100');
+    const [iframeUrl, setIframeUrl] = useState('https://deriv-dtrader.vercel.app');
 
     useEffect(() => {
-        // Initialize - no login required to view
-        const initializeDTrader = async () => {
-            try {
-                console.log('DTrader: Initializing...');
-                console.log('Active Account:', client?.loginid || 'Not logged in');
-                console.log('API Connected:', api_base?.api ? 'Yes' : 'No');
+        // Set custom app_id in localStorage before DTrader loads
+        // This will be picked up by the getAppId function
+        localStorage.setItem('config.app_id', '68794');
+        
+        console.log('🎯 DTrader: Set custom app_id 68794 in localStorage');
+        
+        // Pass authentication token to DTrader via URL parameters
+        const activeLoginid = client?.loginid;
+        
+        if (activeLoginid) {
+            // Get token from localStorage (where Deriv stores it)
+            const token = localStorage.getItem(`client.accounts.${activeLoginid}.token`);
+            
+            if (token) {
+                const url = new URL('https://deriv-dtrader.vercel.app');
+                url.searchParams.set('token', token);
+                url.searchParams.set('acct1', activeLoginid);
+                url.searchParams.set('app_id', '68794'); // Pass app_id via URL
+                setIframeUrl(url.toString());
                 
-                setIsLoading(false);
-            } catch (error) {
-                console.error('Failed to initialize DTrader:', error);
-                setIsLoading(false);
+                console.log('🔐 DTrader: Passing authentication token and app_id to DTrader');
             }
-        };
-
-        // Always initialize, regardless of login status
-        initializeDTrader();
+        } else {
+            // Even without login, pass app_id
+            const url = new URL('https://deriv-dtrader.vercel.app');
+            url.searchParams.set('app_id', '68794');
+            setIframeUrl(url.toString());
+        }
     }, [client?.loginid]);
-
-    if (isLoading) {
-        return (
-            <div className='dtrader-integrated-loading'>
-                <div className='loading-spinner'></div>
-                <p>Loading DTrader...</p>
-            </div>
-        );
-    }
 
     return (
         <div className='dtrader-integrated-container'>
-            <div className='dtrader-header'>
-                <div className='header-left'>
-                    <h2>DTrader</h2>
-                    <span className='commission-badge'>Earning Commissions</span>
-                </div>
-                <div className='account-info'>
-                    {client?.loginid ? (
-                        <>
-                            <span className='account-id'>
-                                <span className='label'>Account:</span>
-                                <span className='value'>{client.loginid}</span>
-                            </span>
-                            <span className='balance'>
-                                <span className='label'>Balance:</span>
-                                <span className='value'>{client?.currency} {Number(client?.balance || 0).toFixed(2)}</span>
-                            </span>
-                        </>
-                    ) : (
-                        <span className='login-prompt'>
-                            <span className='label'>Login required to trade</span>
-                        </span>
-                    )}
-                </div>
-            </div>
-
-            <div className='dtrader-content'>
-                {/* Trading Chart Section - Always visible */}
-                <div className='trading-chart-section'>
-                    <Suspense fallback={<ChunkLoader message={localize('Loading chart...')} />}>
-                        <Chart show_digits_stats={true} />
-                    </Suspense>
-                </div>
-
-                {/* Trading Panel Section - Always visible */}
-                <div className='trading-panel-section'>
-                    <TradingPanel symbol={symbol} />
-                </div>
-            </div>
+            <iframe
+                src={iframeUrl}
+                title='DTrader'
+                className='dtrader-iframe'
+                allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+                allowFullScreen
+            />
         </div>
     );
 };

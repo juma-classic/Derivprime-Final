@@ -8,7 +8,6 @@ import './AnalysisTool.scss';
 const MetatronAnalysisTool = lazy(() =>
     import('@/components/zeus-analysis/ZeusAnalysisTool').then(m => ({ default: m.ZeusAnalysisTool }))
 );
-const AdvancedAlgo = lazy(() => import('@/pages/advanced-algo'));
 const ElvisZonePage = lazy(() => import('@/pages/elvis-zone'));
 const TickSharkPage = lazy(() => import('@/pages/tickshark').then(m => ({ default: m.default })));
 
@@ -33,7 +32,6 @@ export const AnalysisTool: React.FC = () => {
         | 'statistics'
         | 'export'
         | 'matches'
-        | 'advanced-algo'
         | 'elvis-zone'
         | 'tickshark'
     >('dashboard');
@@ -311,12 +309,6 @@ export const AnalysisTool: React.FC = () => {
                             onClick={() => setActiveTab('matches')}
                         >
                             ⚡ Matches Analysis
-                        </button>
-                        <button
-                            className={activeTab === 'advanced-algo' ? 'active' : ''}
-                            onClick={() => setActiveTab('advanced-algo')}
-                        >
-                            🤖 Advanced Algo
                         </button>
                         <button
                             className={activeTab === 'elvis-zone' ? 'active' : ''}
@@ -733,14 +725,6 @@ export const AnalysisTool: React.FC = () => {
                                             window.dispatchEvent(event);
                                         }}
                                     />
-                                </Suspense>
-                            </div>
-                        )}
-
-                        {activeTab === 'advanced-algo' && (
-                            <div className='advanced-algo-tab'>
-                                <Suspense fallback={<div className='loading-spinner'>Loading Advanced Algo...</div>}>
-                                    <AdvancedAlgo />
                                 </Suspense>
                             </div>
                         )}
