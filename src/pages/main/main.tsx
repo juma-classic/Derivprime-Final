@@ -30,6 +30,7 @@ import RunStrategy from '../dashboard/run-strategy';
 const Chart = lazy(() => import('../chart'));
 const Tutorial = lazy(() => import('../tutorials'));
 const DTraderIframe = lazy(() => import('../dtrader-iframe'));
+const DTraderIntegrated = lazy(() => import('../dtrader-integrated'));
 const SignalsScannerIframe = lazy(() => import('../signals-scanner-iframe'));
 
 const DashboardIcon = () => (
@@ -2712,18 +2713,32 @@ const AppWrapper = observer(() => {
                             <ProtectedSignalsCenter />
                         </div>
 
-                        {/* DTRADER TAB */}
+                        {/* DTRADER TAB - INTEGRATED VERSION */}
                         <div
                             label={
                                 <>
                                     <DTraderIcon />
                                     <Localize i18n_default_text='DTrader' />
+                                    <span
+                                        className='tab-badge'
+                                        style={{
+                                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                            color: '#fff',
+                                            padding: '2px 8px',
+                                            borderRadius: '12px',
+                                            fontSize: '10px',
+                                            fontWeight: '700',
+                                            marginLeft: '8px',
+                                        }}
+                                    >
+                                        💰
+                                    </span>
                                 </>
                             }
                             id='id-dtrader'
                         >
                             <Suspense fallback={<ChunkLoader message={localize('Please wait, loading DTrader...')} />}>
-                                <DTraderIframe />
+                                <DTraderIntegrated />
                             </Suspense>
                         </div>
 
