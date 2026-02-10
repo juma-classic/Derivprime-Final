@@ -267,15 +267,6 @@ export const TradingPanel: React.FC<{ symbol: string }> = ({ symbol }) => {
                         </>
                     )}
                 </button>
-
-                {/* Info Notice */}
-                <div className='info-notice'>
-                    <p>
-                        💰 Trades execute through YOUR app_id
-                        <br />
-                        ✅ You receive commissions on all trades
-                    </p>
-                </div>
             </div>
         </div>
     );
