@@ -5,7 +5,25 @@
 
 import { makeObservable, observable, action, computed } from 'mobx';
 import { api_base } from '@/external/bot-skeleton';
-import type { TradePosition } from '@/components/xdtrader/TradeIndicators';
+
+// Local type definition for TradePosition (previously from xdtrader/TradeIndicators)
+export interface TradePosition {
+    id: string;
+    contractId: string;
+    contractType: string;
+    symbol: string;
+    entryPrice: number;
+    entryTime: number;
+    stake: number;
+    payout: number;
+    prediction: string;
+    barrier?: number;
+    duration: number;
+    durationType: 'ticks' | 'minutes';
+    status: 'OPEN' | 'WON' | 'LOST';
+    currentPrice: number;
+    isWinning: boolean;
+}
 
 export interface ContractUpdate {
     contract_id: string;

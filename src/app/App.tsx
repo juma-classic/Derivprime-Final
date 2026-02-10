@@ -41,7 +41,6 @@ const FlashAnimationDemo = lazy(() =>
     import('../components/signals/FlashAnimationDemo').then(m => ({ default: m.FlashAnimationDemo }))
 );
 const EnhancedSignalsDemo = lazy(() => import('../pages/enhanced-signals-demo').then(m => ({ default: m.default })));
-const AdvancedAlgo = lazy(() => import('../pages/advanced-algo').then(m => ({ default: m.default })));
 const ElvisZone = lazy(() => import('../pages/elvis-zone').then(m => ({ default: m.default })));
 
 // Accumulator Trading Page
@@ -100,9 +99,6 @@ const router = createBrowserRouter(
             <Route index element={<AppRoot />} />
             <Route path='endpoint' element={<Endpoint />} />
             <Route path='callback' element={<CallbackPage />} />
-
-            {/* Advanced Algo - Main Production Page */}
-            <Route path='advanced-algo' element={<AdvancedAlgo />} />
 
             {/* ElvisZone - Matches/Differs Analyzer */}
             <Route path='elvis-zone' element={<ElvisZone />} />

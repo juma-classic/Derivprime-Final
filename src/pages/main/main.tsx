@@ -29,9 +29,8 @@ import RunStrategy from '../dashboard/run-strategy';
 
 const Chart = lazy(() => import('../chart'));
 const Tutorial = lazy(() => import('../tutorials'));
-const AdvancedAlgo = lazy(() => import('../advanced-algo'));
-const DAnalysis = lazy(() => import('../danalysis'));
-const XDtrader = lazy(() => import('../xdtrader'));
+const DTraderIframe = lazy(() => import('../dtrader-iframe'));
+const SignalsScannerIframe = lazy(() => import('../signals-scanner-iframe'));
 
 const DashboardIcon = () => (
     <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -120,36 +119,63 @@ const SignalsIcon = () => (
     </svg>
 );
 
-const AdvancedAlgoIcon = () => (
+const DTraderIcon = () => (
     <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-        {/* Brain/AI symbol */}
-        <path
-            d='M12 2C8.5 2 6 4.5 6 8c0 1.5.5 3 1.5 4.5L12 22l4.5-9.5C17.5 11 18 9.5 18 8c0-3.5-2.5-6-6-6z'
-            stroke='currentColor'
-            strokeWidth='2'
-            fill='none'
-        />
-        {/* Algorithm pattern */}
-        <circle cx='12' cy='8' r='2' fill='#3b82f6' />
-        <path d='M10 8h4M12 6v4' stroke='#fff' strokeWidth='1.5' strokeLinecap='round' />
-        {/* Data points */}
-        <circle cx='8' cy='6' r='1' fill='#10b981' />
-        <circle cx='16' cy='6' r='1' fill='#10b981' />
-        <circle cx='8' cy='10' r='1' fill='#f59e0b' />
-        <circle cx='16' cy='10' r='1' fill='#f59e0b' />
-        {/* Connection lines */}
-        <path
-            d='M9 6.5L11 7.5M15 7.5L17 6.5M9 9.5L11 8.5M15 8.5L17 9.5'
-            stroke='currentColor'
-            strokeWidth='1'
-            opacity='0.6'
-        />
-        {/* AI badge */}
-        <text x='12' y='16' textAnchor='middle' fontSize='6' fill='#3b82f6' fontWeight='bold'>
-            AI
-        </text>
+        {/* Trading chart background */}
+        <rect x='2' y='4' width='20' height='16' rx='2' stroke='currentColor' strokeWidth='1.5' fill='none' />
+        <rect x='2' y='4' width='20' height='16' rx='2' fill='#10b981' opacity='0.05' />
+        
+        {/* Chart grid */}
+        <path d='M2 8h20M2 12h20M2 16h20' stroke='currentColor' strokeWidth='0.5' opacity='0.3' />
+        
+        {/* Candlesticks */}
+        <rect x='5' y='10' width='2' height='6' fill='#10b981' />
+        <rect x='9' y='8' width='2' height='8' fill='#ef4444' />
+        <rect x='13' y='11' width='2' height='5' fill='#10b981' />
+        <rect x='17' y='7' width='2' height='9' fill='#ef4444' />
+        
+        {/* Trend line */}
+        <path d='M4 14L8 10L12 12L16 8L20 9' stroke='#10b981' strokeWidth='1.5' strokeLinecap='round' opacity='0.7' />
+        
+        {/* DTrader badge */}
+        <circle cx='19' cy='5' r='3' fill='#10b981' />
+        <text x='19' y='6.5' textAnchor='middle' fontSize='6' fill='#fff' fontWeight='bold'>D</text>
     </svg>
 );
+
+const SignalsScannerIcon = () => (
+    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+        {/* Radar/Scanner circle */}
+        <circle cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='1.5' fill='none' opacity='0.3' />
+        <circle cx='12' cy='12' r='7' stroke='currentColor' strokeWidth='1' fill='none' opacity='0.5' />
+        <circle cx='12' cy='12' r='4' stroke='currentColor' strokeWidth='1' fill='none' opacity='0.7' />
+        
+        {/* Scanning beam */}
+        <path 
+            d='M12 12L20 6' 
+            stroke='#3b82f6' 
+            strokeWidth='2' 
+            strokeLinecap='round'
+            opacity='0.8'
+        />
+        
+        {/* Signal dots */}
+        <circle cx='16' cy='8' r='1.5' fill='#3b82f6' />
+        <circle cx='8' cy='16' r='1.5' fill='#10b981' />
+        <circle cx='16' cy='16' r='1.5' fill='#f59e0b' />
+        <circle cx='8' cy='8' r='1.5' fill='#ef4444' />
+        
+        {/* Center core */}
+        <circle cx='12' cy='12' r='2' fill='#3b82f6' />
+        <circle cx='12' cy='12' r='1' fill='#fff' />
+        
+        {/* Scanner badge */}
+        <rect x='15' y='2' width='7' height='3' rx='1' fill='#3b82f6' />
+        <text x='18.5' y='4' textAnchor='middle' fontSize='5' fill='#fff' fontWeight='bold'>SC</text>
+    </svg>
+);
+
+
 
 const FreeBotsIcon = () => (
     <svg
@@ -201,60 +227,7 @@ const RichMotherIcon = () => (
 
 
 
-const DAnalysisIcon = () => (
-    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-        {/* Background circle */}
-        <circle cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='1.5' fill='none' opacity='0.3' />
-        <circle cx='12' cy='12' r='10' fill='#6366f1' opacity='0.05' />
-        
-        {/* Digit circles representing 0-9 */}
-        <circle cx='12' cy='6' r='2' fill='#27ae60' />
-        <circle cx='18' cy='9' r='2' fill='#3498db' />
-        <circle cx='20' cy='15' r='2' fill='#95a5a6' />
-        <circle cx='15' cy='20' r='2' fill='#e74c3c' />
-        <circle cx='9' cy='20' r='2' fill='#f39c12' />
-        <circle cx='4' cy='15' r='2' fill='#95a5a6' />
-        <circle cx='6' cy='9' r='2' fill='#95a5a6' />
-        
-        {/* Center analysis symbol */}
-        <circle cx='12' cy='12' r='3' fill='#6366f1' />
-        <text x='12' y='14' textAnchor='middle' fontSize='8' fill='#fff' fontWeight='bold'>DA</text>
-        
-        {/* Statistical lines */}
-        <path d='M8 8L16 16M16 8L8 16' stroke='#6366f1' strokeWidth='1' opacity='0.4' />
-    </svg>
-);
 
-const XDtraderIcon = () => (
-    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-        {/* Advanced trading chart background */}
-        <rect x='2' y='4' width='20' height='16' rx='2' stroke='currentColor' strokeWidth='1.5' fill='none' />
-        <rect x='2' y='4' width='20' height='16' rx='2' fill='#8b5cf6' opacity='0.05' />
-        
-        {/* Chart grid */}
-        <path d='M2 8h20M2 12h20M2 16h20' stroke='currentColor' strokeWidth='0.5' opacity='0.3' />
-        <path d='M6 4v16M10 4v16M14 4v16M18 4v16' stroke='currentColor' strokeWidth='0.5' opacity='0.3' />
-        
-        {/* Advanced candlesticks with different patterns */}
-        <rect x='5' y='9' width='2' height='8' fill='#10b981' />
-        <rect x='9' y='7' width='2' height='10' fill='#ef4444' />
-        <rect x='13' y='11' width='2' height='6' fill='#10b981' />
-        <rect x='17' y='5' width='2' height='12' fill='#ef4444' />
-        
-        {/* Technical indicators */}
-        <circle cx='6' cy='13' r='1' fill='#8b5cf6' />
-        <circle cx='10' cy='12' r='1' fill='#8b5cf6' />
-        <circle cx='14' cy='14' r='1' fill='#8b5cf6' />
-        <circle cx='18' cy='11' r='1' fill='#8b5cf6' />
-        
-        {/* Trend lines */}
-        <path d='M4 16L8 12L12 14L16 8L20 10' stroke='#8b5cf6' strokeWidth='1.5' strokeLinecap='round' opacity='0.7' />
-        
-        {/* xDtrader badge */}
-        <rect x='15' y='2' width='7' height='3' rx='1' fill='#8b5cf6' />
-        <text x='18.5' y='4' textAnchor='middle' fontSize='5' fill='#fff' fontWeight='bold'>xDT</text>
-    </svg>
-);
 
 const PatelSignalsIcon = () => (
     <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -2087,39 +2060,7 @@ const AppWrapper = observer(() => {
                         </div>
 
 
-                        {/* DANALYSIS TAB */}
-                        <div
-                            label={
-                                <>
-                                    <DAnalysisIcon />
-                                    <Localize i18n_default_text='DAnalysis' />
-                                </>
-                            }
-                            id='id-danalysis'
-                        >
-                            <div className='danalysis-container'>
-                                <Suspense fallback={<ChunkLoader message={localize('Please wait, loading DAnalysis...')} />}>
-                                    <DAnalysis />
-                                </Suspense>
-                            </div>
-                        </div>
 
-                        {/* XDTRADER TAB */}
-                        <div
-                            label={
-                                <>
-                                    <XDtraderIcon />
-                                    <Localize i18n_default_text='xDtrader' />
-                                </>
-                            }
-                            id='id-xdtrader'
-                        >
-                            <div className='xdtrader-container'>
-                                <Suspense fallback={<ChunkLoader message={localize('Please wait, loading xDtrader...')} />}>
-                                    <XDtrader show_digits_stats={false} />
-                                </Suspense>
-                            </div>
-                        </div>
                         {/* PATEL PRIME TAB */}
                         <div
                             label={
@@ -2770,19 +2711,34 @@ const AppWrapper = observer(() => {
                         >
                             <ProtectedSignalsCenter />
                         </div>
-                        {/* ADVANCED ALGO TAB */}
+
+                        {/* DTRADER TAB */}
                         <div
                             label={
                                 <>
-                                    <AdvancedAlgoIcon />
-                                    <Localize i18n_default_text='Advanced Algo' />
-                                    <span className='tab-badge ai-badge'>AI</span>
+                                    <DTraderIcon />
+                                    <Localize i18n_default_text='DTrader' />
                                 </>
                             }
-                            id='id-advanced-algo'
+                            id='id-dtrader'
                         >
-                            <Suspense fallback={<div>Loading Advanced Algo...</div>}>
-                                <AdvancedAlgo />
+                            <Suspense fallback={<ChunkLoader message={localize('Please wait, loading DTrader...')} />}>
+                                <DTraderIframe />
+                            </Suspense>
+                        </div>
+
+                        {/* SIGNALS SCANNER TAB */}
+                        <div
+                            label={
+                                <>
+                                    <SignalsScannerIcon />
+                                    <Localize i18n_default_text='Signals Scanner' />
+                                </>
+                            }
+                            id='id-signals-scanner'
+                        >
+                            <Suspense fallback={<ChunkLoader message={localize('Please wait, loading Signals Scanner...')} />}>
+                                <SignalsScannerIframe />
                             </Suspense>
                         </div>
 

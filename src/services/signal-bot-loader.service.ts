@@ -5,9 +5,17 @@
  */
 
 import { DBOT_TABS } from '@/constants/bot-contents';
-import type { RealSignal } from './advanced-algo-signal.service';
 import { adaptiveRecoveryStrategy } from './adaptive-recovery-strategy.service';
 import { stakeManager } from './stake-manager.service';
+
+// Local type definition for RealSignal (previously from advanced-algo-signal.service)
+export interface RealSignal {
+    prediction: string;
+    market: string;
+    recommendedStake: number;
+    targetDigit: number;
+    confidence: number;
+}
 
 export interface BotConfiguration {
     botFile: string;
