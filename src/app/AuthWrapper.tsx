@@ -33,6 +33,9 @@ const setLocalStorageToken = async (loginInfo: URLUtils.LoginInfo[], paramsToDel
                     if (filteredTokens.length) {
                         localStorage.setItem('authToken', filteredTokens[0].token);
                         localStorage.setItem('active_loginid', filteredTokens[0].loginid);
+
+                        // Dispatch custom event to notify other components
+                        window.dispatchEvent(new Event('deriv-login'));
                         return;
                     }
                 }
@@ -40,6 +43,9 @@ const setLocalStorageToken = async (loginInfo: URLUtils.LoginInfo[], paramsToDel
 
             localStorage.setItem('authToken', loginInfo[0].token);
             localStorage.setItem('active_loginid', loginInfo[0].loginid);
+
+            // Dispatch custom event to notify other components
+            window.dispatchEvent(new Event('deriv-login'));
         } catch (error) {
             console.error('Error setting up login info:', error);
         }

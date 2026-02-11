@@ -83,6 +83,9 @@ export const ApiTokenLoginModal: React.FC<ApiTokenLoginModalProps> = ({ isOpen, 
                     };
                     localStorage.setItem('clientAccounts', JSON.stringify(clientAccounts));
 
+                    // Dispatch custom event to notify other components
+                    window.dispatchEvent(new Event('deriv-login'));
+
                     console.log('✅ Stored, redirecting...');
                     ws.close();
 

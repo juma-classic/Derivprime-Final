@@ -38,55 +38,81 @@ const NewCopyTrading: React.FC = () => {
 
     // Load all available accounts from localStorage
     useEffect(() => {
-        const accountsList = localStorage.getItem('accountsList');
-        const clientAccounts = localStorage.getItem('clientAccounts');
-        const activeLoginid = localStorage.getItem('active_loginid');
-        const authToken = localStorage.getItem('authToken');
+        const loadAccounts = () => {
+            const accountsList = localStorage.getItem('accountsList');
+            const clientAccounts = localStorage.getItem('clientAccounts');
+            const activeLoginid = localStorage.getItem('active_loginid');
+            const authToken = localStorage.getItem('authToken');
 
-        // Try to load from accountsList and clientAccounts first
-        if (accountsList && clientAccounts) {
-            try {
-                const accounts = JSON.parse(accountsList);
-                const clientAccountsData = JSON.parse(clientAccounts);
+            // Try to load from accountsList and clientAccounts first
+            if (accountsList && clientAccounts) {
+                try {
+                    const accounts = JSON.parse(accountsList);
+                    const clientAccountsData = JSON.parse(clientAccounts);
 
-                const loadedAccounts: AvailableAccount[] = Object.entries(accounts).map(([loginid, token]) => {
-                    const accountInfo = clientAccountsData[loginid];
-                    return {
-                        loginid,
-                        token: String(token),
-                        currency: accountInfo?.currency || 'USD',
-                        isDemo: loginid.startsWith('VR'),
-                    };
-                });
+                    const loadedAccounts: AvailableAccount[] = Object.entries(accounts).map(([loginid, token]) => {
+                        const accountInfo = clientAccountsData[loginid];
+                        return {
+                            loginid,
+                            token: String(token),
+                            currency: accountInfo?.currency || 'USD',
+                            isDemo: loginid.startsWith('VR'),
+                        };
+                    });
 
-                setAvailableAccounts(loadedAccounts);
+                    setAvailableAccounts(loadedAccounts);
 
-                // Set active account as default
-                if (activeLoginid && accounts[activeLoginid]) {
-                    setSelectedAccountLoginid(activeLoginid);
-                    loadAccountBalance(activeLoginid, accounts[activeLoginid]);
+                    // Set active account as default
+                    if (activeLoginid && accounts[activeLoginid]) {
+                        setSelectedAccountLoginid(activeLoginid);
+                        loadAccountBalance(activeLoginid, accounts[activeLoginid]);
+                    }
+                } catch (error) {
+                    console.error('Failed to load accounts:', error);
                 }
-            } catch (error) {
-                console.error('Failed to load accounts:', error);
             }
-        }
-        // Fallback: try to load from authToken and active_loginid
-        else if (authToken && activeLoginid) {
-            try {
-                const singleAccount: AvailableAccount = {
-                    loginid: activeLoginid,
-                    token: authToken,
-                    currency: 'USD',
-                    isDemo: activeLoginid.startsWith('VR'),
-                };
+            // Fallback: try to load from authToken and active_loginid
+            else if (authToken && activeLoginid) {
+                try {
+                    const singleAccount: AvailableAccount = {
+                        loginid: activeLoginid,
+                        token: authToken,
+                        currency: 'USD',
+                        isDemo: activeLoginid.startsWith('VR'),
+                    };
 
-                setAvailableAccounts([singleAccount]);
-                setSelectedAccountLoginid(activeLoginid);
-                loadAccountBalance(activeLoginid, authToken);
-            } catch (error) {
-                console.error('Failed to load account from authToken:', error);
+                    setAvailableAccounts([singleAccount]);
+                    setSelectedAccountLoginid(activeLoginid);
+                    loadAccountBalance(activeLoginid, authToken);
+                } catch (error) {
+                    console.error('Failed to load account from authToken:', error);
+                }
             }
-        }
+        };
+
+        // Load accounts on mount
+        loadAccounts();
+
+        // Listen for storage changes (when user logs in)
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === 'authToken' || e.key === 'accountsList') {
+                loadAccounts();
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        // Also listen for custom event when login happens in same tab
+        const handleLoginEvent = () => {
+            loadAccounts();
+        };
+
+        window.addEventListener('deriv-login', handleLoginEvent);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('deriv-login', handleLoginEvent);
+        };
     }, []);
 
     const loadAccountBalance = (_loginid: string, token: string) => {
