@@ -5,6 +5,7 @@ import { FakeRealModeIndicator } from '@/components/fake-real-account-toggle/Fak
 import { standalone_routes } from '@/components/shared';
 import Button from '@/components/shared_ui/button';
 import Modal from '@/components/shared_ui/modal'; // Import the modal component
+import { ApiTokenLoginNavButton } from '@/components/navigation/ApiTokenLoginNavButton';
 import useActiveAccount from '@/hooks/api/account/useActiveAccount';
 import { useApiBase } from '@/hooks/useApiBase';
 import { useStore } from '@/hooks/useStore';

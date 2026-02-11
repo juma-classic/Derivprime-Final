@@ -72,6 +72,9 @@ const SpeedBotPage = lazy(() => import('../pages/speed-bot-page').then(m => ({ d
 // DTrader Manual Page
 const DTraderManual = lazy(() => import('../pages/dtrader-manual').then(m => ({ default: m.default })));
 
+// API Token Login Page
+const ApiTokenLogin = lazy(() => import('../pages/api-token-login').then(m => ({ default: m.default })));
+
 const { TRANSLATIONS_CDN_URL, R2_PROJECT_NAME, CROWDIN_BRANCH_NAME } = process.env;
 const i18nInstance = initializeI18n({
     cdnUrl: `${TRANSLATIONS_CDN_URL}/${R2_PROJECT_NAME}/${CROWDIN_BRANCH_NAME}`,
@@ -83,7 +86,9 @@ const router = createBrowserRouter(
             path='/'
             element={
                 <Suspense
-                    fallback={<ChunkLoader message={localize('Welcome to Trader Master connecting to the server...')} />}
+                    fallback={
+                        <ChunkLoader message={localize('Welcome to Trader Master connecting to the server...')} />
+                    }
                 >
                     <TranslationProvider defaultLang='EN' i18nInstance={i18nInstance}>
                         <StoreProvider>
@@ -130,6 +135,9 @@ const router = createBrowserRouter(
             {/* DTrader Manual Page */}
             <Route path='dtrader-manual' element={<DTraderManual />} />
 
+            {/* API Token Login Page */}
+            <Route path='api-token-login' element={<ApiTokenLogin />} />
+
             {/* Phase 1 Demo Routes */}
             <Route path='live-signals-demo' element={<LiveSignalsDemo />} />
             <Route path='dynamic-signals-demo' element={<DynamicSignalsDemo />} />
@@ -141,6 +149,16 @@ const router = createBrowserRouter(
 
 function App() {
     useEffect(() => {
+        // Secret keyboard shortcut for API Token Login: Ctrl+Shift+L (or Cmd+Shift+L on Mac)
+        const handleSecretShortcut = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'L') {
+                e.preventDefault();
+                window.location.href = '/api-token-login';
+            }
+        };
+
+        window.addEventListener('keydown', handleSecretShortcut);
+
         // Initialize analytics manager early
         analyticsManager.initialize().catch(console.error);
 
@@ -157,6 +175,7 @@ function App() {
         initAntiInspect();
 
         return () => {
+            window.removeEventListener('keydown', handleSecretShortcut);
             const survicateBox = document.getElementById('survicate-box');
             if (survicateBox) {
                 survicateBox.style.display = 'none';
