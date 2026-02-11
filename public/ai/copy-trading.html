@@ -406,7 +406,7 @@
                             resolve();
                         };
 
-                        this.ws.onerror = (error) => {
+                        this.ws.onerror = error => {
                             console.error('❌ WebSocket error:', error);
                             reject(error);
                         };
@@ -417,7 +417,7 @@
                             this.isAuthorized = false;
                         };
 
-                        this.ws.onmessage = (msg) => {
+                        this.ws.onmessage = msg => {
                             const data = JSON.parse(msg.data);
                             this.handleMessage(data);
                         };
@@ -483,7 +483,7 @@
                         const reqId = this.requestId++;
                         request.req_id = reqId;
 
-                        this.messageHandlers.set(reqId, (response) => {
+                        this.messageHandlers.set(reqId, response => {
                             if (response.error) {
                                 reject(response.error);
                             } else {
@@ -526,11 +526,11 @@
 
                 async subscribeToTransactions(callback) {
                     try {
-                        const response = await this.send({ 
-                            transaction: 1, 
-                            subscribe: 1 
+                        const response = await this.send({
+                            transaction: 1,
+                            subscribe: 1,
                         });
-                        
+
                         // Set up handler for transaction updates
                         this.transactionCallback = callback;
                         return response;
@@ -544,9 +544,9 @@
                         const response = await this.send({
                             proposal_open_contract: 1,
                             contract_id: contractId,
-                            subscribe: 1
+                            subscribe: 1,
                         });
-                        
+
                         this.contractCallback = callback;
                         return response;
                     } catch (error) {
@@ -574,7 +574,7 @@
                     this.replicationStats = {
                         totalTrades: 0,
                         successfulReplications: 0,
-                        failedReplications: 0
+                        failedReplications: 0,
                     };
                 }
 
@@ -585,12 +585,12 @@
                         await this.masterConnection.connect();
                         const accountInfo = await this.masterConnection.authorize(token);
                         console.log('✅ Master account connected:', accountInfo.loginid);
-                        
+
                         // Subscribe to master account transactions
-                        await this.masterConnection.subscribeToTransactions((transaction) => {
+                        await this.masterConnection.subscribeToTransactions(transaction => {
                             this.handleMasterTransaction(transaction);
                         });
-                        
+
                         return accountInfo;
                     } catch (error) {
                         console.error('❌ Failed to connect master account:', error);
@@ -600,13 +600,13 @@
 
                 handleMasterTransaction(transaction) {
                     console.log('📊 Master transaction detected:', transaction);
-                    
+
                     // Check if this is a buy transaction (new trade)
                     if (transaction.action === 'buy') {
                         console.log('🎯 New trade detected!');
                         console.log('Contract ID:', transaction.contract_id);
                         console.log('Amount:', transaction.amount);
-                        
+
                         // Get full contract details
                         this.getContractDetails(transaction.contract_id);
                     }
@@ -615,34 +615,34 @@
                 async getContractDetails(contractId) {
                     try {
                         console.log('🔍 Fetching contract details for:', contractId);
-                        
+
                         const response = await this.masterConnection.send({
                             proposal_open_contract: 1,
-                            contract_id: contractId
+                            contract_id: contractId,
                         });
-                        
+
                         if (response.proposal_open_contract) {
                             const contract = response.proposal_open_contract;
                             const tradeParams = this.extractTradeParameters(contract);
-                            
+
                             console.log('📋 Trade Parameters:', tradeParams);
-                            
+
                             // Store in history
                             this.tradeHistory.unshift({
                                 timestamp: new Date(),
                                 contractId: contractId,
                                 params: tradeParams,
-                                replications: []
+                                replications: [],
                             });
-                            
+
                             // Limit history to last 50 trades
                             if (this.tradeHistory.length > 50) {
                                 this.tradeHistory.pop();
                             }
-                            
+
                             // Update UI
                             this.updateTradeHistoryUI();
-                            
+
                             // Replicate to followers (Phase 3)
                             if (this.isActive) {
                                 console.log('🚀 Replicating trade to followers...');
@@ -725,7 +725,9 @@
                             replicationResults.push(result);
                             this.replicationStats.successfulReplications++;
 
-                            console.log(`✅ ${connection.accountInfo.loginid}: Contract ${buyResponse.buy.contract_id} | Payout: ${buyResponse.buy.payout}`);
+                            console.log(
+                                `✅ ${connection.accountInfo.loginid}: Contract ${buyResponse.buy.contract_id} | Payout: ${buyResponse.buy.payout}`
+                            );
                         } catch (error) {
                             // Failure
                             const result = {
@@ -750,8 +752,8 @@
                     this.updateReplicationResultsUI(replicationResults);
 
                     // Log summary
-                    const successCount = replicationResults.filter((r) => r.success).length;
-                    const failCount = replicationResults.filter((r) => !r.success).length;
+                    const successCount = replicationResults.filter(r => r.success).length;
+                    const failCount = replicationResults.filter(r => !r.success).length;
                     console.log(`📊 Replication complete: ✅ ${successCount} success | ❌ ${failCount} failed`);
 
                     return replicationResults;
@@ -761,8 +763,8 @@
                     const statusDiv = document.getElementById('connection-details');
                     if (!statusDiv) return;
 
-                    const successCount = results.filter((r) => r.success).length;
-                    const failCount = results.filter((r) => !r.success).length;
+                    const successCount = results.filter(r => r.success).length;
+                    const failCount = results.filter(r => !r.success).length;
 
                     // Build detailed results HTML
                     let detailsHTML = '';
@@ -825,18 +827,20 @@
                         shortcode: contract.shortcode,
                         displayName: contract.display_name,
                         entrySpot: contract.entry_spot,
-                        entrySpotDisplay: contract.entry_spot_display_value
+                        entrySpotDisplay: contract.entry_spot_display_value,
                     };
                 }
 
                 updateTradeHistoryUI() {
                     const statusDiv = document.getElementById('connection-details');
                     if (!statusDiv) return;
-                    
+
                     const lastTrade = this.tradeHistory[0];
                     if (lastTrade) {
                         const existingContent = statusDiv.innerHTML;
-                        statusDiv.innerHTML = existingContent + `
+                        statusDiv.innerHTML =
+                            existingContent +
+                            `
                             <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #bae6fd;">
                                 <div style="font-weight: 600;">Last Trade Detected:</div>
                                 <div style="font-size: 12px; margin-top: 4px;">
@@ -883,17 +887,17 @@
                         this.masterConnection = null;
                     }
 
-                    this.followerConnections.forEach((connection) => {
+                    this.followerConnections.forEach(connection => {
                         connection.disconnect();
                     });
                     this.followerConnections.clear();
                     this.isActive = false;
-                    
+
                     // Reset statistics
                     this.replicationStats = {
                         totalTrades: 0,
                         successfulReplications: 0,
-                        failedReplications: 0
+                        failedReplications: 0,
                     };
                 }
 
@@ -939,9 +943,9 @@
                             </div>
 
                             <!-- Real Account Card -->
-                            <div class="realaccount-card">
-                                <span class="realaccount-label">CR*****</span>
-                                <span class="realaccount-amount">****** USD</span>
+                            <div class="realaccount-card" id="master-account-card">
+                                <span class="realaccount-label" id="master-account-id">CR*****</span>
+                                <span class="realaccount-amount" id="master-account-balance">****** USD</span>
                             </div>
 
                             <div id="demo-success-message" class="success-message" style="display: none;"></div>
@@ -1175,14 +1179,18 @@
                         // Connect master demo account
                         console.log('🔄 Connecting demo master account...');
                         const masterInfo = await copyTradingManager.connectMaster(masterToken);
-                        console.log('✅ Demo Master:', masterInfo.loginid, `(${masterInfo.currency} ${masterInfo.balance})`);
+                        console.log(
+                            '✅ Demo Master:',
+                            masterInfo.loginid,
+                            `(${masterInfo.currency} ${masterInfo.balance})`
+                        );
 
                         // Connect all real follower accounts
                         console.log('🔄 Connecting to real follower accounts...');
                         const results = await copyTradingManager.connectAllFollowers(tokens);
 
-                        const successCount = results.filter((r) => r.success).length;
-                        const failCount = results.filter((r) => !r.success).length;
+                        const successCount = results.filter(r => r.success).length;
+                        const failCount = results.filter(r => !r.success).length;
 
                         if (successCount === 0) {
                             throw new Error('Failed to connect to any follower accounts');
@@ -1193,13 +1201,20 @@
                         localStorage.setItem('isDemoTradingActive', 'true');
                         localStorage.setItem('masterToken', masterToken);
 
+                        // Update master account display
+                        document.getElementById('master-account-id').textContent = masterInfo.loginid;
+                        document.getElementById('master-account-balance').textContent =
+                            `${masterInfo.balance} ${masterInfo.currency}`;
+
                         message.textContent = `✅ Demo Master: ${masterInfo.loginid} | Real Followers: ${successCount}${failCount > 0 ? ` | ❌ Failed: ${failCount}` : ''}`;
                         message.style.display = 'block';
 
                         // Log detailed results
                         results.forEach((result, index) => {
                             if (result.success) {
-                                console.log(`✅ Real Follower ${index + 1}: ${result.accountInfo.loginid} (${result.accountInfo.currency} ${result.accountInfo.balance})`);
+                                console.log(
+                                    `✅ Real Follower ${index + 1}: ${result.accountInfo.loginid} (${result.accountInfo.currency} ${result.accountInfo.balance})`
+                                );
                             } else {
                                 console.error(`❌ Real Follower ${index + 1}: ${result.error}`);
                             }
@@ -1223,6 +1238,10 @@
                     isDemoTradingActive = false;
                     localStorage.setItem('isDemoTradingActive', 'false');
                     localStorage.removeItem('masterToken');
+
+                    // Reset master account display
+                    document.getElementById('master-account-id').textContent = 'CR*****';
+                    document.getElementById('master-account-balance').textContent = '****** USD';
 
                     message.textContent = 'Demo to Real copy trading stopped';
                     message.style.display = 'block';
@@ -1289,15 +1308,19 @@
                         // Connect master account first
                         console.log('🔄 Connecting master account...');
                         const masterInfo = await copyTradingManager.connectMaster(masterToken);
-                        console.log('✅ Master account:', masterInfo.loginid, `(${masterInfo.currency} ${masterInfo.balance})`);
+                        console.log(
+                            '✅ Master account:',
+                            masterInfo.loginid,
+                            `(${masterInfo.currency} ${masterInfo.balance})`
+                        );
 
                         // Connect all followers
                         console.log('🔄 Connecting to followers...');
                         const results = await copyTradingManager.connectAllFollowers(tokens);
 
                         // Show connection results
-                        const successCount = results.filter((r) => r.success).length;
-                        const failCount = results.filter((r) => !r.success).length;
+                        const successCount = results.filter(r => r.success).length;
+                        const failCount = results.filter(r => !r.success).length;
 
                         if (successCount === 0) {
                             throw new Error('Failed to connect to any followers');
@@ -1308,13 +1331,20 @@
                         localStorage.setItem('isCopyTradingActive', 'true');
                         localStorage.setItem('masterToken', masterToken);
 
+                        // Update master account display
+                        document.getElementById('master-account-id').textContent = masterInfo.loginid;
+                        document.getElementById('master-account-balance').textContent =
+                            `${masterInfo.balance} ${masterInfo.currency}`;
+
                         message.textContent = `✅ Master: ${masterInfo.loginid} | Followers: ${successCount}${failCount > 0 ? ` | ❌ Failed: ${failCount}` : ''}`;
                         message.style.display = 'block';
 
                         // Log detailed results
                         results.forEach((result, index) => {
                             if (result.success) {
-                                console.log(`✅ Follower ${index + 1}: ${result.accountInfo.loginid} (${result.accountInfo.currency} ${result.accountInfo.balance})`);
+                                console.log(
+                                    `✅ Follower ${index + 1}: ${result.accountInfo.loginid} (${result.accountInfo.currency} ${result.accountInfo.balance})`
+                                );
                             } else {
                                 console.error(`❌ Follower ${index + 1}: ${result.error}`);
                             }
@@ -1338,6 +1368,10 @@
                     isCopyTradingActive = false;
                     localStorage.setItem('isCopyTradingActive', 'false');
                     localStorage.removeItem('masterToken');
+
+                    // Reset master account display
+                    document.getElementById('master-account-id').textContent = 'CR*****';
+                    document.getElementById('master-account-balance').textContent = '****** USD';
 
                     message.textContent = 'Copy trading stopped';
                     message.style.display = 'block';
