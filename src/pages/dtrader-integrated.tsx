@@ -52,7 +52,6 @@ const DTraderIntegrated: React.FC = () => {
             <div className='dtrader-header'>
                 <div className='header-left'>
                     <h2>DTrader</h2>
-                    <span className='commission-badge'>Earning Commissions</span>
                 </div>
                 <div className='account-info'>
                     {client?.loginid ? (

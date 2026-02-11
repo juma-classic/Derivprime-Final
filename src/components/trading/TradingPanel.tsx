@@ -79,10 +79,8 @@ export const TradingPanel: React.FC<{ symbol: string }> = ({ symbol }) => {
             });
 
             if (buyResponse.buy) {
-                setSuccessMessage(
-                    `✅ Trade executed! Contract ID: ${buyResponse.buy.contract_id}`
-                );
-                console.log('🎯 Trade executed:', buyResponse);
+                setSuccessMessage(`✅ Trade executed! Contract ID: ${buyResponse.buy.contract_id}`);
+                console.log('Trade executed:', buyResponse);
             } else if (buyResponse.error) {
                 setError(buyResponse.error.message);
             }
@@ -95,14 +93,87 @@ export const TradingPanel: React.FC<{ symbol: string }> = ({ symbol }) => {
     };
 
     const contractTypes = [
-        { value: 'CALL', label: 'Rise', icon: '📈' },
-        { value: 'PUT', label: 'Fall', icon: '📉' },
-        { value: 'DIGITEVEN', label: 'Even', icon: '⚖️' },
-        { value: 'DIGITODD', label: 'Odd', icon: '🎲' },
-        { value: 'DIGITMATCH', label: 'Matches', icon: '🎯' },
-        { value: 'DIGITDIFF', label: 'Differs', icon: '❌' },
-        { value: 'DIGITOVER', label: 'Over', icon: '⬆️' },
-        { value: 'DIGITUNDER', label: 'Under', icon: '⬇️' },
+        {
+            value: 'CALL',
+            label: 'Rise',
+            icon: (
+                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+                    <polyline points='23 6 13.5 15.5 8.5 10.5 1 18'></polyline>
+                    <polyline points='17 6 23 6 23 12'></polyline>
+                </svg>
+            ),
+        },
+        {
+            value: 'PUT',
+            label: 'Fall',
+            icon: (
+                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+                    <polyline points='23 18 13.5 8.5 8.5 13.5 1 6'></polyline>
+                    <polyline points='17 18 23 18 23 12'></polyline>
+                </svg>
+            ),
+        },
+        {
+            value: 'DIGITEVEN',
+            label: 'Even',
+            icon: (
+                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+                    <circle cx='12' cy='12' r='10'></circle>
+                    <line x1='12' y1='8' x2='12' y2='16'></line>
+                    <line x1='8' y1='12' x2='16' y2='12'></line>
+                </svg>
+            ),
+        },
+        {
+            value: 'DIGITODD',
+            label: 'Odd',
+            icon: (
+                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+                    <rect x='3' y='3' width='7' height='7' rx='1'></rect>
+                    <rect x='14' y='3' width='7' height='7' rx='1'></rect>
+                    <rect x='14' y='14' width='7' height='7' rx='1'></rect>
+                    <rect x='3' y='14' width='7' height='7' rx='1'></rect>
+                </svg>
+            ),
+        },
+        {
+            value: 'DIGITMATCH',
+            label: 'Matches',
+            icon: (
+                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+                    <circle cx='12' cy='12' r='10'></circle>
+                    <circle cx='12' cy='12' r='3' fill='currentColor'></circle>
+                </svg>
+            ),
+        },
+        {
+            value: 'DIGITDIFF',
+            label: 'Differs',
+            icon: (
+                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+                    <line x1='18' y1='6' x2='6' y2='18'></line>
+                    <line x1='6' y1='6' x2='18' y2='18'></line>
+                </svg>
+            ),
+        },
+        {
+            value: 'DIGITOVER',
+            label: 'Over',
+            icon: (
+                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+                    <polyline points='18 15 12 9 6 15'></polyline>
+                </svg>
+            ),
+        },
+        {
+            value: 'DIGITUNDER',
+            label: 'Under',
+            icon: (
+                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+                    <polyline points='6 9 12 15 18 9'></polyline>
+                </svg>
+            ),
+        },
     ];
 
     return (
@@ -119,7 +190,7 @@ export const TradingPanel: React.FC<{ symbol: string }> = ({ symbol }) => {
                 <div className='form-section'>
                     <label>Contract Type</label>
                     <div className='contract-type-grid'>
-                        {contractTypes.map((type) => (
+                        {contractTypes.map(type => (
                             <button
                                 key={type.value}
                                 className={`contract-type-btn ${contractType === type.value ? 'active' : ''}`}
@@ -136,33 +207,23 @@ export const TradingPanel: React.FC<{ symbol: string }> = ({ symbol }) => {
                 <div className='form-section'>
                     <label>Stake Amount ({client?.currency || 'USD'})</label>
                     <div className='input-group'>
-                        <button
-                            className='adjust-btn'
-                            onClick={() => setStake(Math.max(1, stake - 1))}
-                        >
+                        <button className='adjust-btn' onClick={() => setStake(Math.max(1, stake - 1))}>
                             -
                         </button>
                         <input
                             type='number'
                             value={stake}
-                            onChange={(e) => setStake(Math.max(1, Number(e.target.value)))}
+                            onChange={e => setStake(Math.max(1, Number(e.target.value)))}
                             min='1'
                             step='1'
                         />
-                        <button
-                            className='adjust-btn'
-                            onClick={() => setStake(stake + 1)}
-                        >
+                        <button className='adjust-btn' onClick={() => setStake(stake + 1)}>
                             +
                         </button>
                     </div>
                     <div className='quick-amounts'>
-                        {[5, 10, 25, 50, 100].map((amount) => (
-                            <button
-                                key={amount}
-                                className='quick-amount-btn'
-                                onClick={() => setStake(amount)}
-                            >
+                        {[5, 10, 25, 50, 100].map(amount => (
+                            <button key={amount} className='quick-amount-btn' onClick={() => setStake(amount)}>
                                 {amount}
                             </button>
                         ))}
@@ -174,28 +235,22 @@ export const TradingPanel: React.FC<{ symbol: string }> = ({ symbol }) => {
                     <label>Duration</label>
                     <div className='duration-controls'>
                         <div className='input-group'>
-                            <button
-                                className='adjust-btn'
-                                onClick={() => setDuration(Math.max(1, duration - 1))}
-                            >
+                            <button className='adjust-btn' onClick={() => setDuration(Math.max(1, duration - 1))}>
                                 -
                             </button>
                             <input
                                 type='number'
                                 value={duration}
-                                onChange={(e) => setDuration(Math.max(1, Number(e.target.value)))}
+                                onChange={e => setDuration(Math.max(1, Number(e.target.value)))}
                                 min='1'
                             />
-                            <button
-                                className='adjust-btn'
-                                onClick={() => setDuration(duration + 1)}
-                            >
+                            <button className='adjust-btn' onClick={() => setDuration(duration + 1)}>
                                 +
                             </button>
                         </div>
                         <select
                             value={durationType}
-                            onChange={(e) => setDurationType(e.target.value as 't' | 'm')}
+                            onChange={e => setDurationType(e.target.value as 't' | 'm')}
                             className='duration-type-select'
                         >
                             <option value='t'>Ticks</option>
@@ -223,25 +278,13 @@ export const TradingPanel: React.FC<{ symbol: string }> = ({ symbol }) => {
                 )}
 
                 {/* Error Message */}
-                {error && (
-                    <div className='message error-message'>
-                        {error}
-                    </div>
-                )}
+                {error && <div className='message error-message'>{error}</div>}
 
                 {/* Success Message */}
-                {successMessage && (
-                    <div className='message success-message'>
-                        {successMessage}
-                    </div>
-                )}
+                {successMessage && <div className='message success-message'>{successMessage}</div>}
 
                 {/* Login Required Message */}
-                {!isLoggedIn && (
-                    <div className='message info-message'>
-                        Please log in to start trading
-                    </div>
-                )}
+                {!isLoggedIn && <div className='message info-message'>Please log in to start trading</div>}
 
                 {/* Trade Button */}
                 <button
@@ -262,7 +305,18 @@ export const TradingPanel: React.FC<{ symbol: string }> = ({ symbol }) => {
                         </>
                     ) : (
                         <>
-                            <span className='icon'>🚀</span>
+                            <svg
+                                width='16'
+                                height='16'
+                                viewBox='0 0 24 24'
+                                fill='none'
+                                stroke='currentColor'
+                                strokeWidth='2'
+                                style={{ marginRight: '8px' }}
+                            >
+                                <circle cx='12' cy='12' r='10'></circle>
+                                <polyline points='12 6 12 12 16 14'></polyline>
+                            </svg>
                             Trade Now
                         </>
                     )}
