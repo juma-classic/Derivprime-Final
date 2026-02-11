@@ -380,6 +380,535 @@
 
         <!-- Load Copy Trading Component -->
         <script>
+            // Deriv API Configuration
+            const DERIV_APP_ID = '1089'; // Replace with your actual app ID
+            const DERIV_WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`;
+
+            // WebSocket connection manager
+            class DerivConnection {
+                constructor(token = null) {
+                    this.ws = null;
+                    this.token = token;
+                    this.isConnected = false;
+                    this.isAuthorized = false;
+                    this.accountInfo = null;
+                    this.messageHandlers = new Map();
+                    this.requestId = 1;
+                }
+
+                connect() {
+                    return new Promise((resolve, reject) => {
+                        this.ws = new WebSocket(DERIV_WS_URL);
+
+                        this.ws.onopen = () => {
+                            console.log('✅ WebSocket connected');
+                            this.isConnected = true;
+                            resolve();
+                        };
+
+                        this.ws.onerror = (error) => {
+                            console.error('❌ WebSocket error:', error);
+                            reject(error);
+                        };
+
+                        this.ws.onclose = () => {
+                            console.log('🔌 WebSocket disconnected');
+                            this.isConnected = false;
+                            this.isAuthorized = false;
+                        };
+
+                        this.ws.onmessage = (msg) => {
+                            const data = JSON.parse(msg.data);
+                            this.handleMessage(data);
+                        };
+                    });
+                }
+
+                handleMessage(data) {
+                    // Handle responses based on msg_type or req_id
+                    if (data.req_id && this.messageHandlers.has(data.req_id)) {
+                        const handler = this.messageHandlers.get(data.req_id);
+                        handler(data);
+                        this.messageHandlers.delete(data.req_id);
+                    }
+
+                    // Handle specific message types
+                    if (data.msg_type === 'authorize') {
+                        this.handleAuthorize(data);
+                    } else if (data.msg_type === 'balance') {
+                        this.handleBalance(data);
+                    } else if (data.msg_type === 'transaction') {
+                        this.handleTransaction(data);
+                    } else if (data.msg_type === 'proposal_open_contract') {
+                        this.handleContract(data);
+                    }
+                }
+
+                handleAuthorize(data) {
+                    if (data.error) {
+                        console.error('❌ Authorization failed:', data.error.message);
+                        this.isAuthorized = false;
+                    } else {
+                        console.log('✅ Authorization successful');
+                        this.isAuthorized = true;
+                        this.accountInfo = data.authorize;
+                    }
+                }
+
+                handleBalance(data) {
+                    if (data.balance) {
+                        console.log(`💰 Balance: ${data.balance.balance} ${data.balance.currency}`);
+                    }
+                }
+
+                handleTransaction(data) {
+                    if (data.transaction && this.transactionCallback) {
+                        this.transactionCallback(data.transaction);
+                    }
+                }
+
+                handleContract(data) {
+                    if (data.proposal_open_contract && this.contractCallback) {
+                        this.contractCallback(data.proposal_open_contract);
+                    }
+                }
+
+                send(request) {
+                    return new Promise((resolve, reject) => {
+                        if (!this.isConnected) {
+                            reject(new Error('WebSocket not connected'));
+                            return;
+                        }
+
+                        const reqId = this.requestId++;
+                        request.req_id = reqId;
+
+                        this.messageHandlers.set(reqId, (response) => {
+                            if (response.error) {
+                                reject(response.error);
+                            } else {
+                                resolve(response);
+                            }
+                        });
+
+                        this.ws.send(JSON.stringify(request));
+                    });
+                }
+
+                async authorize(token) {
+                    if (!token) {
+                        throw new Error('API token is required');
+                    }
+
+                    try {
+                        const response = await this.send({ authorize: token });
+                        return response.authorize;
+                    } catch (error) {
+                        throw new Error(`Authorization failed: ${error.message}`);
+                    }
+                }
+
+                async getBalance() {
+                    try {
+                        const response = await this.send({ balance: 1, subscribe: 1 });
+                        return response.balance;
+                    } catch (error) {
+                        throw new Error(`Failed to get balance: ${error.message}`);
+                    }
+                }
+
+                async getAccountInfo() {
+                    if (!this.isAuthorized) {
+                        throw new Error('Not authorized');
+                    }
+                    return this.accountInfo;
+                }
+
+                async subscribeToTransactions(callback) {
+                    try {
+                        const response = await this.send({ 
+                            transaction: 1, 
+                            subscribe: 1 
+                        });
+                        
+                        // Set up handler for transaction updates
+                        this.transactionCallback = callback;
+                        return response;
+                    } catch (error) {
+                        throw new Error(`Failed to subscribe to transactions: ${error.message}`);
+                    }
+                }
+
+                async subscribeToProposalOpenContract(contractId, callback) {
+                    try {
+                        const response = await this.send({
+                            proposal_open_contract: 1,
+                            contract_id: contractId,
+                            subscribe: 1
+                        });
+                        
+                        this.contractCallback = callback;
+                        return response;
+                    } catch (error) {
+                        throw new Error(`Failed to subscribe to contract: ${error.message}`);
+                    }
+                }
+
+                disconnect() {
+                    if (this.ws) {
+                        this.ws.close();
+                        this.ws = null;
+                        this.isConnected = false;
+                        this.isAuthorized = false;
+                    }
+                }
+            }
+
+            // Copy Trading Manager
+            class CopyTradingManager {
+                constructor() {
+                    this.masterConnection = null;
+                    this.followerConnections = new Map();
+                    this.isActive = false;
+                    this.tradeHistory = [];
+                    this.replicationStats = {
+                        totalTrades: 0,
+                        successfulReplications: 0,
+                        failedReplications: 0
+                    };
+                }
+
+                async connectMaster(token) {
+                    try {
+                        console.log('🔄 Connecting master account...');
+                        this.masterConnection = new DerivConnection(token);
+                        await this.masterConnection.connect();
+                        const accountInfo = await this.masterConnection.authorize(token);
+                        console.log('✅ Master account connected:', accountInfo.loginid);
+                        
+                        // Subscribe to master account transactions
+                        await this.masterConnection.subscribeToTransactions((transaction) => {
+                            this.handleMasterTransaction(transaction);
+                        });
+                        
+                        return accountInfo;
+                    } catch (error) {
+                        console.error('❌ Failed to connect master account:', error);
+                        throw error;
+                    }
+                }
+
+                handleMasterTransaction(transaction) {
+                    console.log('📊 Master transaction detected:', transaction);
+                    
+                    // Check if this is a buy transaction (new trade)
+                    if (transaction.action === 'buy') {
+                        console.log('🎯 New trade detected!');
+                        console.log('Contract ID:', transaction.contract_id);
+                        console.log('Amount:', transaction.amount);
+                        
+                        // Get full contract details
+                        this.getContractDetails(transaction.contract_id);
+                    }
+                }
+
+                async getContractDetails(contractId) {
+                    try {
+                        console.log('🔍 Fetching contract details for:', contractId);
+                        
+                        const response = await this.masterConnection.send({
+                            proposal_open_contract: 1,
+                            contract_id: contractId
+                        });
+                        
+                        if (response.proposal_open_contract) {
+                            const contract = response.proposal_open_contract;
+                            const tradeParams = this.extractTradeParameters(contract);
+                            
+                            console.log('📋 Trade Parameters:', tradeParams);
+                            
+                            // Store in history
+                            this.tradeHistory.unshift({
+                                timestamp: new Date(),
+                                contractId: contractId,
+                                params: tradeParams,
+                                replications: []
+                            });
+                            
+                            // Limit history to last 50 trades
+                            if (this.tradeHistory.length > 50) {
+                                this.tradeHistory.pop();
+                            }
+                            
+                            // Update UI
+                            this.updateTradeHistoryUI();
+                            
+                            // Replicate to followers (Phase 3)
+                            if (this.isActive) {
+                                console.log('🚀 Replicating trade to followers...');
+                                this.replicateTrade(tradeParams);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('❌ Failed to get contract details:', error);
+                    }
+                }
+
+                async replicateTrade(tradeParams) {
+                    const replicationResults = [];
+                    this.replicationStats.totalTrades++;
+
+                    console.log(`📤 Replicating to ${this.followerConnections.size} follower(s)...`);
+
+                    for (const [token, connection] of this.followerConnections) {
+                        try {
+                            // Build proposal request
+                            const proposalParams = {
+                                proposal: 1,
+                                amount: tradeParams.stake,
+                                basis: 'stake',
+                                contract_type: tradeParams.contractType,
+                                currency: connection.accountInfo.currency,
+                                symbol: tradeParams.symbol,
+                            };
+
+                            // Add duration
+                            if (tradeParams.durationType === 'tick') {
+                                proposalParams.duration = tradeParams.duration;
+                                proposalParams.duration_unit = 't';
+                            } else {
+                                // Epoch-based: calculate seconds from now to expiry
+                                const now = Math.floor(Date.now() / 1000);
+                                const expiryTime = parseInt(tradeParams.duration);
+                                proposalParams.duration = Math.max(expiryTime - now, 15); // Minimum 15 seconds
+                                proposalParams.duration_unit = 's';
+                            }
+
+                            // Add barrier if needed
+                            if (tradeParams.barrier) {
+                                proposalParams.barrier = tradeParams.barrier;
+                            }
+                            if (tradeParams.barrier2) {
+                                proposalParams.barrier2 = tradeParams.barrier2;
+                            }
+
+                            // Get proposal
+                            console.log(`🔄 Getting proposal for ${connection.accountInfo.loginid}...`);
+                            const proposalResponse = await connection.send(proposalParams);
+
+                            if (proposalResponse.error) {
+                                throw new Error(proposalResponse.error.message);
+                            }
+
+                            const proposal = proposalResponse.proposal;
+
+                            // Buy the contract
+                            console.log(`💰 Buying contract for ${connection.accountInfo.loginid}...`);
+                            const buyResponse = await connection.send({
+                                buy: proposal.id,
+                                price: tradeParams.stake,
+                            });
+
+                            if (buyResponse.error) {
+                                throw new Error(buyResponse.error.message);
+                            }
+
+                            // Success
+                            const result = {
+                                success: true,
+                                accountId: connection.accountInfo.loginid,
+                                contractId: buyResponse.buy.contract_id,
+                                buyPrice: buyResponse.buy.buy_price,
+                                payout: buyResponse.buy.payout,
+                            };
+
+                            replicationResults.push(result);
+                            this.replicationStats.successfulReplications++;
+
+                            console.log(`✅ ${connection.accountInfo.loginid}: Contract ${buyResponse.buy.contract_id} | Payout: ${buyResponse.buy.payout}`);
+                        } catch (error) {
+                            // Failure
+                            const result = {
+                                success: false,
+                                accountId: connection.accountInfo?.loginid || 'Unknown',
+                                error: error.message,
+                            };
+
+                            replicationResults.push(result);
+                            this.replicationStats.failedReplications++;
+
+                            console.error(`❌ ${connection.accountInfo?.loginid || 'Unknown'}: ${error.message}`);
+                        }
+                    }
+
+                    // Update trade history with replication results
+                    if (this.tradeHistory.length > 0) {
+                        this.tradeHistory[0].replications = replicationResults;
+                    }
+
+                    // Update UI with results
+                    this.updateReplicationResultsUI(replicationResults);
+
+                    // Log summary
+                    const successCount = replicationResults.filter((r) => r.success).length;
+                    const failCount = replicationResults.filter((r) => !r.success).length;
+                    console.log(`📊 Replication complete: ✅ ${successCount} success | ❌ ${failCount} failed`);
+
+                    return replicationResults;
+                }
+
+                updateReplicationResultsUI(results) {
+                    const statusDiv = document.getElementById('connection-details');
+                    if (!statusDiv) return;
+
+                    const successCount = results.filter((r) => r.success).length;
+                    const failCount = results.filter((r) => !r.success).length;
+
+                    // Build detailed results HTML
+                    let detailsHTML = '';
+                    results.forEach(result => {
+                        if (result.success) {
+                            detailsHTML += `
+                                <div style="font-size: 11px; margin-top: 4px; color: #059669;">
+                                    ✅ ${result.accountId}: Contract ${result.contractId} | Payout: ${result.payout}
+                                </div>
+                            `;
+                        } else {
+                            detailsHTML += `
+                                <div style="font-size: 11px; margin-top: 4px; color: #dc2626;">
+                                    ❌ ${result.accountId}: ${result.error}
+                                </div>
+                            `;
+                        }
+                    });
+
+                    // Add replication results to status
+                    const resultHTML = `
+                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #bae6fd;">
+                            <div style="font-weight: 600;">Last Replication:</div>
+                            <div style="font-size: 12px; margin-top: 4px;">
+                                ✅ Success: ${successCount} | ❌ Failed: ${failCount}
+                            </div>
+                            ${detailsHTML}
+                            <div style="font-size: 11px; margin-top: 8px; color: #0369a1;">
+                                Total: ${this.replicationStats.totalTrades} trades | 
+                                ${this.replicationStats.successfulReplications} successful | 
+                                ${this.replicationStats.failedReplications} failed
+                            </div>
+                        </div>
+                    `;
+
+                    // Find and update or append
+                    const existingResult = statusDiv.querySelector('[data-replication-result]');
+                    if (existingResult) {
+                        existingResult.innerHTML = resultHTML;
+                    } else {
+                        const div = document.createElement('div');
+                        div.setAttribute('data-replication-result', 'true');
+                        div.innerHTML = resultHTML;
+                        statusDiv.appendChild(div);
+                    }
+                }
+
+                extractTradeParameters(contract) {
+                    return {
+                        contractType: contract.contract_type,
+                        symbol: contract.underlying,
+                        stake: contract.buy_price,
+                        currency: contract.currency,
+                        duration: contract.tick_count || contract.date_expiry,
+                        durationType: contract.tick_count ? 'tick' : 'epoch',
+                        barrier: contract.barrier,
+                        barrier2: contract.barrier2,
+                        limitOrder: contract.limit_order,
+                        contractId: contract.contract_id,
+                        shortcode: contract.shortcode,
+                        displayName: contract.display_name,
+                        entrySpot: contract.entry_spot,
+                        entrySpotDisplay: contract.entry_spot_display_value
+                    };
+                }
+
+                updateTradeHistoryUI() {
+                    const statusDiv = document.getElementById('connection-details');
+                    if (!statusDiv) return;
+                    
+                    const lastTrade = this.tradeHistory[0];
+                    if (lastTrade) {
+                        const existingContent = statusDiv.innerHTML;
+                        statusDiv.innerHTML = existingContent + `
+                            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #bae6fd;">
+                                <div style="font-weight: 600;">Last Trade Detected:</div>
+                                <div style="font-size: 12px; margin-top: 4px;">
+                                    ${lastTrade.params.displayName}<br/>
+                                    Stake: ${lastTrade.params.stake} ${lastTrade.params.currency}<br/>
+                                    Time: ${lastTrade.timestamp.toLocaleTimeString()}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+
+                async connectFollower(token, index) {
+                    try {
+                        console.log(`🔄 Connecting follower ${index + 1}...`);
+                        const connection = new DerivConnection(token);
+                        await connection.connect();
+                        const accountInfo = await connection.authorize(token);
+                        this.followerConnections.set(token, connection);
+                        console.log(`✅ Follower ${index + 1} connected:`, accountInfo.loginid);
+                        return accountInfo;
+                    } catch (error) {
+                        console.error(`❌ Failed to connect follower ${index + 1}:`, error);
+                        throw error;
+                    }
+                }
+
+                async connectAllFollowers(tokens) {
+                    const results = [];
+                    for (let i = 0; i < tokens.length; i++) {
+                        try {
+                            const accountInfo = await this.connectFollower(tokens[i], i);
+                            results.push({ success: true, token: tokens[i], accountInfo });
+                        } catch (error) {
+                            results.push({ success: false, token: tokens[i], error: error.message });
+                        }
+                    }
+                    return results;
+                }
+
+                disconnectAll() {
+                    if (this.masterConnection) {
+                        this.masterConnection.disconnect();
+                        this.masterConnection = null;
+                    }
+
+                    this.followerConnections.forEach((connection) => {
+                        connection.disconnect();
+                    });
+                    this.followerConnections.clear();
+                    this.isActive = false;
+                    
+                    // Reset statistics
+                    this.replicationStats = {
+                        totalTrades: 0,
+                        successfulReplications: 0,
+                        failedReplications: 0
+                    };
+                }
+
+                getConnectionStatus() {
+                    return {
+                        master: this.masterConnection?.isAuthorized || false,
+                        followers: this.followerConnections.size,
+                        active: this.isActive,
+                    };
+                }
+            }
+
+            // Global copy trading manager instance
+            const copyTradingManager = new CopyTradingManager();
+
             // Simple Copy Trading Implementation without React
             function createCopyTradingApp() {
                 const container = document.getElementById('copy-trading-root');
@@ -400,6 +929,13 @@
                                     </svg>
                                     <div style="font-size: 12px; color: #333;">Tutorial</div>
                                 </div>
+                            </div>
+
+                            <!-- Master Token Input -->
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">Master Account Token (Your Trading Account)</label>
+                                <input type="text" id="master-token-input" class="tokens-input" placeholder="Enter your master account API token" style="width: 100%;" />
+                                <div style="font-size: 12px; color: #666; margin-top: 4px;">This is the account that will be monitored for trades</div>
                             </div>
 
                             <!-- Real Account Card -->
@@ -452,6 +988,13 @@
                             <div class="tokens_container">
                                 <ul class="tokens-list">
                                     <h2>Total Clients added: <span id="token-count">0</span></h2>
+                                    
+                                    <!-- Connection Status -->
+                                    <div id="connection-status" style="display: none; margin-bottom: 16px; padding: 12px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;">
+                                        <div style="font-weight: 600; margin-bottom: 8px; color: #0369a1;">Connection Status</div>
+                                        <div id="connection-details" style="font-size: 14px; color: #0c4a6e;"></div>
+                                    </div>
+                                    
                                     <div id="tokens-list-container">
                                         <div class="token_info">No tokens added yet</div>
                                     </div>
@@ -475,6 +1018,12 @@
                 if (savedTokens) {
                     tokens = JSON.parse(savedTokens);
                     updateTokensList();
+                }
+
+                // Load master token
+                const savedMasterToken = localStorage.getItem('masterToken');
+                if (savedMasterToken) {
+                    document.getElementById('master-token-input').value = savedMasterToken;
                 }
 
                 // Load trading states from localStorage
@@ -558,6 +1107,22 @@
                     .join('');
             }
 
+            function updateConnectionStatus() {
+                const statusDiv = document.getElementById('connection-status');
+                const detailsDiv = document.getElementById('connection-details');
+                const status = copyTradingManager.getConnectionStatus();
+
+                if (status.active && status.followers > 0) {
+                    statusDiv.style.display = 'block';
+                    detailsDiv.innerHTML = `
+                        <div>✅ Active Connections: ${status.followers} follower(s)</div>
+                        <div style="margin-top: 4px; font-size: 12px; opacity: 0.8;">Copy trading is running</div>
+                    `;
+                } else {
+                    statusDiv.style.display = 'none';
+                }
+            }
+
             function updateDemoTradingUI(isActive) {
                 const btn = document.getElementById('demo-trading-btn');
                 const message = document.getElementById('demo-success-message');
@@ -573,16 +1138,100 @@
                 }
             }
 
-            function toggleDemoTrading() {
-                isDemoTradingActive = !isDemoTradingActive;
-
-                // Save state to localStorage
-                localStorage.setItem('isDemoTradingActive', isDemoTradingActive.toString());
-
-                updateDemoTradingUI(isDemoTradingActive);
-
+            async function toggleDemoTrading() {
+                const btn = document.getElementById('demo-trading-btn');
                 const message = document.getElementById('demo-success-message');
-                message.style.display = 'block';
+                const masterTokenInput = document.getElementById('master-token-input');
+
+                if (!isDemoTradingActive) {
+                    // Check if regular copy trading is active
+                    if (isCopyTradingActive) {
+                        alert('Please stop regular copy trading first before starting demo to real copy trading');
+                        return;
+                    }
+
+                    // Starting demo to real copy trading
+                    if (tokens.length === 0) {
+                        alert('Please add at least one follower token (real accounts)');
+                        return;
+                    }
+
+                    const masterToken = masterTokenInput.value.trim();
+                    if (!masterToken) {
+                        alert('Please enter your demo account API token');
+                        masterTokenInput.focus();
+                        return;
+                    }
+
+                    if (masterToken.length < 10) {
+                        alert('Invalid demo token format');
+                        return;
+                    }
+
+                    btn.disabled = true;
+                    btn.textContent = 'Connecting...';
+
+                    try {
+                        // Connect master demo account
+                        console.log('🔄 Connecting demo master account...');
+                        const masterInfo = await copyTradingManager.connectMaster(masterToken);
+                        console.log('✅ Demo Master:', masterInfo.loginid, `(${masterInfo.currency} ${masterInfo.balance})`);
+
+                        // Connect all real follower accounts
+                        console.log('🔄 Connecting to real follower accounts...');
+                        const results = await copyTradingManager.connectAllFollowers(tokens);
+
+                        const successCount = results.filter((r) => r.success).length;
+                        const failCount = results.filter((r) => !r.success).length;
+
+                        if (successCount === 0) {
+                            throw new Error('Failed to connect to any follower accounts');
+                        }
+
+                        copyTradingManager.isActive = true;
+                        isDemoTradingActive = true;
+                        localStorage.setItem('isDemoTradingActive', 'true');
+                        localStorage.setItem('masterToken', masterToken);
+
+                        message.textContent = `✅ Demo Master: ${masterInfo.loginid} | Real Followers: ${successCount}${failCount > 0 ? ` | ❌ Failed: ${failCount}` : ''}`;
+                        message.style.display = 'block';
+
+                        // Log detailed results
+                        results.forEach((result, index) => {
+                            if (result.success) {
+                                console.log(`✅ Real Follower ${index + 1}: ${result.accountInfo.loginid} (${result.accountInfo.currency} ${result.accountInfo.balance})`);
+                            } else {
+                                console.error(`❌ Real Follower ${index + 1}: ${result.error}`);
+                            }
+                        });
+
+                        console.log('🎯 Demo to Real copy trading is now active!');
+                        updateDemoTradingUI(true);
+                        updateConnectionStatus();
+                    } catch (error) {
+                        console.error('❌ Failed to start demo to real copy trading:', error);
+                        message.textContent = `❌ Error: ${error.message}`;
+                        message.style.display = 'block';
+                        isDemoTradingActive = false;
+                        copyTradingManager.disconnectAll();
+                    } finally {
+                        btn.disabled = false;
+                    }
+                } else {
+                    // Stopping demo to real copy trading
+                    copyTradingManager.disconnectAll();
+                    isDemoTradingActive = false;
+                    localStorage.setItem('isDemoTradingActive', 'false');
+                    localStorage.removeItem('masterToken');
+
+                    message.textContent = 'Demo to Real copy trading stopped';
+                    message.style.display = 'block';
+
+                    updateDemoTradingUI(false);
+                    updateConnectionStatus();
+                    console.log('⏹️ Demo to Real copy trading stopped');
+                }
+
                 setTimeout(() => {
                     message.style.display = 'none';
                 }, 5000);
@@ -603,16 +1252,101 @@
                 }
             }
 
-            function toggleCopyTrading() {
-                isCopyTradingActive = !isCopyTradingActive;
-
-                // Save state to localStorage
-                localStorage.setItem('isCopyTradingActive', isCopyTradingActive.toString());
-
-                updateCopyTradingUI(isCopyTradingActive);
-
+            async function toggleCopyTrading() {
+                const btn = document.getElementById('copy-trading-btn');
                 const message = document.getElementById('success-message');
-                message.style.display = 'block';
+                const masterTokenInput = document.getElementById('master-token-input');
+
+                if (!isCopyTradingActive) {
+                    // Check if demo to real copy trading is active
+                    if (isDemoTradingActive) {
+                        alert('Please stop demo to real copy trading first before starting regular copy trading');
+                        return;
+                    }
+
+                    // Starting copy trading
+                    if (tokens.length === 0) {
+                        alert('Please add at least one follower token');
+                        return;
+                    }
+
+                    const masterToken = masterTokenInput.value.trim();
+                    if (!masterToken) {
+                        alert('Please enter your master account API token');
+                        masterTokenInput.focus();
+                        return;
+                    }
+
+                    if (masterToken.length < 10) {
+                        alert('Invalid master token format');
+                        return;
+                    }
+
+                    btn.disabled = true;
+                    btn.textContent = 'Connecting...';
+
+                    try {
+                        // Connect master account first
+                        console.log('🔄 Connecting master account...');
+                        const masterInfo = await copyTradingManager.connectMaster(masterToken);
+                        console.log('✅ Master account:', masterInfo.loginid, `(${masterInfo.currency} ${masterInfo.balance})`);
+
+                        // Connect all followers
+                        console.log('🔄 Connecting to followers...');
+                        const results = await copyTradingManager.connectAllFollowers(tokens);
+
+                        // Show connection results
+                        const successCount = results.filter((r) => r.success).length;
+                        const failCount = results.filter((r) => !r.success).length;
+
+                        if (successCount === 0) {
+                            throw new Error('Failed to connect to any followers');
+                        }
+
+                        copyTradingManager.isActive = true;
+                        isCopyTradingActive = true;
+                        localStorage.setItem('isCopyTradingActive', 'true');
+                        localStorage.setItem('masterToken', masterToken);
+
+                        message.textContent = `✅ Master: ${masterInfo.loginid} | Followers: ${successCount}${failCount > 0 ? ` | ❌ Failed: ${failCount}` : ''}`;
+                        message.style.display = 'block';
+
+                        // Log detailed results
+                        results.forEach((result, index) => {
+                            if (result.success) {
+                                console.log(`✅ Follower ${index + 1}: ${result.accountInfo.loginid} (${result.accountInfo.currency} ${result.accountInfo.balance})`);
+                            } else {
+                                console.error(`❌ Follower ${index + 1}: ${result.error}`);
+                            }
+                        });
+
+                        console.log('🎯 Copy trading is now active - monitoring master account for trades...');
+                        updateCopyTradingUI(true);
+                        updateConnectionStatus();
+                    } catch (error) {
+                        console.error('❌ Failed to start copy trading:', error);
+                        message.textContent = `❌ Error: ${error.message}`;
+                        message.style.display = 'block';
+                        isCopyTradingActive = false;
+                        copyTradingManager.disconnectAll();
+                    } finally {
+                        btn.disabled = false;
+                    }
+                } else {
+                    // Stopping copy trading
+                    copyTradingManager.disconnectAll();
+                    isCopyTradingActive = false;
+                    localStorage.setItem('isCopyTradingActive', 'false');
+                    localStorage.removeItem('masterToken');
+
+                    message.textContent = 'Copy trading stopped';
+                    message.style.display = 'block';
+
+                    updateCopyTradingUI(false);
+                    updateConnectionStatus();
+                    console.log('⏹️ Copy trading stopped');
+                }
+
                 setTimeout(() => {
                     message.style.display = 'none';
                 }, 5000);
