@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './new-copy-trading.scss';
 
 interface FollowerToken {
@@ -27,6 +27,14 @@ const NewCopyTrading: React.FC = () => {
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [minStake, setMinStake] = useState<number | ''>('');
     const [maxStake, setMaxStake] = useState<number | ''>('');
+
+    // Auto-fill master token from localStorage if user is logged in
+    useEffect(() => {
+        const authToken = localStorage.getItem('authToken');
+        if (authToken) {
+            setMasterToken(authToken);
+        }
+    }, []);
 
     const loadAccountBalance = (token: string) => {
         setIsLoading(true);
