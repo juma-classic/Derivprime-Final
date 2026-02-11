@@ -41,7 +41,9 @@ const NewCopyTrading: React.FC = () => {
         const accountsList = localStorage.getItem('accountsList');
         const clientAccounts = localStorage.getItem('clientAccounts');
         const activeLoginid = localStorage.getItem('active_loginid');
+        const authToken = localStorage.getItem('authToken');
 
+        // Try to load from accountsList and clientAccounts first
         if (accountsList && clientAccounts) {
             try {
                 const accounts = JSON.parse(accountsList);
@@ -60,12 +62,29 @@ const NewCopyTrading: React.FC = () => {
                 setAvailableAccounts(loadedAccounts);
 
                 // Set active account as default
-                if (activeLoginid) {
+                if (activeLoginid && accounts[activeLoginid]) {
                     setSelectedAccountLoginid(activeLoginid);
                     loadAccountBalance(activeLoginid, accounts[activeLoginid]);
                 }
             } catch (error) {
                 console.error('Failed to load accounts:', error);
+            }
+        }
+        // Fallback: try to load from authToken and active_loginid
+        else if (authToken && activeLoginid) {
+            try {
+                const singleAccount: AvailableAccount = {
+                    loginid: activeLoginid,
+                    token: authToken,
+                    currency: 'USD',
+                    isDemo: activeLoginid.startsWith('VR'),
+                };
+
+                setAvailableAccounts([singleAccount]);
+                setSelectedAccountLoginid(activeLoginid);
+                loadAccountBalance(activeLoginid, authToken);
+            } catch (error) {
+                console.error('Failed to load account from authToken:', error);
             }
         }
     }, []);
