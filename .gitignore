@@ -37,3 +37,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 .qodo
+
+# Deriv files (cause build issues with minification)
+public/app.deriv.com/
+public/deriv-api/
