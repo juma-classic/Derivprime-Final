@@ -112,6 +112,17 @@ const AppHeader = observer(() => {
                                 {localize('Deposit')}
                             </Button>
                         ))}
+                    {isDesktop && (
+                        <Button
+                            tertiary
+                            onClick={() => {
+                                client?.logout();
+                            }}
+                            className='logout-button'
+                        >
+                            <Localize i18n_default_text='Logout' />
+                        </Button>
+                    )}
                 </>
             );
         } else {

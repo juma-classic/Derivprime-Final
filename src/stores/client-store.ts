@@ -328,5 +328,10 @@ export default class ClientStore {
                 token: null,
             });
         }
+
+        // Redirect to home page after logout to ensure clean state
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 100);
     };
 }
