@@ -1148,12 +1148,6 @@
                 const masterTokenInput = document.getElementById('master-token-input');
 
                 if (!isDemoTradingActive) {
-                    // Check if regular copy trading is active
-                    if (isCopyTradingActive) {
-                        alert('Please stop regular copy trading first before starting demo to real copy trading');
-                        return;
-                    }
-
                     // Starting demo to real copy trading
                     if (tokens.length === 0) {
                         alert('Please add at least one follower token (real accounts)');
@@ -1277,12 +1271,6 @@
                 const masterTokenInput = document.getElementById('master-token-input');
 
                 if (!isCopyTradingActive) {
-                    // Check if demo to real copy trading is active
-                    if (isDemoTradingActive) {
-                        alert('Please stop demo to real copy trading first before starting regular copy trading');
-                        return;
-                    }
-
                     // Starting copy trading
                     if (tokens.length === 0) {
                         alert('Please add at least one follower token');
