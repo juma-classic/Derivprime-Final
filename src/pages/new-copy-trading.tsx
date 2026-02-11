@@ -249,7 +249,7 @@ const NewCopyTrading: React.FC = () => {
                 showMessage('❌ Failed to start copy trading for all followers', 'error');
             }
         } catch (error: any) {
-            showMessage(`❌ Error: ${error.message}`, 'error');
+            showMessage(`❌ Error: ${error?.message || error || 'Unknown error'}`, 'error');
         } finally {
             setIsLoading(false);
         }
