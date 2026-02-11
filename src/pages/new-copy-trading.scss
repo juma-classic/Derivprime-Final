@@ -65,12 +65,18 @@
         .account-info {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
 
             .account-id {
                 font-size: 18px;
                 font-weight: 700;
                 font-family: 'JetBrains Mono', monospace;
+            }
+
+            .account-type {
+                font-size: 14px;
+                font-weight: 600;
+                opacity: 0.9;
             }
 
             .account-balance {
@@ -86,6 +92,29 @@
             font-size: 12px;
             font-weight: 700;
             letter-spacing: 1px;
+        }
+    }
+
+    .account-selector {
+        margin-bottom: 20px;
+        padding: 16px;
+        background: #f9fafb;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        select.form-control {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-family: 'JetBrains Mono', monospace;
         }
     }
 

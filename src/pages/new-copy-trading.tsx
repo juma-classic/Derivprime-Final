@@ -13,7 +13,16 @@ interface MasterAccountInfo {
     balance: string;
 }
 
+interface AvailableAccount {
+    loginid: string;
+    token: string;
+    currency: string;
+    isDemo: boolean;
+}
+
 const NewCopyTrading: React.FC = () => {
+    const [availableAccounts, setAvailableAccounts] = useState<AvailableAccount[]>([]);
+    const [selectedAccountLoginid, setSelectedAccountLoginid] = useState<string>('');
     const [masterAccount, setMasterAccount] = useState<MasterAccountInfo | null>(null);
     const [followerTokens, setFollowerTokens] = useState<FollowerToken[]>([]);
     const [newToken, setNewToken] = useState('');
@@ -24,73 +33,80 @@ const NewCopyTrading: React.FC = () => {
 
     // Advanced settings
     const [showAdvanced, setShowAdvanced] = useState(false);
-    const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
     const [minStake, setMinStake] = useState<number | ''>('');
     const [maxStake, setMaxStake] = useState<number | ''>('');
-    const [selectedTradeTypes, setSelectedTradeTypes] = useState<string[]>([]);
 
-    // Load master account from localStorage
+    // Load all available accounts from localStorage
     useEffect(() => {
-        const authToken = localStorage.getItem('authToken');
-        const activeLoginid = localStorage.getItem('active_loginid');
+        const accountsList = localStorage.getItem('accountsList');
         const clientAccounts = localStorage.getItem('clientAccounts');
+        const activeLoginid = localStorage.getItem('active_loginid');
 
-        if (authToken && activeLoginid && clientAccounts) {
+        if (accountsList && clientAccounts) {
             try {
-                const accounts = JSON.parse(clientAccounts);
-                const activeAccount = accounts[activeLoginid];
+                const accounts = JSON.parse(accountsList);
+                const clientAccountsData = JSON.parse(clientAccounts);
 
-                if (activeAccount) {
-                    // Connect to get balance
-                    const ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=1089`);
-
-                    ws.onopen = () => {
-                        ws.send(
-                            JSON.stringify({
-                                authorize: authToken,
-                            })
-                        );
+                const loadedAccounts: AvailableAccount[] = Object.entries(accounts).map(([loginid, token]) => {
+                    const accountInfo = clientAccountsData[loginid];
+                    return {
+                        loginid,
+                        token: String(token),
+                        currency: accountInfo?.currency || 'USD',
+                        isDemo: loginid.startsWith('VR'),
                     };
+                });
 
-                    ws.onmessage = msg => {
-                        const data = JSON.parse(msg.data);
+                setAvailableAccounts(loadedAccounts);
 
-                        if (data.msg_type === 'authorize' && !data.error) {
-                            setMasterAccount({
-                                loginid: data.authorize.loginid,
-                                token: authToken,
-                                currency: data.authorize.currency,
-                                balance: data.authorize.balance,
-                            });
-                            ws.close();
-                        }
-                    };
-
-                    ws.onerror = () => {
-                        console.error('Failed to connect master account');
-                    };
+                // Set active account as default
+                if (activeLoginid) {
+                    setSelectedAccountLoginid(activeLoginid);
+                    loadAccountBalance(activeLoginid, accounts[activeLoginid]);
                 }
             } catch (error) {
-                console.error('Failed to load master account:', error);
+                console.error('Failed to load accounts:', error);
             }
         }
     }, []);
 
-    const assetOptions = [
-        { value: 'frxUSDJPY', label: 'USD/JPY' },
-        { value: 'frxEURUSD', label: 'EUR/USD' },
-        { value: 'frxGBPUSD', label: 'GBP/USD' },
-        { value: 'R_10', label: 'Volatility 10 Index' },
-        { value: 'R_25', label: 'Volatility 25 Index' },
-        { value: 'R_50', label: 'Volatility 50 Index' },
-        { value: 'R_75', label: 'Volatility 75 Index' },
-        { value: 'R_100', label: 'Volatility 100 Index' },
-    ];
+    const loadAccountBalance = (_loginid: string, token: string) => {
+        const ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=1089`);
 
-    const tradeTypeOptions = [
-        { value: 'CALL', label: 'Rise/Call' },
-        { value: 'PUT', label: 'Fall/Put' },
-    ];
+        ws.onopen = () => {
+            ws.send(
+                JSON.stringify({
+                    authorize: token,
+                })
+            );
+        };
+
+        ws.onmessage = msg => {
+            const data = JSON.parse(msg.data);
+
+            if (data.msg_type === 'authorize' && !data.error) {
+                setMasterAccount({
+                    loginid: data.authorize.loginid,
+                    token: token,
+                    currency: data.authorize.currency,
+                    balance: data.authorize.balance,
+                });
+                ws.close();
+            }
+        };
+
+        ws.onerror = () => {
+            console.error('Failed to connect account');
+        };
+    };
+
+    const handleAccountChange = (loginid: string) => {
+        setSelectedAccountLoginid(loginid);
+        const account = availableAccounts.find(acc => acc.loginid === loginid);
+        if (account) {
+            loadAccountBalance(account.loginid, account.token);
+        }
+    };
 
     const addFollowerToken = () => {
         if (!newToken.trim()) {
@@ -164,21 +180,13 @@ const NewCopyTrading: React.FC = () => {
                                         copy_start: masterAccount.token,
                                     };
 
-                                    // Add optional filters if configured
-                                    if (selectedAssets.length > 0) {
-                                        request.assets = selectedAssets;
-                                    }
-
+                                    // Add optional stake limits if configured
                                     if (minStake !== '') {
                                         request.min_trade_stake = minStake;
                                     }
 
                                     if (maxStake !== '') {
                                         request.max_trade_stake = maxStake;
-                                    }
-
-                                    if (selectedTradeTypes.length > 0) {
-                                        request.trade_types = selectedTradeTypes;
                                     }
 
                                     ws.send(JSON.stringify(request));
@@ -233,14 +241,6 @@ const NewCopyTrading: React.FC = () => {
         showMessage('Copy trading stopped', 'success');
     };
 
-    const toggleAsset = (asset: string) => {
-        setSelectedAssets(prev => (prev.includes(asset) ? prev.filter(a => a !== asset) : [...prev, asset]));
-    };
-
-    const toggleTradeType = (type: string) => {
-        setSelectedTradeTypes(prev => (prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]));
-    };
-
     return (
         <div className='new-copy-trading'>
             <div className='new-copy-trading__container'>
@@ -254,9 +254,33 @@ const NewCopyTrading: React.FC = () => {
                 {masterAccount ? (
                     <div className='new-copy-trading__section'>
                         <h2>Master Account (Your Account)</h2>
+                        <p className='section-description'>Select which account to use as the master trader</p>
+
+                        {availableAccounts.length > 1 && (
+                            <div className='account-selector'>
+                                <label htmlFor='account-select'>Switch Account:</label>
+                                <select
+                                    id='account-select'
+                                    className='form-control'
+                                    value={selectedAccountLoginid}
+                                    onChange={e => handleAccountChange(e.target.value)}
+                                    disabled={isActive}
+                                >
+                                    {availableAccounts.map(account => (
+                                        <option key={account.loginid} value={account.loginid}>
+                                            {account.loginid} ({account.isDemo ? 'Demo' : 'Real'}) - {account.currency}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
                         <div className='master-account-card'>
                             <div className='account-info'>
                                 <div className='account-id'>{masterAccount.loginid}</div>
+                                <div className='account-type'>
+                                    {masterAccount.loginid.startsWith('VR') ? '🎮 Demo Account' : '💰 Real Account'}
+                                </div>
                                 <div className='account-balance'>
                                     {masterAccount.balance} {masterAccount.currency}
                                 </div>
@@ -322,27 +346,10 @@ const NewCopyTrading: React.FC = () => {
                     {showAdvanced && (
                         <div className='advanced-settings'>
                             <div className='setting-group'>
-                                <h3>Asset Filter</h3>
-                                <p className='setting-description'>
-                                    Only copy trades for selected assets (leave empty for all)
-                                </p>
-                                <div className='checkbox-grid'>
-                                    {assetOptions.map(({ value, label }) => (
-                                        <label key={value} className='checkbox-label'>
-                                            <input
-                                                type='checkbox'
-                                                checked={selectedAssets.includes(value)}
-                                                onChange={() => toggleAsset(value)}
-                                                disabled={isActive}
-                                            />
-                                            <span>{label}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className='setting-group'>
                                 <h3>Stake Limits</h3>
+                                <p className='setting-description'>
+                                    Set minimum and maximum stake amounts for copied trades
+                                </p>
                                 <div className='stake-inputs'>
                                     <div className='input-group'>
                                         <label>Min Stake</label>
@@ -366,26 +373,6 @@ const NewCopyTrading: React.FC = () => {
                                             disabled={isActive}
                                         />
                                     </div>
-                                </div>
-                            </div>
-
-                            <div className='setting-group'>
-                                <h3>Trade Type Filter</h3>
-                                <p className='setting-description'>
-                                    Only copy specific trade types (leave empty for all)
-                                </p>
-                                <div className='checkbox-grid'>
-                                    {tradeTypeOptions.map(({ value, label }) => (
-                                        <label key={value} className='checkbox-label'>
-                                            <input
-                                                type='checkbox'
-                                                checked={selectedTradeTypes.includes(value)}
-                                                onChange={() => toggleTradeType(value)}
-                                                disabled={isActive}
-                                            />
-                                            <span>{label}</span>
-                                        </label>
-                                    ))}
                                 </div>
                             </div>
                         </div>
