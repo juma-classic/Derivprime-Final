@@ -5,7 +5,7 @@ import { FakeRealModeIndicator } from '@/components/fake-real-account-toggle/Fak
 import { standalone_routes } from '@/components/shared';
 import Button from '@/components/shared_ui/button';
 import Modal from '@/components/shared_ui/modal'; // Import the modal component
-import { ApiTokenLoginNavButton } from '@/components/navigation/ApiTokenLoginNavButton';
+import { ApiTokenLoginModal } from '@/components/api-token-login/ApiTokenLoginModal';
 import useActiveAccount from '@/hooks/api/account/useActiveAccount';
 import { useApiBase } from '@/hooks/useApiBase';
 import { useStore } from '@/hooks/useStore';
@@ -55,6 +55,7 @@ const AppHeader = observer(() => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [stake, setStake] = useState('');
     const [martingale, setMartingale] = useState('');
+    const [isApiTokenModalOpen, setIsApiTokenModalOpen] = useState(false);
 
     const handleToggle = () => {
         if (!isToggled) {
@@ -125,6 +126,9 @@ const AppHeader = observer(() => {
                         }}
                     >
                         <Localize i18n_default_text='Log in' />
+                    </Button>
+                    <Button tertiary onClick={() => setIsApiTokenModalOpen(true)} className='api-token-login-btn'>
+                        <Localize i18n_default_text='Login with API Token' />
                     </Button>
                     <Button
                         primary
@@ -201,6 +205,8 @@ const AppHeader = observer(() => {
                     </div>
                 </Modal>
             )}
+
+            <ApiTokenLoginModal isOpen={isApiTokenModalOpen} onClose={() => setIsApiTokenModalOpen(false)} />
         </Header>
     );
 });
