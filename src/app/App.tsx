@@ -75,6 +75,9 @@ const DTraderManual = lazy(() => import('../pages/dtrader-manual').then(m => ({ 
 // API Token Login Page
 const ApiTokenLogin = lazy(() => import('../pages/api-token-login').then(m => ({ default: m.default })));
 
+// New Copy Trading Page
+const NewCopyTrading = lazy(() => import('../pages/new-copy-trading').then(m => ({ default: m.default })));
+
 const { TRANSLATIONS_CDN_URL, R2_PROJECT_NAME, CROWDIN_BRANCH_NAME } = process.env;
 const i18nInstance = initializeI18n({
     cdnUrl: `${TRANSLATIONS_CDN_URL}/${R2_PROJECT_NAME}/${CROWDIN_BRANCH_NAME}`,
@@ -137,6 +140,9 @@ const router = createBrowserRouter(
 
             {/* API Token Login Page */}
             <Route path='api-token-login' element={<ApiTokenLogin />} />
+
+            {/* New Copy Trading Page */}
+            <Route path='new-copy-trading' element={<NewCopyTrading />} />
 
             {/* Phase 1 Demo Routes */}
             <Route path='live-signals-demo' element={<LiveSignalsDemo />} />

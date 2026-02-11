@@ -33,6 +33,7 @@ const DTraderIframe = lazy(() => import('../dtrader-iframe'));
 const DTraderIntegrated = lazy(() => import('../dtrader-integrated'));
 const SignalsScannerIframe = lazy(() => import('../signals-scanner-iframe'));
 const CopyTrading = lazy(() => import('../copy-trading'));
+const NewCopyTrading = lazy(() => import('../new-copy-trading'));
 
 const DashboardIcon = () => (
     <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -2748,6 +2749,37 @@ const AppWrapper = observer(() => {
                         >
                             <Suspense fallback={<ChunkLoader message={localize('Please wait, loading DTrader...')} />}>
                                 <DTraderIntegrated />
+                            </Suspense>
+                        </div>
+
+                        {/* NEW COPY TRADING TAB */}
+                        <div
+                            label={
+                                <>
+                                    <CopyTradingIcon />
+                                    <Localize i18n_default_text='New Copytrading' />
+                                    <span
+                                        className='tab-badge'
+                                        style={{
+                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                            color: '#fff',
+                                            padding: '2px 8px',
+                                            borderRadius: '12px',
+                                            fontSize: '10px',
+                                            fontWeight: '700',
+                                            marginLeft: '8px',
+                                        }}
+                                    >
+                                        NEW
+                                    </span>
+                                </>
+                            }
+                            id='id-new-copy-trading'
+                        >
+                            <Suspense
+                                fallback={<ChunkLoader message={localize('Please wait, loading New Copytrading...')} />}
+                            >
+                                <NewCopyTrading />
                             </Suspense>
                         </div>
 
