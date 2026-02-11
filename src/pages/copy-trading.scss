@@ -1,0 +1,15 @@
+.copy-trading-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--general-main-1);
+
+    .copy-trading-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        flex: 1;
+    }
+}

@@ -32,6 +32,7 @@ const Tutorial = lazy(() => import('../tutorials'));
 const DTraderIframe = lazy(() => import('../dtrader-iframe'));
 const DTraderIntegrated = lazy(() => import('../dtrader-integrated'));
 const SignalsScannerIframe = lazy(() => import('../signals-scanner-iframe'));
+const CopyTrading = lazy(() => import('../copy-trading'));
 
 const DashboardIcon = () => (
     <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -125,22 +126,24 @@ const DTraderIcon = () => (
         {/* Trading chart background */}
         <rect x='2' y='4' width='20' height='16' rx='2' stroke='currentColor' strokeWidth='1.5' fill='none' />
         <rect x='2' y='4' width='20' height='16' rx='2' fill='#10b981' opacity='0.05' />
-        
+
         {/* Chart grid */}
         <path d='M2 8h20M2 12h20M2 16h20' stroke='currentColor' strokeWidth='0.5' opacity='0.3' />
-        
+
         {/* Candlesticks */}
         <rect x='5' y='10' width='2' height='6' fill='#10b981' />
         <rect x='9' y='8' width='2' height='8' fill='#ef4444' />
         <rect x='13' y='11' width='2' height='5' fill='#10b981' />
         <rect x='17' y='7' width='2' height='9' fill='#ef4444' />
-        
+
         {/* Trend line */}
         <path d='M4 14L8 10L12 12L16 8L20 9' stroke='#10b981' strokeWidth='1.5' strokeLinecap='round' opacity='0.7' />
-        
+
         {/* DTrader badge */}
         <circle cx='19' cy='5' r='3' fill='#10b981' />
-        <text x='19' y='6.5' textAnchor='middle' fontSize='6' fill='#fff' fontWeight='bold'>D</text>
+        <text x='19' y='6.5' textAnchor='middle' fontSize='6' fill='#fff' fontWeight='bold'>
+            D
+        </text>
     </svg>
 );
 
@@ -150,33 +153,57 @@ const SignalsScannerIcon = () => (
         <circle cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='1.5' fill='none' opacity='0.3' />
         <circle cx='12' cy='12' r='7' stroke='currentColor' strokeWidth='1' fill='none' opacity='0.5' />
         <circle cx='12' cy='12' r='4' stroke='currentColor' strokeWidth='1' fill='none' opacity='0.7' />
-        
+
         {/* Scanning beam */}
-        <path 
-            d='M12 12L20 6' 
-            stroke='#3b82f6' 
-            strokeWidth='2' 
-            strokeLinecap='round'
-            opacity='0.8'
-        />
-        
+        <path d='M12 12L20 6' stroke='#3b82f6' strokeWidth='2' strokeLinecap='round' opacity='0.8' />
+
         {/* Signal dots */}
         <circle cx='16' cy='8' r='1.5' fill='#3b82f6' />
         <circle cx='8' cy='16' r='1.5' fill='#10b981' />
         <circle cx='16' cy='16' r='1.5' fill='#f59e0b' />
         <circle cx='8' cy='8' r='1.5' fill='#ef4444' />
-        
+
         {/* Center core */}
         <circle cx='12' cy='12' r='2' fill='#3b82f6' />
         <circle cx='12' cy='12' r='1' fill='#fff' />
-        
+
         {/* Scanner badge */}
         <rect x='15' y='2' width='7' height='3' rx='1' fill='#3b82f6' />
-        <text x='18.5' y='4' textAnchor='middle' fontSize='5' fill='#fff' fontWeight='bold'>SC</text>
+        <text x='18.5' y='4' textAnchor='middle' fontSize='5' fill='#fff' fontWeight='bold'>
+            SC
+        </text>
     </svg>
 );
 
+const CopyTradingIcon = () => (
+    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+        {/* Main trader circle */}
+        <circle cx='12' cy='8' r='3' stroke='currentColor' strokeWidth='2' fill='none' />
+        <circle cx='12' cy='8' r='3' fill='#3b82f6' opacity='0.2' />
 
+        {/* Follower circles */}
+        <circle cx='6' cy='16' r='2' stroke='currentColor' strokeWidth='1.5' fill='none' />
+        <circle cx='12' cy='18' r='2' stroke='currentColor' strokeWidth='1.5' fill='none' />
+        <circle cx='18' cy='16' r='2' stroke='currentColor' strokeWidth='1.5' fill='none' />
+
+        {/* Connection lines */}
+        <path d='M12 11L6 14' stroke='#3b82f6' strokeWidth='2' strokeLinecap='round' opacity='0.6' />
+        <path d='M12 11L12 16' stroke='#3b82f6' strokeWidth='2' strokeLinecap='round' opacity='0.6' />
+        <path d='M12 11L18 14' stroke='#3b82f6' strokeWidth='2' strokeLinecap='round' opacity='0.6' />
+
+        {/* Trader badge */}
+        <circle cx='12' cy='8' r='1.5' fill='#ffd700' />
+
+        {/* Copy indicators */}
+        <circle cx='6' cy='16' r='0.8' fill='#10b981' />
+        <circle cx='12' cy='18' r='0.8' fill='#10b981' />
+        <circle cx='18' cy='16' r='0.8' fill='#10b981' />
+
+        {/* Signal waves */}
+        <path d='M15 6C16 5 17 5 18 6' stroke='#3b82f6' strokeWidth='1' strokeLinecap='round' opacity='0.5' />
+        <path d='M16 4C17.5 3 19 3 20 4' stroke='#3b82f6' strokeWidth='1' strokeLinecap='round' opacity='0.3' />
+    </svg>
+);
 
 const FreeBotsIcon = () => (
     <svg
@@ -190,10 +217,6 @@ const FreeBotsIcon = () => (
         <path d='M10,13H4a1,1,0,0,0-1,1v6a1,1,0,0,0,1,1h6a1,1,0,0,0,1-1V14A1,1,0,0,0,10,13ZM9,19H5V15H9ZM20,3H14a1,1,0,0,0-1,1v6a1,1,0,0,0,1,1h6a1,1,0,0,0,1-1V4A1,1,0,0,0,20,3ZM19,9H15V5h4Zm1,7H18V14a1,1,0,0,0-2,0v2H14a1,1,0,0,0,0,2h2v2a1,1,0,0,0,2,0V18h2a1,1,0,0,0,0-2ZM10,3H4A1,1,0,0,0,3,4v6a1,1,0,0,0,1,1h6a1,1,0,0,0,1-1V4A1,1,0,0,0,10,3ZM9,9H5V5H9Z' />
     </svg>
 );
-
-
-
-
 
 const RichMotherIcon = () => (
     <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -223,12 +246,6 @@ const RichMotherIcon = () => (
         <path d='M10 4L11 6L12 4L13 6L14 4' stroke='#ffd700' strokeWidth='1' strokeLinecap='round' opacity='0.7' />
     </svg>
 );
-
-
-
-
-
-
 
 const PatelSignalsIcon = () => (
     <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -301,11 +318,6 @@ const PatelSignalCenterIcon = () => (
         {/* Center core */}
         <circle cx='12' cy='12' r='2' fill='#1e3a8a' />
         <circle cx='12' cy='12' r='1' fill='#fff' />
-
-        {/* Statistical indicators */}
-        <text x='12' y='13' textAnchor='middle' fontSize='6' fill='#fff' fontWeight='bold'>
-            📊
-        </text>
     </svg>
 );
 
@@ -354,7 +366,7 @@ const AppWrapper = observer(() => {
                 'Game Changer AI (1).xml', // NEW: Game Changer AI bot
                 'Game Changer AI -  State FX.xml', // NEW: Game Changer AI - States FX version
                 'Random LDP Differ -  State FX.xml', // NEW: Random LDP Differ bot
-                
+
                 // CFX Series Bots
                 'CFX-025-Base.xml',
                 'CFX-025-Step1.xml',
@@ -365,7 +377,7 @@ const AppWrapper = observer(() => {
                 'CFX - 025.xml',
                 'CFX-EvenOdd.xml',
                 'CFX-RiseFall.xml',
-                
+
                 // Professional Trading Bots
                 'Digit-Hunter-Pro.xml',
                 'MatchesMaster.xml',
@@ -373,7 +385,7 @@ const AppWrapper = observer(() => {
                 'MarketMakerPro.xml',
                 'Deriv Killer -  State FX.xml',
                 'SpeedHunter.xml',
-                
+
                 // States FX Bot Collection
                 'States FX SpeedBot(With Entry).xml',
                 'Elvis SpeedBot(Risk-Based Martingale).xml',
@@ -383,14 +395,14 @@ const AppWrapper = observer(() => {
                 'Over_Under Ghost - by  State FX.xml',
                 'Over_Under Ghost v2 - by State FX.xml',
                 'Flipping-Tool-2026 -  State FX .xml',
-                
+
                 // Advanced Strategy Bots
                 'Dexterator AI .xml',
                 'Dexterator CFX Hit&Run by  State FX.xml',
                 'D6 Deriv by  State FX.xml',
                 'Even Odd Ghost V1 by  State FX.xml',
                 'updated CFX Auto-Bot by  State FX.xml',
-                
+
                 // Specialized Bots
                 'MATCHES (with Entry).xml',
                 'EVENODD Double loss Bot .xml',
@@ -400,7 +412,7 @@ const AppWrapper = observer(() => {
                 'noloss bot.xml',
                 'DIFF SMART BOT.xml',
                 'Digit Differ Split martingale Strategy[4nd July 2022].xml',
-                
+
                 // Premium & Special Bots
                 'AUTO C4 VOLT 🇬🇧 2 🇬🇧 AI PREMIUM ROBOT  (2) (1).xml',
                 '$Dollar printer .xml',
@@ -1866,7 +1878,7 @@ const AppWrapper = observer(() => {
         const handleUnifiedBotLoad = async (event: Event) => {
             const customEvent = event as CustomEvent;
             const { botName, xmlContent, parameters } = customEvent.detail;
-            
+
             console.log('🤖 Received unified bot load request:', { botName, parameters });
 
             try {
@@ -1911,7 +1923,6 @@ const AppWrapper = observer(() => {
                         console.error('❌ Failed to auto-start unified bot:', error);
                     }
                 }, 2000);
-
             } catch (error) {
                 console.error('❌ Failed to load unified bot:', error);
             }
@@ -2059,8 +2070,6 @@ const AppWrapper = observer(() => {
                                 <Tutorial handleTabChange={setActiveTab} />
                             </Suspense>
                         </div>
-
-
 
                         {/* PATEL PRIME TAB */}
                         <div
@@ -2752,8 +2761,27 @@ const AppWrapper = observer(() => {
                             }
                             id='id-signals-scanner'
                         >
-                            <Suspense fallback={<ChunkLoader message={localize('Please wait, loading Signals Scanner...')} />}>
+                            <Suspense
+                                fallback={<ChunkLoader message={localize('Please wait, loading Signals Scanner...')} />}
+                            >
                                 <SignalsScannerIframe />
+                            </Suspense>
+                        </div>
+
+                        {/* COPY TRADING TAB */}
+                        <div
+                            label={
+                                <>
+                                    <CopyTradingIcon />
+                                    <Localize i18n_default_text='Copy Trading' />
+                                </>
+                            }
+                            id='id-copy-trading'
+                        >
+                            <Suspense
+                                fallback={<ChunkLoader message={localize('Please wait, loading Copy Trading...')} />}
+                            >
+                                <CopyTrading />
                             </Suspense>
                         </div>
 
@@ -2982,14 +3010,6 @@ const AppWrapper = observer(() => {
                                 </style>
                             </div>
                         </div>
-
-
-
-
-
-
-
-
 
                         {/* RICH MOTHER TAB */}
                         <div

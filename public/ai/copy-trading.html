@@ -5,7 +5,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Copy Trading - Advanced Trading Tools</title>
         <link rel="stylesheet" href="/ai/index-enhanced.css" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+            rel="stylesheet"
+        />
         <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -351,7 +354,10 @@
                                     </svg>
                                     Analysis Tool
                                 </button>
-                                <button onclick="window.location.href='/ai/smart-analysis.html'" class="btn-compact btn-secondary">
+                                <button
+                                    onclick="window.location.href='/ai/smart-analysis.html'"
+                                    class="btn-compact btn-secondary"
+                                >
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                         <path d="M9 19c-5 0-8-3-8-8s3-8 8-8 8 3 8 8-3 8-8 8z"></path>
                                         <path d="M17 17l4.5 4.5"></path>
@@ -377,7 +383,7 @@
             // Simple Copy Trading Implementation without React
             function createCopyTradingApp() {
                 const container = document.getElementById('copy-trading-root');
-                
+
                 // Create the main structure
                 container.innerHTML = `
                     <div class="main_copy">
@@ -471,6 +477,20 @@
                     updateTokensList();
                 }
 
+                // Load trading states from localStorage
+                const savedDemoState = localStorage.getItem('isDemoTradingActive');
+                const savedCopyState = localStorage.getItem('isCopyTradingActive');
+
+                if (savedDemoState === 'true') {
+                    isDemoTradingActive = true;
+                    updateDemoTradingUI(true);
+                }
+
+                if (savedCopyState === 'true') {
+                    isCopyTradingActive = true;
+                    updateCopyTradingUI(true);
+                }
+
                 // Setup event listeners
                 document.getElementById('demo-trading-btn').addEventListener('click', toggleDemoTrading);
                 document.getElementById('copy-trading-btn').addEventListener('click', toggleCopyTrading);
@@ -479,9 +499,9 @@
             function addToken() {
                 const input = document.getElementById('token-input');
                 const token = input.value.trim();
-                
+
                 if (!token) return;
-                
+
                 if (token.length < 10) {
                     alert('Invalid token format. Token must be at least 10 characters long.');
                     return;
@@ -502,7 +522,7 @@
             function syncTokens() {
                 const syncText = document.getElementById('sync-text');
                 syncText.textContent = 'Syncing...';
-                
+
                 setTimeout(() => {
                     syncText.textContent = 'Sync';
                     updateTokensList();
@@ -512,15 +532,17 @@
             function updateTokensList() {
                 const container = document.getElementById('tokens-list-container');
                 const countElement = document.getElementById('token-count');
-                
+
                 countElement.textContent = tokens.length;
-                
+
                 if (tokens.length === 0) {
                     container.innerHTML = '<div class="token_info">No tokens added yet</div>';
                     return;
                 }
 
-                container.innerHTML = tokens.map((token, index) => `
+                container.innerHTML = tokens
+                    .map(
+                        (token, index) => `
                     <li class="token">
                         <span class="token-number">${index + 1}.</span>
                         <span class="token-item">${token}</span>
@@ -531,45 +553,65 @@
                             </svg>
                         </button>
                     </li>
-                `).join('');
+                `
+                    )
+                    .join('');
+            }
+
+            function updateDemoTradingUI(isActive) {
+                const btn = document.getElementById('demo-trading-btn');
+                const message = document.getElementById('demo-success-message');
+
+                if (isActive) {
+                    btn.textContent = 'Stop Demo to Real Copy Trading';
+                    btn.className = 'copy-trading-btn stop';
+                    message.textContent = 'Demo to Real copy trading is active';
+                } else {
+                    btn.textContent = 'Start Demo to Real Copy Trading';
+                    btn.className = 'copy-trading-btn start';
+                    message.textContent = 'Demo to Real copy trading stopped';
+                }
             }
 
             function toggleDemoTrading() {
                 isDemoTradingActive = !isDemoTradingActive;
-                const btn = document.getElementById('demo-trading-btn');
+
+                // Save state to localStorage
+                localStorage.setItem('isDemoTradingActive', isDemoTradingActive.toString());
+
+                updateDemoTradingUI(isDemoTradingActive);
+
                 const message = document.getElementById('demo-success-message');
-                
-                if (isDemoTradingActive) {
-                    btn.textContent = 'Stop Demo to Real Copy Trading';
-                    btn.className = 'copy-trading-btn stop';
-                    message.textContent = 'Demo to Real copy trading started successfully';
-                } else {
-                    btn.textContent = 'Start Demo to Real Copy Trading';
-                    btn.className = 'copy-trading-btn start';
-                    message.textContent = 'Demo to Real copy trading stopped successfully';
-                }
-                
                 message.style.display = 'block';
                 setTimeout(() => {
                     message.style.display = 'none';
                 }, 5000);
             }
 
-            function toggleCopyTrading() {
-                isCopyTradingActive = !isCopyTradingActive;
+            function updateCopyTradingUI(isActive) {
                 const btn = document.getElementById('copy-trading-btn');
                 const message = document.getElementById('success-message');
-                
-                if (isCopyTradingActive) {
+
+                if (isActive) {
                     btn.textContent = 'Stop Copy Trading';
                     btn.className = 'copy-trading-btn stop';
-                    message.textContent = `Copy trading started successfully for all ${tokens.length} tokens!`;
+                    message.textContent = `Copy trading is active for ${tokens.length} token(s)`;
                 } else {
                     btn.textContent = 'Start Copy Trading';
                     btn.className = 'copy-trading-btn start';
-                    message.textContent = `Copy trading stopped successfully for all ${tokens.length} tokens!`;
+                    message.textContent = `Copy trading stopped for ${tokens.length} token(s)`;
                 }
-                
+            }
+
+            function toggleCopyTrading() {
+                isCopyTradingActive = !isCopyTradingActive;
+
+                // Save state to localStorage
+                localStorage.setItem('isCopyTradingActive', isCopyTradingActive.toString());
+
+                updateCopyTradingUI(isCopyTradingActive);
+
+                const message = document.getElementById('success-message');
                 message.style.display = 'block';
                 setTimeout(() => {
                     message.style.display = 'none';
