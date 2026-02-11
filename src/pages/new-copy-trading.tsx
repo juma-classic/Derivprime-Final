@@ -322,15 +322,18 @@ const NewCopyTrading: React.FC = () => {
 
                     {followerTokens.length > 0 && (
                         <div className='token-list'>
-                            {followerTokens.map(({ id, token }) => (
+                            <div className='list-header'>Total Clients added: {followerTokens.length}</div>
+                            {followerTokens.map(({ id, token }, index) => (
                                 <div key={id} className='token-item'>
-                                    <span className='token-text'>{token.substring(0, 20)}...</span>
+                                    <span className='token-number'>{index + 1}.</span>
+                                    <span className='token-text'>{token}</span>
                                     <button
                                         className='btn-remove'
                                         onClick={() => removeFollowerToken(id)}
                                         disabled={isActive}
+                                        title='Remove token'
                                     >
-                                        ×
+                                        🗑
                                     </button>
                                 </div>
                             ))}
