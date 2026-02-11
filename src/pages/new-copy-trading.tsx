@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './new-copy-trading.scss';
 
 interface FollowerToken {
@@ -13,16 +13,8 @@ interface MasterAccountInfo {
     balance: string;
 }
 
-interface AvailableAccount {
-    loginid: string;
-    token: string;
-    currency: string;
-    isDemo: boolean;
-}
-
 const NewCopyTrading: React.FC = () => {
-    const [availableAccounts, setAvailableAccounts] = useState<AvailableAccount[]>([]);
-    const [selectedAccountLoginid, setSelectedAccountLoginid] = useState<string>('');
+    const [masterToken, setMasterToken] = useState('');
     const [masterAccount, setMasterAccount] = useState<MasterAccountInfo | null>(null);
     const [followerTokens, setFollowerTokens] = useState<FollowerToken[]>([]);
     const [newToken, setNewToken] = useState('');
@@ -36,86 +28,8 @@ const NewCopyTrading: React.FC = () => {
     const [minStake, setMinStake] = useState<number | ''>('');
     const [maxStake, setMaxStake] = useState<number | ''>('');
 
-    // Load all available accounts from localStorage
-    useEffect(() => {
-        const loadAccounts = () => {
-            const accountsList = localStorage.getItem('accountsList');
-            const clientAccounts = localStorage.getItem('clientAccounts');
-            const activeLoginid = localStorage.getItem('active_loginid');
-            const authToken = localStorage.getItem('authToken');
-
-            // Try to load from accountsList and clientAccounts first
-            if (accountsList && clientAccounts) {
-                try {
-                    const accounts = JSON.parse(accountsList);
-                    const clientAccountsData = JSON.parse(clientAccounts);
-
-                    const loadedAccounts: AvailableAccount[] = Object.entries(accounts).map(([loginid, token]) => {
-                        const accountInfo = clientAccountsData[loginid];
-                        return {
-                            loginid,
-                            token: String(token),
-                            currency: accountInfo?.currency || 'USD',
-                            isDemo: loginid.startsWith('VR'),
-                        };
-                    });
-
-                    setAvailableAccounts(loadedAccounts);
-
-                    // Set active account as default
-                    if (activeLoginid && accounts[activeLoginid]) {
-                        setSelectedAccountLoginid(activeLoginid);
-                        loadAccountBalance(activeLoginid, accounts[activeLoginid]);
-                    }
-                } catch (error) {
-                    console.error('Failed to load accounts:', error);
-                }
-            }
-            // Fallback: try to load from authToken and active_loginid
-            else if (authToken && activeLoginid) {
-                try {
-                    const singleAccount: AvailableAccount = {
-                        loginid: activeLoginid,
-                        token: authToken,
-                        currency: 'USD',
-                        isDemo: activeLoginid.startsWith('VR'),
-                    };
-
-                    setAvailableAccounts([singleAccount]);
-                    setSelectedAccountLoginid(activeLoginid);
-                    loadAccountBalance(activeLoginid, authToken);
-                } catch (error) {
-                    console.error('Failed to load account from authToken:', error);
-                }
-            }
-        };
-
-        // Load accounts on mount
-        loadAccounts();
-
-        // Listen for storage changes (when user logs in)
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'authToken' || e.key === 'accountsList') {
-                loadAccounts();
-            }
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-
-        // Also listen for custom event when login happens in same tab
-        const handleLoginEvent = () => {
-            loadAccounts();
-        };
-
-        window.addEventListener('deriv-login', handleLoginEvent);
-
-        return () => {
-            window.removeEventListener('storage', handleStorageChange);
-            window.removeEventListener('deriv-login', handleLoginEvent);
-        };
-    }, []);
-
-    const loadAccountBalance = (_loginid: string, token: string) => {
+    const loadAccountBalance = (token: string) => {
+        setIsLoading(true);
         const ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=1089`);
 
         ws.onopen = () => {
@@ -129,6 +43,13 @@ const NewCopyTrading: React.FC = () => {
         ws.onmessage = msg => {
             const data = JSON.parse(msg.data);
 
+            if (data.error) {
+                showMessage(`Error: ${data.error.message}`, 'error');
+                setIsLoading(false);
+                ws.close();
+                return;
+            }
+
             if (data.msg_type === 'authorize' && !data.error) {
                 setMasterAccount({
                     loginid: data.authorize.loginid,
@@ -136,21 +57,31 @@ const NewCopyTrading: React.FC = () => {
                     currency: data.authorize.currency,
                     balance: data.authorize.balance,
                 });
+                setMasterToken(token);
+                showMessage('Master account connected successfully', 'success');
+                setIsLoading(false);
                 ws.close();
             }
         };
 
         ws.onerror = () => {
-            console.error('Failed to connect account');
+            showMessage('Failed to connect master account', 'error');
+            setIsLoading(false);
         };
     };
 
-    const handleAccountChange = (loginid: string) => {
-        setSelectedAccountLoginid(loginid);
-        const account = availableAccounts.find(acc => acc.loginid === loginid);
-        if (account) {
-            loadAccountBalance(account.loginid, account.token);
+    const handleSetMasterAccount = () => {
+        if (!masterToken.trim()) {
+            showMessage('Please enter master account token', 'error');
+            return;
         }
+
+        if (masterToken.length < 10) {
+            showMessage('Invalid token format', 'error');
+            return;
+        }
+
+        loadAccountBalance(masterToken);
     };
 
     const addFollowerToken = () => {
@@ -182,7 +113,7 @@ const NewCopyTrading: React.FC = () => {
 
     const startCopyTrading = async () => {
         if (!masterAccount) {
-            showMessage('Please login first to use copy trading', 'error');
+            showMessage('Please set master account first', 'error');
             return;
         }
 
@@ -296,30 +227,26 @@ const NewCopyTrading: React.FC = () => {
 
                 {message && <div className={`alert alert-${messageType}`}>{message}</div>}
 
-                {masterAccount ? (
-                    <div className='new-copy-trading__section'>
-                        <h2>Master Account (Your Account)</h2>
-                        <p className='section-description'>Select which account to use as the master trader</p>
+                <div className='new-copy-trading__section'>
+                    <h2>Master Account (Your Account)</h2>
+                    <p className='section-description'>Enter the API token for the account that will be copied</p>
 
-                        {availableAccounts.length > 1 && (
-                            <div className='account-selector'>
-                                <label htmlFor='account-select'>Switch Account:</label>
-                                <select
-                                    id='account-select'
-                                    className='form-control'
-                                    value={selectedAccountLoginid}
-                                    onChange={e => handleAccountChange(e.target.value)}
-                                    disabled={isActive}
-                                >
-                                    {availableAccounts.map(account => (
-                                        <option key={account.loginid} value={account.loginid}>
-                                            {account.loginid} ({account.isDemo ? 'Demo' : 'Real'}) - {account.currency}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        )}
-
+                    {!masterAccount ? (
+                        <div className='token-input-group'>
+                            <input
+                                type='text'
+                                className='form-control'
+                                placeholder='Enter master account API token'
+                                value={masterToken}
+                                onChange={e => setMasterToken(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && handleSetMasterAccount()}
+                                disabled={isLoading}
+                            />
+                            <button className='btn btn-secondary' onClick={handleSetMasterAccount} disabled={isLoading}>
+                                {isLoading ? 'Connecting...' : 'Set Master'}
+                            </button>
+                        </div>
+                    ) : (
                         <div className='master-account-card'>
                             <div className='account-info'>
                                 <div className='account-id'>{masterAccount.loginid}</div>
@@ -332,14 +259,8 @@ const NewCopyTrading: React.FC = () => {
                             </div>
                             <div className='account-badge'>MASTER</div>
                         </div>
-                    </div>
-                ) : (
-                    <div className='new-copy-trading__section'>
-                        <div className='alert alert-error'>
-                            Please login to your Deriv account first to use copy trading
-                        </div>
-                    </div>
-                )}
+                    )}
+                </div>
 
                 <div className='new-copy-trading__section'>
                     <h2>Follower Accounts (Client Tokens)</h2>
