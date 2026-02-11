@@ -16,41 +16,108 @@ interface ProposalResponse {
     };
 }
 
+interface ContractTypeConfig {
+    name: string;
+    types: {
+        primary: string;
+        secondary: string;
+    };
+    labels: {
+        primary: string;
+        secondary: string;
+    };
+    requiresBarrier: boolean;
+}
+
 export const TradingPanel: React.FC<{ symbol: string }> = ({ symbol }) => {
     const { client } = useStore();
-    const [contractType, setContractType] = useState('CALL');
+    const [currentContractIndex, setCurrentContractIndex] = useState(0);
     const [stake, setStake] = useState(10);
-    const [duration, setDuration] = useState(5);
-    const [durationType, setDurationType] = useState<'t' | 'm'>('t');
-    const [proposal, setProposal] = useState<ProposalResponse | null>(null);
+    const [duration, setDuration] = useState(1);
+    const [lastDigit, setLastDigit] = useState(3);
+    const [viewMode, setViewMode] = useState<'stake' | 'payout'>('stake');
+    const [primaryProposal, setPrimaryProposal] = useState<ProposalResponse | null>(null);
+    const [secondaryProposal, setSecondaryProposal] = useState<ProposalResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const isLoggedIn = Boolean(client?.loginid);
 
-    // Get proposal whenever parameters change (only if logged in)
+    const contractTypes: ContractTypeConfig[] = [
+        {
+            name: 'Over/Under',
+            types: { primary: 'DIGITOVER', secondary: 'DIGITUNDER' },
+            labels: { primary: 'Over', secondary: 'Under' },
+            requiresBarrier: true,
+        },
+        {
+            name: 'Rise/Fall',
+            types: { primary: 'CALL', secondary: 'PUT' },
+            labels: { primary: 'Rise', secondary: 'Fall' },
+            requiresBarrier: false,
+        },
+        {
+            name: 'Even/Odd',
+            types: { primary: 'DIGITEVEN', secondary: 'DIGITODD' },
+            labels: { primary: 'Even', secondary: 'Odd' },
+            requiresBarrier: false,
+        },
+        {
+            name: 'Matches/Differs',
+            types: { primary: 'DIGITMATCH', secondary: 'DIGITDIFF' },
+            labels: { primary: 'Matches', secondary: 'Differs' },
+            requiresBarrier: true,
+        },
+    ];
+
+    const currentContract = contractTypes[currentContractIndex];
+
+    // Navigate between contract types
+    const navigateContract = (direction: 'prev' | 'next') => {
+        if (direction === 'prev') {
+            setCurrentContractIndex(prev => (prev === 0 ? contractTypes.length - 1 : prev - 1));
+        } else {
+            setCurrentContractIndex(prev => (prev === contractTypes.length - 1 ? 0 : prev + 1));
+        }
+    };
+
+    // Get proposals for both contract types
     useEffect(() => {
-        if (!isLoggedIn) {
-            setProposal(null);
+        if (!isLoggedIn || !api_base.api) {
+            setPrimaryProposal(null);
+            setSecondaryProposal(null);
             return;
         }
 
-        const getProposal = async () => {
-            if (!api_base.api) return;
-
+        const getProposals = async () => {
             try {
-                const response = await api_base.api.proposal({
+                const baseParams = {
                     proposal: 1,
                     amount: stake,
                     basis: 'stake',
-                    contract_type: contractType,
                     currency: client.currency || 'USD',
                     duration: duration,
-                    duration_unit: durationType,
+                    duration_unit: 't',
                     symbol: symbol,
-                });
+                };
 
-                setProposal(response as ProposalResponse);
+                // Primary proposal
+                const primaryParams = {
+                    ...baseParams,
+                    contract_type: currentContract.types.primary,
+                    ...(currentContract.requiresBarrier && { barrier: lastDigit.toString() }),
+                };
+                const primaryResponse = await api_base.api.proposal(primaryParams);
+                setPrimaryProposal(primaryResponse as ProposalResponse);
+
+                // Secondary proposal
+                const secondaryParams = {
+                    ...baseParams,
+                    contract_type: currentContract.types.secondary,
+                    ...(currentContract.requiresBarrier && { barrier: lastDigit.toString() }),
+                };
+                const secondaryResponse = await api_base.api.proposal(secondaryParams);
+                setSecondaryProposal(secondaryResponse as ProposalResponse);
+
                 setError(null);
             } catch (err: any) {
                 console.error('Proposal error:', err);
@@ -58,11 +125,13 @@ export const TradingPanel: React.FC<{ symbol: string }> = ({ symbol }) => {
             }
         };
 
-        const debounce = setTimeout(getProposal, 500);
+        const debounce = setTimeout(getProposals, 500);
         return () => clearTimeout(debounce);
-    }, [contractType, stake, duration, durationType, symbol, client?.loginid, client?.currency, isLoggedIn]);
+    }, [stake, duration, lastDigit, symbol, client?.loginid, client?.currency, isLoggedIn, currentContractIndex]);
 
-    const handleTrade = async () => {
+    const handleTrade = async (type: 'primary' | 'secondary') => {
+        const proposal = type === 'primary' ? primaryProposal : secondaryProposal;
+
         if (!api_base.api || !proposal?.proposal) {
             setError('No proposal available');
             return;
@@ -70,7 +139,6 @@ export const TradingPanel: React.FC<{ symbol: string }> = ({ symbol }) => {
 
         setIsLoading(true);
         setError(null);
-        setSuccessMessage(null);
 
         try {
             const buyResponse = await api_base.api.buy({
@@ -79,7 +147,6 @@ export const TradingPanel: React.FC<{ symbol: string }> = ({ symbol }) => {
             });
 
             if (buyResponse.buy) {
-                setSuccessMessage(`✅ Trade executed! Contract ID: ${buyResponse.buy.contract_id}`);
                 console.log('Trade executed:', buyResponse);
             } else if (buyResponse.error) {
                 setError(buyResponse.error.message);
@@ -92,233 +159,188 @@ export const TradingPanel: React.FC<{ symbol: string }> = ({ symbol }) => {
         }
     };
 
-    const contractTypes = [
-        {
-            value: 'CALL',
-            label: 'Rise',
-            icon: (
-                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
-                    <polyline points='23 6 13.5 15.5 8.5 10.5 1 18'></polyline>
-                    <polyline points='17 6 23 6 23 12'></polyline>
-                </svg>
-            ),
-        },
-        {
-            value: 'PUT',
-            label: 'Fall',
-            icon: (
-                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
-                    <polyline points='23 18 13.5 8.5 8.5 13.5 1 6'></polyline>
-                    <polyline points='17 18 23 18 23 12'></polyline>
-                </svg>
-            ),
-        },
-        {
-            value: 'DIGITEVEN',
-            label: 'Even',
-            icon: (
-                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
-                    <circle cx='12' cy='12' r='10'></circle>
-                    <line x1='12' y1='8' x2='12' y2='16'></line>
-                    <line x1='8' y1='12' x2='16' y2='12'></line>
-                </svg>
-            ),
-        },
-        {
-            value: 'DIGITODD',
-            label: 'Odd',
-            icon: (
-                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
-                    <rect x='3' y='3' width='7' height='7' rx='1'></rect>
-                    <rect x='14' y='3' width='7' height='7' rx='1'></rect>
-                    <rect x='14' y='14' width='7' height='7' rx='1'></rect>
-                    <rect x='3' y='14' width='7' height='7' rx='1'></rect>
-                </svg>
-            ),
-        },
-        {
-            value: 'DIGITMATCH',
-            label: 'Matches',
-            icon: (
-                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
-                    <circle cx='12' cy='12' r='10'></circle>
-                    <circle cx='12' cy='12' r='3' fill='currentColor'></circle>
-                </svg>
-            ),
-        },
-        {
-            value: 'DIGITDIFF',
-            label: 'Differs',
-            icon: (
-                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
-                    <line x1='18' y1='6' x2='6' y2='18'></line>
-                    <line x1='6' y1='6' x2='18' y2='18'></line>
-                </svg>
-            ),
-        },
-        {
-            value: 'DIGITOVER',
-            label: 'Over',
-            icon: (
-                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
-                    <polyline points='18 15 12 9 6 15'></polyline>
-                </svg>
-            ),
-        },
-        {
-            value: 'DIGITUNDER',
-            label: 'Under',
-            icon: (
-                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
-                    <polyline points='6 9 12 15 18 9'></polyline>
-                </svg>
-            ),
-        },
-    ];
+    const calculateProfitPercentage = (payout: number, stake: number) => {
+        return (((payout - stake) / stake) * 100).toFixed(2);
+    };
 
     return (
-        <div className='trading-panel'>
-            <div className='trading-panel__header'>
-                <h3>Trade Parameters</h3>
-                <div className='account-badge'>
-                    {client?.currency} {Number(client?.balance || 0).toFixed(2)}
+        <div className='trading-panel-deriv'>
+            {/* Trade Type Selector */}
+            <div className='trade-type-section'>
+                <div className='section-label'>Learn about this trade type</div>
+                <div className='trade-type-selector'>
+                    <button className='nav-btn' onClick={() => navigateContract('prev')}>
+                        <svg
+                            width='16'
+                            height='16'
+                            viewBox='0 0 24 24'
+                            fill='none'
+                            stroke='currentColor'
+                            strokeWidth='2'
+                        >
+                            <polyline points='15 18 9 12 15 6'></polyline>
+                        </svg>
+                    </button>
+                    <div className='trade-type-display'>
+                        <svg
+                            width='20'
+                            height='20'
+                            viewBox='0 0 24 24'
+                            fill='none'
+                            stroke='currentColor'
+                            strokeWidth='2'
+                        >
+                            <polyline points='18 15 12 9 6 15'></polyline>
+                            <polyline points='6 9 12 15 18 9'></polyline>
+                        </svg>
+                        <span>{currentContract.name}</span>
+                    </div>
+                    <button className='nav-btn' onClick={() => navigateContract('next')}>
+                        <svg
+                            width='16'
+                            height='16'
+                            viewBox='0 0 24 24'
+                            fill='none'
+                            stroke='currentColor'
+                            strokeWidth='2'
+                        >
+                            <polyline points='9 18 15 12 9 6'></polyline>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
-            <div className='trading-panel__content'>
-                {/* Contract Type Selection */}
-                <div className='form-section'>
-                    <label>Contract Type</label>
-                    <div className='contract-type-grid'>
-                        {contractTypes.map(type => (
+            {/* Duration */}
+            <div className='duration-section'>
+                <div className='duration-label'>Ticks</div>
+                <div className='duration-value'>{duration} Tick</div>
+            </div>
+
+            {/* Last Digit Prediction - Only show for contracts that require barrier */}
+            {currentContract.requiresBarrier && (
+                <div className='digit-prediction-section'>
+                    <div className='section-title'>Last Digit Prediction</div>
+                    <div className='digit-grid'>
+                        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(digit => (
                             <button
-                                key={type.value}
-                                className={`contract-type-btn ${contractType === type.value ? 'active' : ''}`}
-                                onClick={() => setContractType(type.value)}
+                                key={digit}
+                                className={`digit-btn ${lastDigit === digit ? 'active' : ''}`}
+                                onClick={() => setLastDigit(digit)}
                             >
-                                <span className='icon'>{type.icon}</span>
-                                <span className='label'>{type.label}</span>
+                                {digit}
                             </button>
                         ))}
                     </div>
                 </div>
+            )}
 
-                {/* Stake Amount */}
-                <div className='form-section'>
-                    <label>Stake Amount ({client?.currency || 'USD'})</label>
-                    <div className='input-group'>
-                        <button className='adjust-btn' onClick={() => setStake(Math.max(1, stake - 1))}>
-                            -
-                        </button>
-                        <input
-                            type='number'
-                            value={stake}
-                            onChange={e => setStake(Math.max(1, Number(e.target.value)))}
-                            min='1'
-                            step='1'
-                        />
-                        <button className='adjust-btn' onClick={() => setStake(stake + 1)}>
-                            +
-                        </button>
-                    </div>
-                    <div className='quick-amounts'>
-                        {[5, 10, 25, 50, 100].map(amount => (
-                            <button key={amount} className='quick-amount-btn' onClick={() => setStake(amount)}>
-                                {amount}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Duration */}
-                <div className='form-section'>
-                    <label>Duration</label>
-                    <div className='duration-controls'>
-                        <div className='input-group'>
-                            <button className='adjust-btn' onClick={() => setDuration(Math.max(1, duration - 1))}>
-                                -
-                            </button>
-                            <input
-                                type='number'
-                                value={duration}
-                                onChange={e => setDuration(Math.max(1, Number(e.target.value)))}
-                                min='1'
-                            />
-                            <button className='adjust-btn' onClick={() => setDuration(duration + 1)}>
-                                +
-                            </button>
-                        </div>
-                        <select
-                            value={durationType}
-                            onChange={e => setDurationType(e.target.value as 't' | 'm')}
-                            className='duration-type-select'
-                        >
-                            <option value='t'>Ticks</option>
-                            <option value='m'>Minutes</option>
-                        </select>
-                    </div>
-                </div>
-
-                {/* Proposal Info */}
-                {proposal?.proposal && (
-                    <div className='proposal-info'>
-                        <div className='proposal-row'>
-                            <span>Payout:</span>
-                            <span className='value'>
-                                {client?.currency} {proposal.proposal.payout.toFixed(2)}
-                            </span>
-                        </div>
-                        <div className='proposal-row'>
-                            <span>Potential Profit:</span>
-                            <span className='value profit'>
-                                {client?.currency} {(proposal.proposal.payout - stake).toFixed(2)}
-                            </span>
-                        </div>
-                    </div>
-                )}
-
-                {/* Error Message */}
-                {error && <div className='message error-message'>{error}</div>}
-
-                {/* Success Message */}
-                {successMessage && <div className='message success-message'>{successMessage}</div>}
-
-                {/* Login Required Message */}
-                {!isLoggedIn && <div className='message info-message'>Please log in to start trading</div>}
-
-                {/* Trade Button */}
+            {/* Stake/Payout Toggle */}
+            <div className='stake-payout-toggle'>
                 <button
-                    className='trade-button'
-                    onClick={handleTrade}
-                    disabled={isLoading || !proposal?.proposal || !isLoggedIn}
-                    title={!isLoggedIn ? 'Please log in to trade' : ''}
+                    className={`toggle-btn ${viewMode === 'stake' ? 'active' : ''}`}
+                    onClick={() => setViewMode('stake')}
                 >
-                    {isLoading ? (
-                        <>
-                            <span className='spinner'></span>
-                            Processing...
-                        </>
-                    ) : !isLoggedIn ? (
-                        <>
-                            <span className='icon'>🔐</span>
-                            Login to Trade
-                        </>
-                    ) : (
-                        <>
+                    Stake
+                </button>
+                <button
+                    className={`toggle-btn ${viewMode === 'payout' ? 'active' : ''}`}
+                    onClick={() => setViewMode('payout')}
+                >
+                    Payout
+                </button>
+            </div>
+
+            {/* Stake Amount */}
+            <div className='stake-input-section'>
+                <button className='adjust-btn' onClick={() => setStake(Math.max(1, stake - 1))}>
+                    −
+                </button>
+                <input
+                    type='number'
+                    value={stake}
+                    onChange={e => setStake(Math.max(1, Number(e.target.value)))}
+                    className='stake-input'
+                />
+                <span className='currency-label'>{client?.currency || 'USD'}</span>
+                <button className='adjust-btn' onClick={() => setStake(stake + 1)}>
+                    +
+                </button>
+            </div>
+
+            {/* Payout Display */}
+            {primaryProposal?.proposal && (
+                <div className='payout-display'>
+                    Payout {primaryProposal.proposal.payout.toFixed(2)} {client?.currency || 'USD'}
+                </div>
+            )}
+
+            {/* Error Message */}
+            {error && <div className='error-message'>{error}</div>}
+
+            {/* Trade Buttons */}
+            <div className='trade-buttons'>
+                {!isLoggedIn && <div className='login-required-message-inline'>Please log in to start trading</div>}
+                <button
+                    className='trade-btn primary-btn'
+                    onClick={() => handleTrade('primary')}
+                    disabled={isLoading || !primaryProposal?.proposal || !isLoggedIn}
+                >
+                    <div className='btn-content'>
+                        <div className='btn-label'>
                             <svg
-                                width='16'
-                                height='16'
+                                width='18'
+                                height='18'
                                 viewBox='0 0 24 24'
                                 fill='none'
                                 stroke='currentColor'
-                                strokeWidth='2'
-                                style={{ marginRight: '8px' }}
+                                strokeWidth='2.5'
                             >
-                                <circle cx='12' cy='12' r='10'></circle>
-                                <polyline points='12 6 12 12 16 14'></polyline>
+                                <polyline points='18 15 12 9 6 15'></polyline>
                             </svg>
-                            Trade Now
-                        </>
+                            <span>{currentContract.labels.primary}</span>
+                        </div>
+                        {primaryProposal?.proposal && (
+                            <div className='btn-percentage'>
+                                {calculateProfitPercentage(primaryProposal.proposal.payout, stake)}%
+                            </div>
+                        )}
+                    </div>
+                    {primaryProposal?.proposal && (
+                        <div className='btn-payout'>
+                            Payout {primaryProposal.proposal.payout.toFixed(2)} {client?.currency || 'USD'}
+                        </div>
+                    )}
+                </button>
+
+                <button
+                    className='trade-btn secondary-btn'
+                    onClick={() => handleTrade('secondary')}
+                    disabled={isLoading || !secondaryProposal?.proposal || !isLoggedIn}
+                >
+                    <div className='btn-content'>
+                        <div className='btn-label'>
+                            <svg
+                                width='18'
+                                height='18'
+                                viewBox='0 0 24 24'
+                                fill='none'
+                                stroke='currentColor'
+                                strokeWidth='2.5'
+                            >
+                                <polyline points='6 9 12 15 18 9'></polyline>
+                            </svg>
+                            <span>{currentContract.labels.secondary}</span>
+                        </div>
+                        {secondaryProposal?.proposal && (
+                            <div className='btn-percentage'>
+                                {calculateProfitPercentage(secondaryProposal.proposal.payout, stake)}%
+                            </div>
+                        )}
+                    </div>
+                    {secondaryProposal?.proposal && (
+                        <div className='btn-payout'>
+                            Payout {secondaryProposal.proposal.payout.toFixed(2)} {client?.currency || 'USD'}
+                        </div>
                     )}
                 </button>
             </div>

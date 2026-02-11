@@ -1,350 +1,393 @@
-.trading-panel {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.trading-panel-deriv {
+    background: #fff;
+    border-radius: 8px;
     height: 100%;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    font-family:
+        'IBM Plex Sans',
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        sans-serif;
+    overflow-y: auto;
 
-    &__header {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        color: white;
-        padding: 1rem 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    .panel-header {
+        padding: 16px;
+        border-bottom: 1px solid #e5e7eb;
 
-        h3 {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
+        .balance-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
 
-        .account-badge {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.4rem 0.8rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-        }
-    }
+            .demo-label {
+                font-size: 14px;
+                color: #6b7280;
+            }
 
-    &__content {
-        flex: 1;
-        padding: 1.5rem;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-}
-
-.form-section {
-    label {
-        display: block;
-        font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
-    }
-}
-
-.contract-type-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-
-    .contract-type-btn {
-        background: #f3f4f6;
-        border: 2px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 0.75rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.25rem;
-
-        .icon {
-            font-size: 1.5rem;
-        }
-
-        .label {
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #4b5563;
-        }
-
-        &:hover {
-            background: #e5e7eb;
-            transform: translateY(-2px);
-        }
-
-        &.active {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            border-color: #2563eb;
-            color: white;
-
-            .label {
-                color: white;
+            .balance-amount {
+                font-size: 16px;
+                font-weight: 600;
+                color: #111827;
             }
         }
     }
-}
 
-.input-group {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
+    .trade-type-section {
+        padding: 16px;
+        border-bottom: 1px solid #e5e7eb;
 
-    input {
-        flex: 1;
-        padding: 0.75rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 8px;
-        font-size: 1rem;
-        text-align: center;
-        font-weight: 600;
-        transition: border-color 0.2s;
+        .section-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
 
-        &:focus {
-            outline: none;
-            border-color: #3b82f6;
+        .trade-type-selector {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+
+            .nav-btn {
+                background: none;
+                border: none;
+                cursor: pointer;
+                padding: 4px;
+                color: #6b7280;
+                display: flex;
+                align-items: center;
+                transition: color 0.2s;
+
+                &:hover {
+                    color: #111827;
+                }
+            }
+
+            .trade-type-display {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 15px;
+                font-weight: 500;
+                color: #111827;
+            }
         }
     }
 
-    .adjust-btn {
-        width: 40px;
-        height: 40px;
-        background: #f3f4f6;
-        border: 2px solid #e5e7eb;
-        border-radius: 8px;
-        font-size: 1.2rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
+    .duration-section {
+        padding: 16px;
+        border-bottom: 1px solid #e5e7eb;
 
-        &:hover {
-            background: #3b82f6;
-            border-color: #3b82f6;
-            color: white;
+        .duration-label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
         }
 
-        &:active {
-            transform: scale(0.95);
+        .duration-value {
+            font-size: 16px;
+            font-weight: 500;
+            color: #111827;
         }
     }
-}
 
-.quick-amounts {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
+    .digit-prediction-section {
+        padding: 16px;
+        border-bottom: 1px solid #e5e7eb;
 
-    .quick-amount-btn {
-        flex: 1;
-        padding: 0.5rem;
-        background: #f3f4f6;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s;
+        .section-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 12px;
+        }
 
-        &:hover {
-            background: #e5e7eb;
-            transform: translateY(-1px);
+        .digit-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+
+            .digit-btn {
+                aspect-ratio: 1;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                background: #fff;
+                font-size: 16px;
+                font-weight: 500;
+                color: #111827;
+                cursor: pointer;
+                transition: all 0.2s;
+
+                &:hover {
+                    background: #f9fafb;
+                    border-color: #d1d5db;
+                }
+
+                &.active {
+                    background: #1e3a8a;
+                    color: #fff;
+                    border-color: #1e3a8a;
+                }
+            }
         }
     }
-}
 
-.duration-controls {
-    display: flex;
-    gap: 0.5rem;
-
-    .input-group {
-        flex: 2;
-    }
-
-    .duration-type-select {
-        flex: 1;
-        padding: 0.75rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        cursor: pointer;
-        background: white;
-        transition: border-color 0.2s;
-
-        &:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-    }
-}
-
-.proposal-info {
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    border: 2px solid #bae6fd;
-    border-radius: 8px;
-    padding: 1rem;
-
-    .proposal-row {
+    .stake-payout-toggle {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.5rem 0;
+        padding: 16px;
+        gap: 8px;
 
-        &:not(:last-child) {
-            border-bottom: 1px solid #bae6fd;
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+
+            &:hover {
+                background: #f9fafb;
+            }
+
+            &.active {
+                background: #1e3a8a;
+                color: #fff;
+                border-color: #1e3a8a;
+            }
+        }
+    }
+
+    .stake-input-section {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 16px 16px;
+
+        .adjust-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            border-radius: 8px;
+            font-size: 20px;
+            color: #111827;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:hover {
+                background: #f9fafb;
+                border-color: #d1d5db;
+            }
+
+            &:active {
+                transform: scale(0.95);
+            }
         }
 
-        span {
-            font-size: 0.9rem;
-            color: #0c4a6e;
+        .stake-input {
+            flex: 1;
+            height: 40px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 0 12px;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+            color: #111827;
 
-            &.value {
-                font-weight: 600;
-                font-size: 1rem;
+            &:focus {
+                outline: none;
+                border-color: #1e3a8a;
+            }
+        }
 
-                &.profit {
-                    color: #059669;
+        .currency-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+        }
+    }
+
+    .payout-display {
+        padding: 0 16px 16px;
+        font-size: 14px;
+        color: #6b7280;
+        text-align: center;
+    }
+
+    .error-message {
+        margin: 0 16px 16px;
+        padding: 12px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        color: #dc2626;
+        font-size: 14px;
+    }
+
+    .login-required-message {
+        margin: 0 16px 16px;
+        padding: 12px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 8px;
+        color: #1e40af;
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .login-required-message-inline {
+        margin-bottom: 12px;
+        padding: 10px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 4px;
+        color: #1e40af;
+        font-size: 13px;
+        text-align: center;
+    }
+
+    .trade-buttons {
+        padding: 0 16px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        .trade-btn {
+            border: none;
+            border-radius: 4px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+            min-height: 60px;
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+            &:not(:disabled):hover {
+                opacity: 0.9;
+            }
+
+            &:not(:disabled):active {
+                transform: scale(0.98);
+            }
+
+            .btn-content {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 4px;
+
+                .btn-label {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 15px;
+                    font-weight: 600;
+
+                    svg {
+                        flex-shrink: 0;
+                    }
+                }
+
+                .btn-percentage {
+                    font-size: 20px;
+                    font-weight: 700;
+                    letter-spacing: -0.5px;
+                }
+            }
+
+            .btn-payout {
+                font-size: 12px;
+                opacity: 0.95;
+                font-weight: 400;
+                margin-top: 2px;
+            }
+
+            &.primary-btn {
+                background: #17a2b8;
+                box-shadow: 0 2px 4px rgb(23 162 184 / 30%);
+
+                &:not(:disabled):hover {
+                    background: #138496;
+                }
+            }
+
+            &.secondary-btn {
+                background: #ec3f3f;
+                box-shadow: 0 2px 4px rgb(236 63 63 / 30%);
+
+                &:not(:disabled):hover {
+                    background: #d63031;
                 }
             }
         }
     }
 }
 
-.message {
-    padding: 1rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    line-height: 1.5;
+// Responsive adjustments
+@media (width <= 768px) {
+    .trading-panel-deriv {
+        .digit-prediction-section {
+            .digit-grid {
+                gap: 6px;
 
-    &.error-message {
-        background: #fee2e2;
-        border: 2px solid #fca5a5;
-        color: #991b1b;
-    }
-
-    &.success-message {
-        background: #d1fae5;
-        border: 2px solid #6ee7b7;
-        color: #065f46;
-    }
-
-    &.info-message {
-        background: #dbeafe;
-        border: 2px solid #93c5fd;
-        color: #1e40af;
-        text-align: center;
-        font-weight: 500;
-    }
-}
-
-.trade-button {
-    width: 100%;
-    padding: 1rem;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-
-    .icon {
-        font-size: 1.3rem;
-    }
-
-    .spinner {
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-
-    &:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
-    }
-
-    &:active:not(:disabled) {
-        transform: translateY(0);
-    }
-
-    &:disabled {
-        background: #9ca3af;
-        cursor: not-allowed;
-        box-shadow: none;
-    }
-}
-
-.info-notice {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border: 2px solid #fbbf24;
-    border-radius: 8px;
-    padding: 1rem;
-    text-align: center;
-
-    p {
-        margin: 0;
-        font-size: 0.85rem;
-        line-height: 1.6;
-        color: #78350f;
-        font-weight: 500;
-    }
-}
-
-@media (max-width: 768px) {
-    .trading-panel {
-        &__content {
-            padding: 1rem;
-            gap: 1rem;
-        }
-    }
-
-    .contract-type-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.4rem;
-
-        .contract-type-btn {
-            padding: 0.6rem;
-
-            .icon {
-                font-size: 1.2rem;
-            }
-
-            .label {
-                font-size: 0.75rem;
+                .digit-btn {
+                    font-size: 14px;
+                }
             }
         }
-    }
 
-    .quick-amounts {
-        flex-wrap: wrap;
+        .stake-input-section {
+            .adjust-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
 
-        .quick-amount-btn {
-            font-size: 0.8rem;
+            .stake-input {
+                height: 36px;
+                font-size: 14px;
+            }
+        }
+
+        .trade-buttons {
+            .trade-btn {
+                padding: 14px;
+
+                .btn-content {
+                    .btn-label {
+                        font-size: 14px;
+                    }
+
+                    .btn-percentage {
+                        font-size: 16px;
+                    }
+                }
+
+                .btn-payout {
+                    font-size: 12px;
+                }
+            }
         }
     }
 }

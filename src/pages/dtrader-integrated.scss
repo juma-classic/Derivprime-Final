@@ -5,6 +5,12 @@
     flex-direction: column;
     background: #f8fafc;
     overflow: hidden;
+
+    // Hide any floating buttons that might appear
+    button[style*='position: fixed'],
+    div[style*='position: fixed'][style*='bottom'][style*='right'] {
+        display: none !important;
+    }
 }
 
 .dtrader-integrated-loading {
@@ -119,9 +125,10 @@
         background: #fff;
         border-radius: 12px;
         box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
-        overflow: hidden;
+        overflow: visible; // Changed from hidden to visible
         display: flex;
         flex-direction: column;
+        margin-right: 10px; // Add margin to prevent price label cutoff
     }
 
     .trading-panel-section {
