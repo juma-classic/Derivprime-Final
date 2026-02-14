@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
 import ChunkLoader from '@/components/loader/chunk-loader';
 import RoutePromptDialog from '@/components/route-prompt-dialog';
+import RiskDisclaimer from '@/components/risk-disclaimer/RiskDisclaimer';
 import { StoreProvider } from '@/hooks/useStore';
 import CallbackPage from '@/pages/callback';
 import Endpoint from '@/pages/endpoint';
@@ -69,8 +70,8 @@ const RichMotherPage = lazy(() => import('../pages/rich-mother-page').then(m => 
 // Speed Bot Page
 const SpeedBotPage = lazy(() => import('../pages/speed-bot-page').then(m => ({ default: m.default })));
 
-// DTrader Manual Page
-const DTraderManual = lazy(() => import('../pages/dtrader-manual').then(m => ({ default: m.default })));
+// DTrader External Iframe
+const DTraderIframeExternal = lazy(() => import('../pages/dtrader-iframe-external').then(m => ({ default: m.default })));
 
 // New Copy Trading Page
 const NewCopyTrading = lazy(() => import('../pages/new-copy-trading').then(m => ({ default: m.default })));
@@ -132,8 +133,8 @@ const router = createBrowserRouter(
             {/* Speed Bot Page */}
             <Route path='speed-bot' element={<SpeedBotPage />} />
 
-            {/* DTrader Manual Page */}
-            <Route path='dtrader-manual' element={<DTraderManual />} />
+            {/* DTrader External Iframe */}
+            <Route path='dtrader-external' element={<DTraderIframeExternal />} />
 
             {/* New Copy Trading Page */}
             <Route path='new-copy-trading' element={<NewCopyTrading />} />
@@ -244,6 +245,7 @@ function App() {
     return (
         <>
             <RouterProvider router={router} />
+            <RiskDisclaimer />
             <Analytics />
             <SpeedInsights />
         </>

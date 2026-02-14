@@ -29,8 +29,7 @@ import RunStrategy from '../dashboard/run-strategy';
 
 const Chart = lazy(() => import('../chart'));
 const Tutorial = lazy(() => import('../tutorials'));
-const DTraderIframe = lazy(() => import('../dtrader-iframe'));
-const DTraderIntegrated = lazy(() => import('../dtrader-integrated'));
+const DTraderIframeExternal = lazy(() => import('../dtrader-iframe-external'));
 const SignalsScannerIframe = lazy(() => import('../signals-scanner-iframe'));
 const CopyTrading = lazy(() => import('../copy-trading'));
 const NewCopyTrading = lazy(() => import('../new-copy-trading'));
@@ -122,31 +121,6 @@ const SignalsIcon = () => (
     </svg>
 );
 
-const DTraderIcon = () => (
-    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-        {/* Trading chart background */}
-        <rect x='2' y='4' width='20' height='16' rx='2' stroke='currentColor' strokeWidth='1.5' fill='none' />
-        <rect x='2' y='4' width='20' height='16' rx='2' fill='#10b981' opacity='0.05' />
-
-        {/* Chart grid */}
-        <path d='M2 8h20M2 12h20M2 16h20' stroke='currentColor' strokeWidth='0.5' opacity='0.3' />
-
-        {/* Candlesticks */}
-        <rect x='5' y='10' width='2' height='6' fill='#10b981' />
-        <rect x='9' y='8' width='2' height='8' fill='#ef4444' />
-        <rect x='13' y='11' width='2' height='5' fill='#10b981' />
-        <rect x='17' y='7' width='2' height='9' fill='#ef4444' />
-
-        {/* Trend line */}
-        <path d='M4 14L8 10L12 12L16 8L20 9' stroke='#10b981' strokeWidth='1.5' strokeLinecap='round' opacity='0.7' />
-
-        {/* DTrader badge */}
-        <circle cx='19' cy='5' r='3' fill='#10b981' />
-        <text x='19' y='6.5' textAnchor='middle' fontSize='6' fill='#fff' fontWeight='bold'>
-            D
-        </text>
-    </svg>
-);
 
 const SignalsScannerIcon = () => (
     <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -173,6 +147,26 @@ const SignalsScannerIcon = () => (
         <text x='18.5' y='4' textAnchor='middle' fontSize='5' fill='#fff' fontWeight='bold'>
             SC
         </text>
+    </svg>
+);
+
+const DTraderExternalIcon = () => (
+    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+        {/* Trading platform */}
+        <rect x='2' y='4' width='20' height='16' rx='2' stroke='currentColor' strokeWidth='1.5' fill='none' />
+        <rect x='2' y='4' width='20' height='16' rx='2' fill='#10b981' opacity='0.1' />
+        
+        {/* Chart */}
+        <path d='M5 8h14M5 12h14M5 16h14' stroke='currentColor' strokeWidth='0.5' opacity='0.2' />
+        <rect x='6' y='10' width='1.5' height='5' fill='#10b981' rx='0.3' />
+        <rect x='10' y='9' width='1.5' height='6' fill='#ef4444' rx='0.3' />
+        <rect x='14' y='11' width='1.5' height='4' fill='#10b981' rx='0.3' />
+        <rect x='18' y='8' width='1.5' height='7' fill='#ef4444' rx='0.3' />
+        <path d='M5 13L9 10L13 11L17 8L21 9' stroke='#10b981' strokeWidth='1.5' strokeLinecap='round' opacity='0.8' />
+        
+        {/* External link indicator */}
+        <circle cx='19' cy='5' r='3' fill='#3b82f6' />
+        <path d='M17.5 5h3M19 3.5v3' stroke='#fff' strokeWidth='1.2' strokeLinecap='round' />
     </svg>
 );
 
@@ -2723,11 +2717,11 @@ const AppWrapper = observer(() => {
                             <ProtectedSignalsCenter />
                         </div>
 
-                        {/* DTRADER TAB - INTEGRATED VERSION */}
+                        {/* DTRADER EXTERNAL TAB */}
                         <div
                             label={
                                 <>
-                                    <DTraderIcon />
+                                    <DTraderExternalIcon />
                                     <Localize i18n_default_text='DTrader' />
                                     <span
                                         className='tab-badge'
@@ -2741,14 +2735,14 @@ const AppWrapper = observer(() => {
                                             marginLeft: '8px',
                                         }}
                                     >
-                                        💰
+                                        LIVE
                                     </span>
                                 </>
                             }
-                            id='id-dtrader'
+                            id='id-dtrader-external'
                         >
-                            <Suspense fallback={<ChunkLoader message={localize('Please wait, loading DTrader...')} />}>
-                                <DTraderIntegrated />
+                            <Suspense fallback={<ChunkLoader message={localize('Loading DTrader...')} />}>
+                                <DTraderIframeExternal />
                             </Suspense>
                         </div>
 

@@ -1,14 +1,14 @@
 import {
-    registerRoute as workbox_routing_registerRoute
+  registerRoute as workbox_routing_registerRoute
 } from '/vercel/path0/node_modules/workbox-routing/registerRoute.mjs';
 import {
-    ExpirationPlugin as workbox_expiration_ExpirationPlugin
+  ExpirationPlugin as workbox_expiration_ExpirationPlugin
 } from '/vercel/path0/node_modules/workbox-expiration/ExpirationPlugin.mjs';
 import {
-    CacheFirst as workbox_strategies_CacheFirst
+  CacheFirst as workbox_strategies_CacheFirst
 } from '/vercel/path0/node_modules/workbox-strategies/CacheFirst.mjs';
 import {
-    clientsClaim as workbox_core_clientsClaim
+  clientsClaim as workbox_core_clientsClaim
 } from '/vercel/path0/node_modules/workbox-core/clientsClaim.mjs';
 /**
  * Welcome to your Workbox-powered service worker!
@@ -36,44 +36,44 @@ workbox_core_clientsClaim();
 
 
 workbox_routing_registerRoute(/public\/(images|sprites)\/(?!.*favicons).*$/, new workbox_strategies_CacheFirst({
-    "cacheName": "assets",
-    plugins: [new workbox_expiration_ExpirationPlugin({
-        maxAgeSeconds: 86400
-    })]
+  "cacheName": "assets",
+  plugins: [new workbox_expiration_ExpirationPlugin({
+    maxAgeSeconds: 86400
+  })]
 }), 'GET');
 workbox_routing_registerRoute(({
-    url
+  url
 }) => {
-    return url.pathname.match(/^\/js\/(?!(.*((core\.[a-z_]*-json\.)|smartcharts))).*$/);
+  return url.pathname.match(/^\/js\/(?!(.*((core\.[a-z_]*-json\.)|smartcharts))).*$/);
 }, new workbox_strategies_CacheFirst({
-    "cacheName": "core-js-files",
-    plugins: [new workbox_expiration_ExpirationPlugin({
-        maxAgeSeconds: 86400
-    })]
+  "cacheName": "core-js-files",
+  plugins: [new workbox_expiration_ExpirationPlugin({
+    maxAgeSeconds: 86400
+  })]
 }), 'GET');
 workbox_routing_registerRoute(({
-    url
+  url
 }) => {
-    return url.pathname.match(/^\/js\/(smartcharts)\//);
+  return url.pathname.match(/^\/js\/(smartcharts)\//);
 }, new workbox_strategies_CacheFirst({
-    "cacheName": "smartchart-files",
-    plugins: [new workbox_expiration_ExpirationPlugin({
-        maxAgeSeconds: 86400
-    })]
+  "cacheName": "smartchart-files",
+  plugins: [new workbox_expiration_ExpirationPlugin({
+    maxAgeSeconds: 86400
+  })]
 }), 'GET');
 workbox_routing_registerRoute(({
-    url
+  url
 }) => {
-    return url.pathname.match(/^\/css\//);
+  return url.pathname.match(/^\/css\//);
 }, new workbox_strategies_CacheFirst({
-    "cacheName": "core-css-files",
-    plugins: [new workbox_expiration_ExpirationPlugin({
-        maxAgeSeconds: 86400
-    })]
+  "cacheName": "core-css-files",
+  plugins: [new workbox_expiration_ExpirationPlugin({
+    maxAgeSeconds: 86400
+  })]
 }), 'GET');
 workbox_routing_registerRoute(/(account|appstore|bot|cashier|cfd|trader|reports)\//, new workbox_strategies_CacheFirst({
-    "cacheName": "packages-files",
-    plugins: [new workbox_expiration_ExpirationPlugin({
-        maxAgeSeconds: 86400
-    })]
+  "cacheName": "packages-files",
+  plugins: [new workbox_expiration_ExpirationPlugin({
+    maxAgeSeconds: 86400
+  })]
 }), 'GET');
