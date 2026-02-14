@@ -41,3 +41,6 @@ lerna-debug.log*
 # Deriv files (cause build issues with minification)
 public/app.deriv.com/
 public/deriv-api/
+public/app.binarytool.site/
+public/filebyelvis/
+public/deriv-dtrader.vercel.app/
