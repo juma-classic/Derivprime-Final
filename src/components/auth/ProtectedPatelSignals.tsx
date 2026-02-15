@@ -34,10 +34,10 @@ export const ProtectedPatelSignals: React.FC<ProtectedPatelSignalsProps> = ({ ch
         return (
             <PasswordProtection
                 onAuthenticate={authenticate}
-                title='🎯 Patel Signals - Premium Access'
+                title='Patel Signals - Premium Access'
                 subtitle='Enter password to access Patel Signal Suite'
                 placeholder='Enter premium password...'
-                errorMessage='Incorrect password. Contact Elvis Trades for access.'
+                errorMessage='Incorrect password. Contact States Fx for access.'
             />
         );
     }

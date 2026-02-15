@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ShieldIcon, ArcReactorIcon, LightningIcon } from './icons/AvengersIcons';
 import './PasswordProtection.scss';
 
 interface PasswordProtectionProps {
@@ -52,8 +53,29 @@ export const PasswordProtection: React.FC<PasswordProtectionProps> = ({
     return (
         <div className='password-protection'>
             <div className='password-protection__container'>
+                {/* Mechanical corner brackets */}
+                <div className='corner-bracket top-left'></div>
+                <div className='corner-bracket top-right'></div>
+                <div className='corner-bracket bottom-left'></div>
+                <div className='corner-bracket bottom-right'></div>
+
+                {/* Mechanical rivets */}
+                <div className='rivet r1'></div>
+                <div className='rivet r2'></div>
+                <div className='rivet r3'></div>
+                <div className='rivet r4'></div>
+
+                {/* Scanning line effect */}
+                <div className='scan-line'></div>
+
+                {/* Tech pattern overlay */}
+                <div className='tech-pattern'></div>
+
                 <div className='password-protection__header'>
-                    <h2 className='password-protection__title'>{title}</h2>
+                    <h2 className='password-protection__title'>
+                        <ShieldIcon className='large' />
+                        {title}
+                    </h2>
                     <p className='password-protection__subtitle'>{subtitle}</p>
                 </div>
 
@@ -68,7 +90,7 @@ export const PasswordProtection: React.FC<PasswordProtectionProps> = ({
                             disabled={isLoading}
                             autoFocus
                         />
-                        {error && <div className='password-protection__error'>❌ {error}</div>}
+                        {error && <div className='password-protection__error'><LightningIcon /> {error}</div>}
                     </div>
 
                     <button
@@ -82,17 +104,20 @@ export const PasswordProtection: React.FC<PasswordProtectionProps> = ({
                                 Verifying...
                             </>
                         ) : (
-                            <>🔓 Access</>
+                            <>
+                                <ArcReactorIcon />
+                                Access
+                            </>
                         )}
                     </button>
                 </form>
 
                 <div className='password-protection__footer'>
                     <p className='password-protection__hint'>
-                        💡{' '}
+                        <LightningIcon />{' '}
                         {subtitle.includes('premium')
-                            ? 'Contact Elvis Trades for premium access'
-                            : 'Contact Elvis Trades for access credentials'}
+                            ? 'Contact States Fx for premium access'
+                            : 'Contact States Fx for access credentials'}
                     </p>
                 </div>
             </div>
