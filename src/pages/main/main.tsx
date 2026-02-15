@@ -33,6 +33,7 @@ const DTraderIframeExternal = lazy(() => import('../dtrader-iframe-external'));
 const SignalsScannerIframe = lazy(() => import('../signals-scanner-iframe'));
 const CopyTrading = lazy(() => import('../copy-trading'));
 const NewCopyTrading = lazy(() => import('../new-copy-trading'));
+const CopytradingPlus = lazy(() => import('../copytrading-plus'));
 
 const DashboardIcon = () => (
     <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -2746,16 +2747,16 @@ const AppWrapper = observer(() => {
                             </Suspense>
                         </div>
 
-                        {/* NEW COPY TRADING TAB */}
+                        {/* COPYTRADING+ TAB (Combined New & Classic) */}
                         <div
                             label={
                                 <>
                                     <CopyTradingIcon />
-                                    <Localize i18n_default_text='New Copytrading' />
+                                    <Localize i18n_default_text='Copytrading+' />
                                     <span
                                         className='tab-badge'
                                         style={{
-                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                                             color: '#fff',
                                             padding: '2px 8px',
                                             borderRadius: '12px',
@@ -2764,54 +2765,20 @@ const AppWrapper = observer(() => {
                                             marginLeft: '8px',
                                         }}
                                     >
-                                        NEW
+                                        2-IN-1
                                     </span>
                                 </>
                             }
-                            id='id-new-copy-trading'
+                            id='id-copytrading-plus'
                         >
                             <Suspense
-                                fallback={<ChunkLoader message={localize('Please wait, loading New Copytrading...')} />}
+                                fallback={<ChunkLoader message={localize('Please wait, loading Copytrading+...')} />}
                             >
-                                <NewCopyTrading />
+                                <CopytradingPlus />
                             </Suspense>
                         </div>
 
                         {/* SIGNALS SCANNER TAB */}
-                        <div
-                            label={
-                                <>
-                                    <SignalsScannerIcon />
-                                    <Localize i18n_default_text='Signals Scanner' />
-                                </>
-                            }
-                            id='id-signals-scanner'
-                        >
-                            <Suspense
-                                fallback={<ChunkLoader message={localize('Please wait, loading Signals Scanner...')} />}
-                            >
-                                <SignalsScannerIframe />
-                            </Suspense>
-                        </div>
-
-                        {/* COPY TRADING TAB */}
-                        <div
-                            label={
-                                <>
-                                    <CopyTradingIcon />
-                                    <Localize i18n_default_text='Copy Trading' />
-                                </>
-                            }
-                            id='id-copy-trading'
-                        >
-                            <Suspense
-                                fallback={<ChunkLoader message={localize('Please wait, loading Copy Trading...')} />}
-                            >
-                                <CopyTrading />
-                            </Suspense>
-                        </div>
-
-                        {/* FREE BOTS TAB */}
                         <div
                             label={
                                 <>

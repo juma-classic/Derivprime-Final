@@ -1,7 +1,9 @@
 .new-copy-trading {
-    min-height: 100vh;
+    min-height: 100%;
+    height: 100%;
     background: var(--general-main-1);
     padding: 24px 40px;
+    overflow-y: auto;
 
     &__container {
         max-width: 1400px;
